@@ -54,3 +54,15 @@
 	path = workspaces/this.wallet
 	url = https://github.com/neurons-me/this.wallet
 	branch = main
+[submodule "workspaces/this.file"]
+	path = workspaces/this.file
+	url = https://github.com/neurons-me/this.file.git
+	branch = main
+[submodule "workspaces/this.dir"]
+	path = workspaces/this.dir
+	url = https://github.com/neurons-me/this.dir.git
+	branch = main
+[submodule "workspaces/this.document"]
+	path = workspaces/this.document
+	url = https://github.com/neurons-me/this.document.git
+	branch = main
