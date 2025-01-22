@@ -1,5 +1,3 @@
-  
-  
   <img src="https://docs.neurons.me/media/all.this.png" alt="SVG Image" width="377" height="269" align="right">
 
 # All.This
