@@ -1,6 +1,6 @@
 {
   "name": "this.url",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "urls ",
   "main": "index.js",
   "type": "module",
