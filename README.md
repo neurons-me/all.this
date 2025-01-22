@@ -1,4 +1,4 @@
-  <img src="https://docs.neurons.me/media/all.this.png" alt="SVG Image" width="377" height="269" align="right">
+  <img src="https://docs.neurons.me/media/all.this.png" alt="SVG Image" width="377" height="269">
 
 # All.This
 > **All.This** is a central framework for managing a suite of modular packages, each designed for **specific data structures and functionalities. **
