@@ -62,3 +62,6 @@
 	path = workspaces/this.document
 	url = https://github.com/neurons-me/this.document.git
 	branch = main
+[submodule "workspaces/this.blockchain"]
+	path = workspaces/this.blockchain
+	url = https://github.com/neurons-me/this.blockchain.git
