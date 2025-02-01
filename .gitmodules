@@ -52,15 +52,17 @@
 	branch = main
 [submodule "codespaces/this.dir"]
 	path = codespaces/this.dir
-	url = https://github.com/neurons-me/this.dir.git
+	url = https://github.com/neurons-me/this.dir
 	branch = main
 [submodule "codespaces/this.document"]
 	path = codespaces/this.document
-	url = https://github.com/neurons-me/this.document.git
+	url = https://github.com/neurons-me/this.document
 	branch = main
 [submodule "codespaces/this.blockchain"]
 	path = codespaces/this.blockchain
-	url = https://github.com/neurons-me/this.blockchain.git
+	url = https://github.com/neurons-me/this.blockchain
+	branch = main
 [submodule "codespaces/this.url"]
 	path = codespaces/this.url
-	url = https://github.com/neurons-me/this.url.git
+	url = https://github.com/neurons-me/this.url
+	branch = main
