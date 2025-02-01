@@ -42,10 +42,6 @@
 	path = codespaces/this.text
 	url = https://github.com/neurons-me/this.text
 	branch = main
-[submodule "codespaces/this.url"]
-	path = codespaces/this.url
-	url = https://github.com/neurons-me/this.url
-	branch = main
 [submodule "codespaces/this.video"]
 	path = codespaces/this.video
 	url = https://github.com/neurons-me/this.video
@@ -65,3 +61,6 @@
 [submodule "codespaces/this.blockchain"]
 	path = codespaces/this.blockchain
 	url = https://github.com/neurons-me/this.blockchain.git
+[submodule "codespaces/this.url"]
+	path = codespaces/this.url
+	url = https://github.com/neurons-me/this.url.git
