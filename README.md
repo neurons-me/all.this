@@ -19,6 +19,21 @@ Open your terminal and run the following command to install the `all.this` packa
 npm i all.this
 ```
 
+Inside your all.this directory, there is a script file called install-all.sh.
+Give Execution Permissions
+Run this command to make the script executable:
+```bash
+chmod +x install-all.sh
+```
+
+Run the Script
+
+Execute the script to install dependencies in all submodules:
+```bash
+./install-all.sh
+```
+
+
 #### Here's a breakdown of each class:
 
 **[this.me](https://docs.neurons.me/this.me/index.html)  - [this.wallet](https://docs.neurons.me/this.wallet/index.html) - [this.audio](https://docs.neurons.me/this.audio/index.html) - [this.text](https://docs.neurons.me/this.text/index.html)  - [this.img](https://docs.neurons.me/this.img/index.html) - [this.pixel](https://docs.neurons.me/this.pixel/index.html) - [this.DOM](https://docs.neurons.me/this.DOM/index.html) - [this.env](https://docs.neurons.me/this.env/index.html) - [this.GUI](https://docs.neurons.me/this.GUI/index.html) - [this.be](https://docs.neurons.me/this.be/index.html) - [this.video](https://docs.neurons.me/this.video/index.html) - [this.dictionaries](https://docs.neurons.me/this.dictionaries/index.html)** 
