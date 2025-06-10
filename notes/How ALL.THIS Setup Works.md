@@ -4,7 +4,6 @@
 - The parent repo simply stores a reference (a specific commit SHA) to each submodule. When you pull and update submodules, it points to the latest commit on each submodule’s branch.
 
 ### Workflow Tips for Submodules
-
 1. **Making Changes in Multiple Submodules**
    - Go into each submodule folder, make changes, commit, and push.
    - Then go back to the parent 
@@ -49,9 +48,7 @@
    - It doesn’t affect `all.this` unless you then **return** to `all.this` to pull in that submodule’s latest commits.
 
 4. **Checking Which Submodules Are Out-of-Date**
-
    - From inside the parent repo:
-
      ```
      git submodule status
      ```

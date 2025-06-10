@@ -15,6 +15,7 @@
   ],
   "dependencies": {
     "be.this": "^1.2.33",
+    "dotenv": "^16.5.0",
     "this.audio": "^1.1.23",
     "this.be": "^2.2.12",
     "this.dictionaries": "",
