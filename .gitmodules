@@ -1,0 +1,68 @@
+[submodule "codespaces/npm/be.this"]
+	path = codespaces/npm/be.this
+	url = https://github.com/neurons-me/be.this
+	branch = main
+[submodule "codespaces/npm/this.audio"]
+	path = codespaces/npm/this.audio
+	url = https://github.com/neurons-me/this.audio
+	branch = main
+[submodule "codespaces/npm/this.be"]
+	path = codespaces/npm/this.be
+	url = https://github.com/neurons-me/this.be
+	branch = main
+[submodule "codespaces/npm/this.dictionaries"]
+	path = codespaces/npm/this.dictionaries
+	url = https://github.com/neurons-me/this.dictionaries
+	branch = main
+[submodule "codespaces/npm/this.DOM"]
+	path = codespaces/npm/this.DOM
+	url = https://github.com/neurons-me/this.DOM
+	branch = main
+[submodule "codespaces/npm/this.env"]
+	path = codespaces/npm/this.env
+	url = https://github.com/neurons-me/this.env
+	branch = main
+[submodule "codespaces/npm/this.GUI"]
+	path = codespaces/npm/this.GUI
+	url = https://github.com/neurons-me/this.GUI
+	branch = main
+[submodule "codespaces/npm/this.img"]
+	path = codespaces/npm/this.img
+	url = https://github.com/neurons-me/this.img
+	branch = main
+[submodule "codespaces/npm/this.me"]
+	path = codespaces/npm/this.me
+	url = https://github.com/neurons-me/this.me
+	branch = main
+[submodule "codespaces/npm/this.pixel"]
+	path = codespaces/npm/this.pixel
+	url = https://github.com/neurons-me/this.pixel
+	branch = main
+[submodule "codespaces/npm/this.text"]
+	path = codespaces/npm/this.text
+	url = https://github.com/neurons-me/this.text
+	branch = main
+[submodule "codespaces/npm/this.video"]
+	path = codespaces/npm/this.video
+	url = https://github.com/neurons-me/this.video
+	branch = main
+[submodule "codespaces/npm/this.wallet"]
+	path = codespaces/npm/this.wallet
+	url = https://github.com/neurons-me/this.wallet
+	branch = main
+[submodule "codespaces/npm/this.dir"]
+	path = codespaces/npm/this.dir
+	url = https://github.com/neurons-me/this.dir
+	branch = main
+[submodule "codespaces/npm/this.document"]
+	path = codespaces/npm/this.document
+	url = https://github.com/neurons-me/this.document
+	branch = main
+[submodule "codespaces/npm/this.blockchain"]
+	path = codespaces/npm/this.blockchain
+	url = https://github.com/neurons-me/this.blockchain
+	branch = main
+[submodule "codespaces/npm/this.url"]
+	path = codespaces/npm/this.url
+	url = https://github.com/neurons-me/this.url
+	branch = main
