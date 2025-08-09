@@ -2,7 +2,6 @@
 
 # All.This
 > **All.This** is a central framework for managing a suite of modular packages, each designed for **specific data structures and functionalities. **
-
 **All.This** simplifies access to and interaction with **data structures** and functionalities, enabling seamless development and integration across the [neurons.me](https://neurons.me) ecosystem.
 
 #### **Standardizing Elements for Machine Learning**

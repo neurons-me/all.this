@@ -1,0 +1,16 @@
+[package]
+name = "all-this"
+version = "0.1.0"
+edition = "2021"
+authors = ["suiGn <jabellae@gmail.com>"]
+description = "Shared primitives, identity structures, and session logic for decentralized apps within the Neurons ecosystem."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/neurons-me/all-this"
+documentation = "https://docs.rs/all-this"
+homepage = "https://neurons.me"
+readme = "README.md"
+keywords = ["identity", "session", "decentralized", "neurons", "wasm"]
+categories = ["data-structures", "web-programming", "authentication"]
+rust-version = "1.76" # O la versión mínima que uses
+
+[dependencies]

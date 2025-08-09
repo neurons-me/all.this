@@ -1,0 +1,18 @@
+Metadata-Version: 2.4
+Name: all.this
+Version: 0.1.0
+Summary: All.This.Stuff
+Author: suiGn
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Dynamic: author
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: requires-python
+Dynamic: summary
+
+## all.this
+For Python.
+https://neurons.me

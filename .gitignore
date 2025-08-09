@@ -47,9 +47,9 @@ dist-ssr/
 *.sw?
 `
 
-!codespaces/apps/.gitkeep
-!codespaces/GPTS/.gitkeep
-!codespaces/endpoints/.gitkeep
-!codespaces/modules/objects/.gitkeep
-!codespaces/modules/tools/.gitkeep
-!codespaces/modules/controllers/.gitkeep
+!packages-src/apps/.gitkeep
+!packages-src/GPTS/.gitkeep
+!packages-src/endpoints/.gitkeep
+!packages-src/modules/objects/.gitkeep
+!packages-src/modules/tools/.gitkeep
+!packages-src/modules/controllers/.gitkeep

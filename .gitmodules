@@ -1,68 +1,68 @@
-[submodule "codespaces/be.this"]
-	path = codespaces/be.this
+[submodule "packages-src/be.this"]
+	path = packages-src/be.this
 	url = https://github.com/neurons-me/be.this
 	branch = main
-[submodule "codespaces/this.audio"]
-	path = codespaces/this.audio
+[submodule "packages-src/this.audio"]
+	path = packages-src/this.audio
 	url = https://github.com/neurons-me/this.audio
 	branch = main
-[submodule "codespaces/this.be"]
-	path = codespaces/this.be
+[submodule "packages-src/this.be"]
+	path = packages-src/this.be
 	url = https://github.com/neurons-me/this.be
 	branch = main
-[submodule "codespaces/this.dictionaries"]
-	path = codespaces/this.dictionaries
+[submodule "packages-src/this.dictionaries"]
+	path = packages-src/this.dictionaries
 	url = https://github.com/neurons-me/this.dictionaries
 	branch = main
-[submodule "codespaces/this.DOM"]
-	path = codespaces/this.DOM
+[submodule "packages-src/this.DOM"]
+	path = packages-src/this.DOM
 	url = https://github.com/neurons-me/this.DOM
 	branch = main
-[submodule "codespaces/this.env"]
-	path = codespaces/this.env
+[submodule "packages-src/this.env"]
+	path = packages-src/this.env
 	url = https://github.com/neurons-me/this.env
 	branch = main
-[submodule "codespaces/this.GUI"]
-	path = codespaces/this.GUI
+[submodule "packages-src/this.GUI"]
+	path = packages-src/this.GUI
 	url = https://github.com/neurons-me/this.GUI
 	branch = main
-[submodule "codespaces/this.img"]
-	path = codespaces/this.img
+[submodule "packages-src/this.img"]
+	path = packages-src/this.img
 	url = https://github.com/neurons-me/this.img
 	branch = main
-[submodule "codespaces/this.me"]
-	path = codespaces/this.me
+[submodule "packages-src/this.me"]
+	path = packages-src/this.me
 	url = https://github.com/neurons-me/this.me
 	branch = main
-[submodule "codespaces/this.pixel"]
-	path = codespaces/this.pixel
+[submodule "packages-src/this.pixel"]
+	path = packages-src/this.pixel
 	url = https://github.com/neurons-me/this.pixel
 	branch = main
-[submodule "codespaces/this.text"]
-	path = codespaces/this.text
+[submodule "packages-src/this.text"]
+	path = packages-src/this.text
 	url = https://github.com/neurons-me/this.text
 	branch = main
-[submodule "codespaces/this.video"]
-	path = codespaces/this.video
+[submodule "packages-src/this.video"]
+	path = packages-src/this.video
 	url = https://github.com/neurons-me/this.video
 	branch = main
-[submodule "codespaces/this.wallet"]
-	path = codespaces/this.wallet
+[submodule "packages-src/this.wallet"]
+	path = packages-src/this.wallet
 	url = https://github.com/neurons-me/this.wallet
 	branch = main
-[submodule "codespaces/this.dir"]
-	path = codespaces/this.dir
+[submodule "packages-src/this.dir"]
+	path = packages-src/this.dir
 	url = https://github.com/neurons-me/this.dir
 	branch = main
-[submodule "codespaces/this.document"]
-	path = codespaces/this.document
+[submodule "packages-src/this.document"]
+	path = packages-src/this.document
 	url = https://github.com/neurons-me/this.document
 	branch = main
-[submodule "codespaces/this.blockchain"]
-	path = codespaces/this.blockchain
+[submodule "packages-src/this.blockchain"]
+	path = packages-src/this.blockchain
 	url = https://github.com/neurons-me/this.blockchain
 	branch = main
-[submodule "codespaces/this.url"]
-	path = codespaces/this.url
+[submodule "packages-src/this.url"]
+	path = packages-src/this.url
 	url = https://github.com/neurons-me/this.url
 	branch = main
