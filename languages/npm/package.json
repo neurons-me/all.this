@@ -21,14 +21,15 @@
     "this.dictionaries": "",
     "this.dom": "^1.0.93",
     "this.env": "^0.0.44",
-    "this.gui": "^0.0.55",
+    "this.gui": "*",
     "this.img": "^1.0.26",
-    "this.me": "^2.9.0",
+    "this.me": "*",
     "this.pixel": "^3.4.92",
     "this.text": "^1.0.82",
     "this.url": "^1.0.0",
     "this.video": "^1.0.22",
-    "this.wallet": "^1.0.54"
+    "this.wallet": "*",
+    "cleaker": "*"
   },
   "repository": {
     "type": "git",

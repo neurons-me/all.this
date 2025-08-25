@@ -3,19 +3,21 @@
 ╠═╣║  ║   ║ ╠═╣║╚═╗
 ╩ ╩╩═╝╩═╝o╩ ╩ ╩╩╚═╝
 ⓝⓔⓤⓡⓞⓝⓢ.ⓜⓔ
-🆂🆄🅸🅶🅽                                                                                                            
---------------------------------*/
-import dotenv from 'dotenv';
-dotenv.config();
-//Data Structures.
-const isDev = process.env.ENV === 'development';
-let Me;
-if (isDev) {
-  Me = (await import('./codespaces/this.me/index.js')).default;
-} else {
-  Me = (await import('this.me')).default;
-}
-//import Img from "./codespaces/this.img/index.js";  // ✅ Fix this path
-//import Text from "./codespaces/this.text/index.js"; 
-export default all;
+🆂🆄🅸🅶🅽----------*/
+import GUI from "this.gui";
+export { GUI };
+export * from "this.gui"; // <- permite import { TextTitle } from "all.this" si quieres
 
+// Namespaces para otras libs
+import * as me from "this.me";
+import * as wallet from "this.wallet";
+import * as cleaker from "cleaker";
+export { me, wallet, cleaker };
+
+// Default export (opcional)
+export default {
+  GUI,
+  me,
+  wallet,
+  cleaker,
+};
