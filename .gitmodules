@@ -10,9 +10,9 @@
 	path = packages-src/this.be
 	url = https://github.com/neurons-me/this.be
 	branch = main
-[submodule "packages-src/this.dictionaries"]
-	path = packages-src/this.dictionaries
-	url = https://github.com/neurons-me/this.dictionaries
+[submodule "packages-src/this.dictionary"]
+	path = packages-src/this.dictionary
+	url = https://github.com/neurons-me/this.dictionary
 	branch = main
 [submodule "packages-src/this.DOM"]
 	path = packages-src/this.DOM
