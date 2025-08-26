@@ -1,0 +1,16 @@
+{
+  "pages": [
+    {
+      "name": "Welcome",
+      "path": "/welcome",
+      "type": "mdx",
+      "file": "./pages/Welcome.mdx"
+    },
+    {
+      "name": "Home",
+      "path": "/home",
+      "type": "json",
+      "file": "./pages/home.json"
+    }
+  ]
+}

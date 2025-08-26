@@ -1,0 +1,14 @@
+{
+      "layout": [
+        {
+          "type": "Card",
+          "props": { "variant": "solid", "color": "primary-color", "width": "300px" },
+          "children": [
+            {
+              "type": "Paragraph",
+              "props": { "text": "Welcome to our site!" }
+            }
+          ]
+        }
+      ]
+    }
