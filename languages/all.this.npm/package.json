@@ -16,9 +16,9 @@
   "dependencies": {
     "dotenv": "^16.5.0",
     "cleaker": "file:./../../../cleaker.space/packages/npm/Cleaker",
-    "this.wallet": "file:./../../packages-src/this.wallet/npm",
-    "this.me": "file:./../../packages-src/this.me/npm",
-    "this.gui": "file:./../../packages-src/this.gui/npm"
+    "this.wallet": "file:./../../packages-src/this.wallet/wallet.npm",
+    "this.me": "file:./../../packages-src/this.me/me.npm",
+    "this.gui": "file:./../../packages-src/this.gui/GUI.npm"
   },
   "repository": {
     "type": "git",
