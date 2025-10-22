@@ -1,16 +1,24 @@
-[submodule "packages-src/this.env"]
-	path = packages-src/this.env
-	url = https://github.com/neurons-me/this.env
-	branch = main
-[submodule "packages-src/this.GUI"]
-	path = packages-src/this.GUI
-	url = https://github.com/neurons-me/this.GUI
-	branch = main
-[submodule "packages-src/this.me"]
-	path = packages-src/this.me
-	url = https://github.com/neurons-me/this.me
-	branch = main
-[submodule "packages-src/this.wallet"]
-	path = packages-src/this.wallet
-	url = https://github.com/neurons-me/this.wallet
-	branch = main
+[submodule "this.env"]
+  path = this/env
+  url = https://github.com/neurons-me/this.env.git
+  branch = main
+
+[submodule "this.GUI"]
+  path = this/GUI
+  url = https://github.com/neurons-me/this.GUI.git
+  branch = main
+
+[submodule "this.me"]
+  path = this/me
+  url = https://github.com/neurons-me/this.me.git
+  branch = main
+
+[submodule "this.wallet"]
+  path = this/wallet
+  url = https://github.com/neurons-me/this.wallet.git
+  branch = main
+
+[submodule "this.url"]
+  path = this/url
+  url = https://github.com/neurons-me/this.url.git
+  branch = main
