@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>.GUI</title>
+<!-- Tu favicon -->
+<link rel="icon" href="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761276578/this.gui.npm.png" />
+<!-- Estilos generados por Vite (copiados del build final) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/this.gui@latest/dist/this.gui.css" />
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react-jsx-runtime.production.min.js"></script>
+    <script>
+  window.process = {
+    env: {
+      NODE_ENV: "production"
+    }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/this.gui@latest/dist/this.gui.umd.js"></script>
+<script>
+  (function () {
+    const GUI = window.GUI;
+
+    // Try to resolve the loaded version.
+    // 1) Prefer a version exposed by the bundle itself.
+    // 2) If using a pinned CDN version (this.gui@x.y.z), infer from the URL.
+    // 3) If using @latest, ask jsDelivr's metadata API for the latest published version.
+
+    const GUI_VERSION =
+      GUI?.version ||
+      GUI?.VERSION ||
+      GUI?.__version ||
+      GUI?.__VERSION__ ||
+      GUI?.default?.version ||
+      GUI?.default?.VERSION ||
+      null;
+
+    const CDN_VERSION = (() => {
+      try {
+        const urls = [];
+        document.querySelectorAll('script[src]').forEach((s) => urls.push(s.src));
+        document.querySelectorAll('link[href]').forEach((l) => urls.push(l.href));
+        for (const url of urls) {
+          const m = url.match(/\/npm\/this\.gui@([^/]+)\//);
+          if (m && m[1]) return m[1];
+        }
+      } catch (e) {}
+      return null;
+    })();
+
+    const RESOLVED_VERSION =
+      GUI_VERSION || (CDN_VERSION && CDN_VERSION !== 'latest' ? CDN_VERSION : null);
+
+    // For @latest: resolve actual version via jsDelivr metadata API.
+    let LATEST_RESOLVED_VERSION = null;
+    const resolveLatestFromJsDelivr = async () => {
+      try {
+        const r = await fetch('https://data.jsdelivr.com/v1/package/npm/this.gui');
+        if (!r.ok) return null;
+        const j = await r.json();
+        return j?.tags?.latest || j?.version || null;
+      } catch (e) {
+        return null;
+      }
+    };
+
+    // Compute the label shown in UI.
+    let VERSION_LABEL = RESOLVED_VERSION
+      ? RESOLVED_VERSION
+      : CDN_VERSION === 'latest'
+        ? 'latest (resolving…)'
+        : 'unknown';
+
+    // Show version in the tab title for quick confirmation.
+    try {
+      document.title = RESOLVED_VERSION ? `.GUI v${RESOLVED_VERSION}` : `.GUI (${VERSION_LABEL})`;
+    } catch (e) {}
+
+    if (!GUI) {
+      console.error('[GUI] window.GUI not found. UMD bundle may not be exposing correctly.');
+      const rootEl = document.getElementById('root');
+      if (rootEl) rootEl.innerHTML = '<div style="font-family:sans-serif;padding:24px;">❌ window.GUI not found</div>';
+      return;
+    }
+
+    const rootEl = document.getElementById('root');
+    if (!rootEl) {
+      console.warn('[GUI] Root element not found.');
+      return;
+    }
+
+    // Resolve common exports.
+    const GuiProvider = GUI.GuiProvider || GUI.GuiProvider?.default || GUI.default?.GuiProvider;
+    const Hero = GUI.Hero || GUI.molecules?.Hero || GUI.molecules?.Hero2 || GUI.default?.Hero || GUI.default?.Hero2;
+    const Box = GUI.Box || GUI.atoms?.Box || GUI.default?.atoms?.Box;
+
+    // Basic fallback wrapper (no dependency on MUI components being present).
+    function FallbackShell(props) {
+      return React.createElement(
+        'div',
+        {
+          style: {
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '24px',
+            fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif',
+            background: '#0b1220',
+            color: 'white',
+          },
+        },
+        props.children
+      );
+    }
+
+    function CenterCard(props) {
+      return React.createElement(
+        'div',
+        {
+          style: {
+            width: 'min(680px, 92vw)',
+            borderRadius: '16px',
+            border: '1px solid rgba(255,255,255,0.12)',
+            background: 'rgba(255,255,255,0.06)',
+            padding: '18px',
+            backdropFilter: 'blur(10px)',
+          },
+        },
+        props.children
+      );
+    }
+
+    function DebugKeys() {
+      const target = GUI?.default && typeof GUI.default === 'object' ? GUI.default : GUI;
+      const keys = (() => {
+        try {
+          // Reflect.ownKeys includes non-enumerable + symbols.
+          return Reflect.ownKeys(target).map(String).sort();
+        } catch (e) {
+          try {
+            return Object.getOwnPropertyNames(target).sort();
+          } catch (e2) {
+            return [];
+          }
+        }
+      })();
+
+      const meta = {
+        'window.GUI type': typeof GUI,
+        'window.GUI isArray': Array.isArray(GUI),
+        'window.GUI has default': !!GUI?.default,
+        'resolved version': RESOLVED_VERSION || null,
+        'cdn version token': CDN_VERSION || null,
+        'latest resolved (api)': LATEST_RESOLVED_VERSION || null,
+      };
+
+      return React.createElement(
+        'pre',
+        {
+          style: {
+            marginTop: 14,
+            padding: 12,
+            borderRadius: 12,
+            background: 'rgba(0,0,0,0.35)',
+            overflow: 'auto',
+            fontSize: 12,
+            lineHeight: 1.35,
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+          },
+        },
+        'debug:\n' +
+          JSON.stringify(meta, null, 2) +
+          '\n\n' +
+          'exports keys (' + keys.length + '):\n' +
+          (keys.length ? keys.join(', ') : '(none)')
+      );
+    }
+
+    function Content() {
+      const inner = React.createElement(
+        CenterCard,
+        null,
+        React.createElement('img', {
+          src: 'https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760629119/this.gui.neurons.me_mkapde.png',
+          alt: 'this.GUI',
+          style: { width: 220, maxWidth: '70vw', height: 'auto', display: 'block', margin: '0 auto 14px' },
+        }),
+        React.createElement('div', { style: { fontSize: 18, fontWeight: 700, letterSpacing: '-0.2px' } }, '.GUI Runtime Environment'),
+        React.createElement('div', { id: 'version-line', style: { opacity: 0.85, marginTop: 6, fontSize: 13 } }, 'version: ' + VERSION_LABEL),
+        React.createElement('div', { style: { opacity: 0.78, marginTop: 6 } }, 'Standalone Test Page. UMD bundle → window.GUI'),
+        React.createElement(DebugKeys, null)
+      );
+
+      // Prefer using GUI Hero if available, but keep it optional.
+      if (Hero) {
+        return React.createElement(
+          Hero,
+          {
+            backgroundSrc: 'https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761149344/this.me_kx1ura.jpg',
+            backgroundType: 'image',
+            blur: 'light',
+            customColor: 'rgba(13, 36, 52, 0.70)',
+          },
+          inner
+        );
+      }
+
+      // If GUI Box exists, use it as a wrapper (optional).
+      if (Box) {
+        return React.createElement(Box, { sx: { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 } }, inner);
+      }
+
+      return React.createElement(FallbackShell, null, inner);
+    }
+
+    const App = GuiProvider
+      ? React.createElement(GuiProvider, { theme: 'dark' }, React.createElement(Content, null))
+      : React.createElement(FallbackShell, null, React.createElement(Content, null));
+    const root = ReactDOM.createRoot(rootEl);
+    root.render(App);
+    console.log('[GUI] ✅ Standalone render complete.');
+    // If using @latest and the bundle doesn't expose a version, resolve it via jsDelivr API and re-render once.
+    (async () => {
+      if (RESOLVED_VERSION || CDN_VERSION !== 'latest') return;
+      const v = await resolveLatestFromJsDelivr();
+      if (!v) {
+        VERSION_LABEL = 'latest (unknown)';
+      } else {
+        LATEST_RESOLVED_VERSION = v;
+        VERSION_LABEL = v;
+        try {
+          document.title = `.GUI v${v}`;
+        } catch (e) {}
+      }
+
+      // Update the on-page label without rebuilding the whole app.
+      const el = document.getElementById('version-line');
+      if (el) el.textContent = 'version: ' + VERSION_LABEL;
+
+      // Also log it for clarity.
+      console.log('[GUI] Resolved @latest via jsDelivr API:', VERSION_LABEL);
+    })();
+  })();
+</script>
+  </body>
+</html>

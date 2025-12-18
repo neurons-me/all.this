@@ -1,0 +1,11 @@
+{# src/templates/components/card.html #}
+{% macro card(title="", content="") -%}
+  <section class="card">
+    <header class="card-header">
+      {% if title %}<h1 class="card-title">{{ title }}</h1>{% endif %}
+    </header>
+    <div class="card-body">
+      {{ content | safe }}
+    </div>
+  </section>
+{%- endmacro card %}

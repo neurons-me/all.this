@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+
+{% block head %}
+  <title>{{ title | default(value="RPC Providers | This.Wallet API") }}</title>
+{% endblock %}
+
+{% block body %}
+  <div class="container" style="margin-top: 4px;">
+    <div style="display: flex; gap: 24px; align-items: flex-start;">
+
+      {# Sidebar (needs nets for dynamic Networks section) #}
+      {% include "components/Allowed_Methods_Sidebar.html" %}
+
+      <!-- Main content -->
+      <div style="flex: 1; min-width: 0;">
+        <div style="text-align:center; margin-bottom: 16px;">
+          <h2 style="margin: 0;">RPC Providers</h2>
+          <p class="muted" style="margin: 6px 0 0;">
+            Providers that power requests behind the proxy. Keys are never exposed to the browser.
+          </p>
+        </div>
+
+        <section class="card" style="margin-bottom: 16px;">
+          <h3 style="margin: 0 0 8px;">Overview</h3>
+          <p style="margin: 0;">
+            This.Wallet forwards JSON‑RPC calls to multiple upstream providers per network (e.g., PublicNode, Infura, Alchemy, Ankr, Binance).
+            We try them in order, rotate when enabled, and fail over automatically if one is down.
+          </p>
+        </section>
+
+        <section class="card">
+          <h3 style="margin: 0 0 8px;">Configured (dev‑only) view</h3>
+          <p class="muted" style="margin-top: 0;">
+            In development you can inspect the effective upstream list (keys redacted) at
+            <a href="{{ base }}/dev/eth-upstreams">/dev/eth-upstreams</a>. This reads from
+            <code>{{ base }}/meta/upstreams</code>.
+          </p>
+
+          <div id="upstreams" style="margin-top: 12px;">
+            <em class="muted">Loading upstreams…</em>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (async function () {
+      const box = document.getElementById('upstreams');
+      try {
+        const res = await fetch('/meta/upstreams', { cache: 'no-store' });
+        if (!res.ok) {
+          box.innerHTML = '<span class="muted">Failed to load upstreams (' + res.status + ')</span>';
+          return;
+        }
+        const data = await res.json();
+
+        // Expect: { rr_enabled: bool, chains: { chain: [{url, status, ttl_down_secs, provider}] } }
+        const chains = data.chains || {};
+        const rr = data.rr_enabled ? 'on' : 'off';
+
+        let html = '';
+        for (const [chain, list] of Object.entries(chains)) {
+          html += `
+            <div class="section" style="margin-bottom: 12px;">
+              <h4 style="margin: 0 0 6px;">${chain} <small class="muted">RR: ${rr}</small></h4>
+              <ul style="list-style:none; padding:0; margin:0;">
+          `;
+          (list || []).forEach((item, idx) => {
+            const status = (item.status || 'up').toLowerCase();
+            const color = status === 'down' ? 'rgb(255 70 70)' : 'rgb(70 200 120)';
+            const url = item.url || '';
+            const ttl = item.ttl_down_secs || 0;
+            const ttlBadge = status === 'down'
+              ? `<span style="margin-left:8px; font-size:12px; opacity:.75;">down ${ttl}s</span>`
+              : '';
+            const provider = item.provider ? `<strong>[${item.provider}]</strong>` : '';
+            html += `
+              <li style="padding:6px 0; border-bottom: 1px dashed rgba(255,255,255,.08);">
+                <small style="opacity:.7;margin-right:6px;">#${idx+1}</small>
+                <span style="display:inline-flex;align-items:center;gap:8px;">
+                  <span title="${status}" style="width:10px;height:10px;border-radius:50%;background:${color};display:inline-block;"></span>
+                  ${provider}
+                  <code>${url}</code>
+                  ${ttlBadge}
+                </span>
+              </li>`;
+          });
+          html += `
+              </ul>
+            </div>
+          `;
+        }
+        if (!html) {
+          html = '<span class="muted">No upstreams configured or endpoint disabled.</span>';
+        }
+        box.innerHTML = html;
+      } catch (e) {
+        box.innerHTML = '<span class="muted">Failed to load /meta/upstreams: ' + (e?.message || e) + '</span>';
+      }
+    })();
+  </script>
+{% endblock %}

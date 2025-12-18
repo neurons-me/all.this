@@ -1,0 +1,34 @@
+# Exclude development files and folders
+node_modules/
+.storybook/
+storybook-static/
+dist-storybook/
+__tests__/
+test/
+tests/
+coverage/
+
+# Exclude configs and build tools
+tsconfig.json
+vite.config.js
+webpack.config.js
+eslint*
+.prettier*
+babel.config.js
+jest.config.js
+
+# Exclude documentation and examples not needed for npm
+examples/
+docs/
+assets/
+scripts/
+scripts-dev/
+playground/
+
+# Keep only built output, CLI, and init template
+!dist/
+!bin/
+!init/
+!README.md
+!LICENSE
+!package.json

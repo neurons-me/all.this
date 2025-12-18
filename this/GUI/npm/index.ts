@@ -1,0 +1,95 @@
+// =========================================
+// this.gui public entry (root)
+// Goal:
+// - Provide *tree-shakeable* named exports for app bundlers.
+// - Provide a *small* default surface for convenience.
+//
+// Rule 0 (API stability):
+// - ❌ Do NOT use `export *` in the root entrypoint.
+//   Root exports must be explicit so we control the public surface, avoid accidental leaks,
+//   and prevent name collisions.
+//
+// Pattern:
+//  1) constants
+//  2) explicit named exports (tree-shakeable)
+//  3) imports for the default surface
+//  4) default surface export
+//
+// Usage examples:
+//   // ✅ Recommended (tree-shakeable)
+//   import { GuiProvider, ThemeModeToggle, Icon } from 'this.gui';
+//
+//   // ✅ Also supported (convenience default surface)
+//   import GUI from 'this.gui';
+//   const { GuiProvider, Layout } = GUI;
+//   const { Button } = GUI;
+//
+//   // ✅ Subpath imports (more explicit boundaries)
+//   // import { Button } from 'this.gui/atoms';
+//   // import { useThemeContext } from 'this.gui/contexts';
+//   // import { Hero } from 'this.gui/molecules';
+//
+// Notes:
+// - Keep the default export SMALL (core primitives + a few top-level components) to protect tree-shaking.
+// - Large aggregates (GUI.atoms / GUI.molecules / GUI.organisms) should live in a separate
+//   entrypoint (e.g. `this.gui/full`) if you decide to offer that convenience.
+// =========================================
+
+// 1) constants
+export const version = '1.3.48';
+
+// 2) named exports (tree-shakeable)
+// Core primitives (ergonomic root exports)
+// NOTE: Export from concrete modules (not barrels) to preserve tree-shaking and avoid pulling in the whole atoms surface.
+export { default as Box } from '@/gui/components/atoms/Box/Box';
+export { default as Button } from '@/gui/components/atoms/Button/Button';
+export { default as Link } from '@/gui/components/atoms/Link/Link';
+export { default as Paper } from '@/gui/components/atoms/Paper/Paper';
+export { default as TextField } from '@/gui/components/atoms/TextField/TextField';
+export { default as Typography } from '@/gui/components/atoms/Typography/Typography';
+
+// Friendly aliases (optional ergonomics)
+export { default as Text } from '@/gui/components/atoms/Typography/Typography';
+export { default as Input } from '@/gui/components/atoms/TextField/TextField';
+
+export { default as GuiProvider } from '@/gui/Theme/GuiProvider';
+export { default as Layout } from '@/gui/Theme/Layout/Layout/Layout';
+export { default as Icon } from '@/gui/Theme/Icon/Icon';
+export { default as ThemeModeToggle } from '@/gui/components/molecules/Theme/ThemeModeToggle/ThemeModeToggle';
+export { default as Blockchain } from '@/gui/components/organisms/Blockchain/blockchain';
+export { default as HighLighter } from '@/gui/components/organisms/HighLighter/HighLighter';
+
+// 3) imports for the default surface
+import GuiProvider from '@/gui/Theme/GuiProvider';
+import Box from '@/gui/components/atoms/Box/Box';
+import Button from '@/gui/components/atoms/Button/Button';
+import Link from '@/gui/components/atoms/Link/Link';
+import Paper from '@/gui/components/atoms/Paper/Paper';
+import TextField from '@/gui/components/atoms/TextField/TextField';
+import Typography from '@/gui/components/atoms/Typography/Typography';
+import Layout from '@/gui/Theme/Layout/Layout/Layout';
+import Icon from '@/gui/Theme/Icon/Icon';
+import ThemeModeToggle from '@/gui/components/molecules/Theme/ThemeModeToggle/ThemeModeToggle';
+import Blockchain from '@/gui/components/organisms/Blockchain/blockchain';
+import HighLighter from '@/gui/components/organisms/HighLighter/HighLighter';
+
+// 4) default surface export
+// Keep this object SMALL (core primitives + a few top-level components) to avoid harming tree-shaking for named imports.
+// (If you later want GUI.atoms / GUI.molecules, do it via a separate entrypoint.)
+const GUI = {
+  version,
+  Box,
+  Button,
+  Link,
+  Paper,
+  TextField,
+  Typography,
+  GuiProvider,
+  Layout,
+  Icon,
+  ThemeModeToggle,
+  Blockchain,
+  HighLighter,
+} as const;
+
+export default GUI;

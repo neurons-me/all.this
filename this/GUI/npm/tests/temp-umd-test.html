@@ -1,0 +1,21 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>UMD Test</title>
+      <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+      <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+      <script src="https://unpkg.com/this.gui@1.3.48/dist/this.gui.umd.js"></script>
+    </head>
+    <body>
+      <script>
+        if (window.GUI && Object.keys(window.GUI).length > 0 && window.GUI.version) {
+          console.log("UMD test passed!");
+        } else {
+          console.error("UMD test failed!");
+          throw new Error("UMD test failed");
+        }
+      </script>
+    </body>
+    </html>
+  

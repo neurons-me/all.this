@@ -1,0 +1,35 @@
+# ─── System Files ─────────────────────────────
+.DS_Store
+**/.DS_Store
+*.log
+*.tmp
+
+# ─── General Ignore ───────────────────────────
+.env
+.vscode/
+.idea/
+
+# ─── Node (JavaScript / npm) ──────────────────
+npm/node_modules/
+npm/dist/
+npm/build/
+npm/coverage/
+npm/package-lock.json
+npm/yarn.lock
+
+# ─── Python (py) ─────────────────────────────
+pip/__pycache__/
+pip/**/*.pyc
+pip/**/*.pyo
+pip/**/*.egg-info/
+pip/dist/
+pip/build/
+pip/*.egg
+pip/venv/
+pip/.venv/
+pip/Pipfile.lock
+pip/poetry.lock
+
+# ─── Rust (crate) ─────────────────────────────
+crate/target/
+crate/Cargo.lock

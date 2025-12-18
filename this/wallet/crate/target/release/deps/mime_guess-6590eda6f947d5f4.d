@@ -1,0 +1,12 @@
+/Users/suign/Desktop/Neuroverse/all.this/packages-src/this.wallet/wallet.crate/target/release/deps/mime_guess-6590eda6f947d5f4.d: /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/lib.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/impl_bin_search.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/mime_types.rs /Users/suign/Desktop/Neuroverse/all.this/packages-src/this.wallet/wallet.crate/target/release/build/mime_guess-d3070c2b1be28892/out/mime_types_generated.rs
+
+/Users/suign/Desktop/Neuroverse/all.this/packages-src/this.wallet/wallet.crate/target/release/deps/libmime_guess-6590eda6f947d5f4.rlib: /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/lib.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/impl_bin_search.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/mime_types.rs /Users/suign/Desktop/Neuroverse/all.this/packages-src/this.wallet/wallet.crate/target/release/build/mime_guess-d3070c2b1be28892/out/mime_types_generated.rs
+
+/Users/suign/Desktop/Neuroverse/all.this/packages-src/this.wallet/wallet.crate/target/release/deps/libmime_guess-6590eda6f947d5f4.rmeta: /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/lib.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/impl_bin_search.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/mime_types.rs /Users/suign/Desktop/Neuroverse/all.this/packages-src/this.wallet/wallet.crate/target/release/build/mime_guess-d3070c2b1be28892/out/mime_types_generated.rs
+
+/Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/lib.rs:
+/Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/impl_bin_search.rs:
+/Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/mime_types.rs:
+/Users/suign/Desktop/Neuroverse/all.this/packages-src/this.wallet/wallet.crate/target/release/build/mime_guess-d3070c2b1be28892/out/mime_types_generated.rs:
+
+# env-dep:MIME_TYPES_GENERATED_PATH=/Users/suign/Desktop/Neuroverse/all.this/packages-src/this.wallet/wallet.crate/target/release/build/mime_guess-d3070c2b1be28892/out/mime_types_generated.rs

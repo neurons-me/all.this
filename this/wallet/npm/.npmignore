@@ -1,0 +1,31 @@
+# Source files
+/src/
+
+# Test files
+/tests/
+/__tests__/
+
+# Configuration files
+.babelrc
+.eslintrc.js
+.prettierrc
+jest.config.cjs
+jest.setup.cjs
+
+# Documentation
+/docs/
+
+# Various documentation files
+README.md
+CHANGELOG.md
+CONTRIBUTING.md
+
+# Environment files
+.env*
+
+# IDE and Editor folders
+/.vscode/
+/.idea/
+
+# Logs
+*.log

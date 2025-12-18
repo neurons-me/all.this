@@ -1,0 +1,165 @@
+{% extends "layout.html" %}
+
+{% block head %}
+  <title>{{ title | default(value="ETH Endpoints | This.Wallet") }}</title>
+{% endblock %}
+
+{% block body %}
+<div class="container" style="margin-top: 4px;">
+  <div style="display:flex; gap:24px; align-items:flex-start;">
+
+    {% include "components/Allowed_Methods_Sidebar.html" %}
+
+    <!-- Main Content -->
+    <div style="flex:1; min-width:0;">
+      <h2>Ethereum Endpoints</h2>
+      <p class="muted">
+        A list of all API-consumable Ethereum JSON-RPC endpoints and meta endpoints used by <strong>this.Wallet</strong>.
+      </p>
+
+      <h3>Primary API Endpoint</h3>
+      <p>
+        The <strong>/rpc</strong> endpoint is the <strong>primary JSON-RPC endpoint</strong> for Ethereum networks. The <code>chain</code> parameter is passed as a <strong>query parameter</strong>, while the <code>method</code> and <code>params</code> are sent in the <strong>JSON body</strong> of the POST request.
+      </p>
+      <ul>
+        <li>
+          <strong>Endpoint:</strong> <a href="{{ base }}/rpc?chain=mainnet">{{ base }}/rpc?chain=mainnet</a><br>
+          <small>Access the primary Ethereum mainnet JSON-RPC endpoint.</small>
+        </li>
+        <li>
+          <strong>Example with a different network:</strong> <a href="{{ base }}/rpc?chain=ropsten">{{ base }}/rpc?chain=ropsten</a><br>
+          <small>Replace <code>{network}</code> with the desired Ethereum network name.</small>
+        </li>
+      </ul>
+
+      <h4>Example JSON-RPC Requests and Responses</h4>
+
+      <h5>1. eth_chainId</h5>
+      <pre><code>{
+  "jsonrpc": "2.0",
+  "method": "eth_chainId",
+  "params": [],
+  "id": 1
+}</code></pre>
+      <p>Response:</p>
+      <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x1"
+}</code></pre>
+
+      <h5>2. eth_getBalance</h5>
+      <pre><code>{
+  "jsonrpc": "2.0",
+  "method": "eth_getBalance",
+  "params": ["0x742d35Cc6634C0532925a3b844Bc454e4438f44e", "latest"],
+  "id": 2
+}</code></pre>
+      <p>Response:</p>
+      <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": "0x0234c8a3397aab58"
+}</code></pre>
+
+      <h5>3. eth_blockNumber</h5>
+      <pre><code>{
+  "jsonrpc": "2.0",
+  "method": "eth_blockNumber",
+  "params": [],
+  "id": 3
+}</code></pre>
+      <p>Response:</p>
+      <pre><code>{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": "0x10d4f"
+}</code></pre>
+
+      <section class="card" style="margin-top:16px;">
+        <h3 class="section-header" style="margin-top:0;">How <code>/rpc</code> routes your request internally</h3>
+
+        <!-- Toggle controls -->
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px;">
+          <button id="toggle-flow" class="btn" type="button" style="padding:6px 10px; font-weight:600;">Show details</button>
+          <small class="muted">Peek under the hood (stateless JSON-RPC proxy behavior).</small>
+        </div>
+
+        <!-- Collapsible content -->
+        <div id="flow-content" style="display:none;">
+          <ol style="margin:0; padding-left:18px;">
+            <li><strong>Preflight &amp; guards</strong>
+              <ul>
+                <li>CORS: responds to <code>OPTIONS</code> with permissive headers (no cookies).</li>
+                <li>Rate limit: keyed by <em>origin|ip</em> using a token bucket.</li>
+                <li>Payload shape: only a <em>single</em> JSON-RPC object (batch arrays are rejected).</li>
+                <li>Allow‑list: the <code>method</code> must be in <code>ALLOW_METHODS</code>.</li>
+              </ul>
+            </li>
+            <li><strong>Pick upstreams for the selected chain</strong>
+              <ul>
+                <li>Start from built‑ins (e.g., PublicNode, vendor RPCs).</li>
+                <li>Augment with <code>PUBLIC_RPCS_&lt;CHAIN&gt;</code> (env) when present.</li>
+                <li>Order matters; keys (Infura/Alchemy/Ankr) may be preferred.</li>
+              </ul>
+            </li>
+            <li><strong>Optional round‑robin</strong>
+              <ul>
+                <li>If <code>RR_ENABLED</code> is true (default), rotate the list so load is spread.</li>
+              </ul>
+            </li>
+            <li><strong>Circuit breaker &amp; retries</strong>
+              <ul>
+                <li>Skip endpoints currently marked down.</li>
+                <li>Try providers in order; on network/5xx, mark down for <code>CB_COOLDOWN_SECS</code> and continue.</li>
+                <li>Return the first successful JSON body (200 or JSON error 400 from provider).</li>
+              </ul>
+            </li>
+            <li><strong>Light caching</strong>
+              <ul>
+                <li>For <code>eth_chainId</code> only: cache the raw JSON for <code>CACHE_CHAINID_TTL</code> seconds.</li>
+              </ul>
+            </li>
+            <li><strong>Raw passthrough response</strong>
+              <ul>
+                <li>We don’t transform the provider’s JSON; you get the exact JSON-RPC result/error.</li>
+              </ul>
+            </li>
+          </ol>
+
+          <div class="muted" style="margin-top:10px;">
+            <strong>Tunable via env:</strong>
+            <code>RR_ENABLED</code>, <code>CB_COOLDOWN_SECS</code>, <code>CACHE_CHAINID_TTL</code>, and <code>PUBLIC_RPCS_&lt;CHAIN&gt;</code>.
+          </div>
+        </div>
+      </section>
+
+      <hr style="margin: 32px 0; border-top: 2px solid #ddd;">
+
+      <h3>Meta Endpoints</h3>
+      <ul>
+        <li>
+          <strong>/meta/evm-networks</strong> — <a href="{{ base }}/meta/evm-networks">{{ base }}/meta/evm-networks</a><br>
+          <small>Retrieve metadata about supported EVM-compatible networks.</small>
+        </li>
+        <li>
+          <strong>/meta/upstreams</strong> — <a href="{{ base }}/meta/upstreams">{{ base }}/meta/upstreams</a><br>
+          <small>Get information about upstream JSON-RPC providers and their status.</small>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+<script>
+  (function(){
+    var btn = document.getElementById('toggle-flow');
+    var box = document.getElementById('flow-content');
+    if (!btn || !box) return;
+    btn.addEventListener('click', function(){
+      var isHidden = box.style.display === 'none' || box.style.display === '';
+      box.style.display = isHidden ? 'block' : 'none';
+      btn.textContent = isHidden ? 'Hide details' : 'Show details';
+    });
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends "layout.html" %}
+
+{% block head %}
+  <title>{{ title | default(value="Effective Upstream Nodes | This.Wallet") }}</title>
+{% endblock %}
+
+{% block body %}
+<div class="container" style="margin-top: 4px;">
+  <div style="display:flex; gap:24px; align-items:flex-start;">
+    {% include "components/Allowed_Methods_Sidebar.html" %}
+
+    <div style="flex:1; min-width:0;">
+      <h2 style="margin:0 0 8px;">Effective Upstream Nodes.</h2>
+      <p style="color:var(--text-2); font-size:15px; margin:0 0 16px;">
+        Upstream nodes are external RPC providers used by <strong>this.Wallet</strong> to connect to blockchain networks.
+        The API forwards your JSON-RPC requests to these nodes and returns their raw responses.
+      </p>
+      <p class="muted" style="margin:0 0 16px;">This page reads <code>/meta/upstreams</code>. Set <code>EXPOSE_UPSTREAMS=1</code> in your <code>.env</code> to enable it. Provider secrets are masked.</p>
+
+      <div id="ups-root" class="section">
+        <div id="ups-status" class="muted">Loading…</div>
+      </div>
+
+      <div class="card" style="margin-top:24px;">
+        <h4 class="section-header">Notes</h4>
+        <ul>
+          <li>The order reflects the rotation/failover preference.</li>
+          <li>Round-robin status (<code>rr_enabled</code>) is displayed when available.</li>
+          <li>Keys/tokens in URLs are redacted (e.g., <code>…/v3/***</code>).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function startCountdown() {
+    setInterval(() => {
+      document.querySelectorAll('[data-ttl]').forEach(el => {
+        let ttl = Number(el.getAttribute('data-ttl')) || 0;
+        if (ttl > 0) {
+          ttl -= 1;
+          el.setAttribute('data-ttl', ttl);
+          const span = el.querySelector('.ttl-secs');
+          if (span) span.textContent = `${ttl}s`;
+        }
+      });
+    }, 1000);
+  }
+
+  async function loadUpstreams(){
+    const statusEl = document.getElementById('ups-status');
+    const root = document.getElementById('ups-root');
+    try{
+      const res = await fetch('/meta/upstreams');
+      if(res.status === 403){
+        statusEl.textContent = 'Disabled. Set EXPOSE_UPSTREAMS=1 in .env and restart the server.';
+        return;
+      }
+      const data = await res.json();
+      statusEl.textContent = '';
+
+      const rr = document.createElement('div');
+      rr.className = 'muted';
+      rr.style.marginBottom = '12px';
+      rr.textContent = `Round-robin enabled: ${Boolean(data.rr_enabled)}`;
+      root.appendChild(rr);
+
+      const legend = document.createElement('div');
+      legend.className = 'muted';
+      legend.style.marginBottom = '8px';
+      legend.innerHTML = '<span style="display:inline-flex;align-items:center;gap:6px;margin-right:12px;"><span style="width:10px;height:10px;border-radius:50%;background:#30d158;display:inline-block;"></span>up</span><span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:#ff453a;display:inline-block;"></span>down</span>';
+      root.appendChild(legend);
+
+      const chains = data.chains || {};
+      Object.keys(chains).forEach(chain => {
+        const list = chains[chain] || [];
+        const card = document.createElement('section');
+        card.className = 'card';
+        card.style.margin = '12px 0';
+
+        const h = document.createElement('h4');
+        h.className = 'section-header';
+        h.textContent = chain;
+        card.appendChild(h);
+
+        if(list.length === 0){
+          const p = document.createElement('p');
+          p.className = 'muted';
+          p.textContent = 'No upstreams configured.';
+          card.appendChild(p);
+        } else {
+          const ul = document.createElement('ul');
+          ul.style.margin = '0';
+          ul.style.paddingLeft = '0';
+          list.forEach((item, idx) => {
+            const li = document.createElement('li');
+            li.style.wordBreak = 'break-all';
+            li.style.listStyle = 'none';
+
+            const url = (typeof item === 'string') ? item : (item && item.url ? item.url : '');
+            const status = (typeof item === 'object' && item && item.status) ? String(item.status).toLowerCase() : 'up';
+            const ttl = (typeof item === 'object' && item && (item.ttl_down_secs !== undefined)) ? Number(item.ttl_down_secs) : 0;
+            const color = status === 'down' ? '#ff453a' : '#30d158';
+            const provider = (typeof item === 'object' && item && item.provider) ? String(item.provider) : '';
+            const providerBadge = provider ? `<strong class="provider-badge" style="font-weight:600;opacity:.9;">[${provider}]</strong>` : '';
+
+            const ttlBadge = (status === 'down' && ttl > 0)
+              ? `<span class="cb-ttl" data-ttl="${ttl}" style="display:inline-flex;align-items:center;gap:6px;padding:2px 6px;border-radius:8px;border:1px solid ${color};color:${color};font-size:12px;">
+                   down <span class="ttl-secs">${ttl}s</span>
+                 </span>`
+              : (status === 'down'
+                  ? `<span style="display:inline-flex;align-items:center;gap:6px;padding:2px 6px;border-radius:8px;border:1px solid ${color};color:${color};font-size:12px;">down</span>`
+                  : '');
+
+            li.innerHTML = `
+              <small style="opacity:.7;margin-right:6px;">#${idx+1}</small>
+              <span style="display:inline-flex;align-items:center;gap:8px;">
+                <span title="${status}" style="width:10px;height:10px;border-radius:50%;background:${color};display:inline-block;"></span>
+                ${providerBadge}
+                <code>${url}</code>
+                ${ttlBadge}
+              </span>`;
+            ul.appendChild(li);
+          });
+          card.appendChild(ul);
+        }
+        root.appendChild(card);
+      });
+
+      // Start countdown updates (only affects elements with data-ttl)
+      startCountdown();
+    } catch(e){
+      statusEl.textContent = 'Failed to load /meta/upstreams: ' + (e && e.message ? e.message : e);
+    }
+  }
+  loadUpstreams();
+</script>
+{% endblock %}

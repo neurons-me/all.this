@@ -1,0 +1,162 @@
+{% extends "layout.html" %}
+
+{% block body %}
+<div class="container" style="margin-top: 4px;">
+  <div style="display:flex; gap:24px; align-items:flex-start;">
+
+    {% include "components/Allowed_Methods_Sidebar.html" %}
+
+    <div style="flex:1; min-width:0; max-width: 800px;">
+
+      <div style="text-align: center; margin-bottom: 16px;">
+        <img src="/static/imgs/icons/eth_crypto.png" alt="Ethereum Logo" width="144" height="144" style="display: block; margin: 0 auto;">
+      </div>
+
+      <h1 style="color: var(--text-1);">Ethereum API Overview</h1>
+      <p style="color: var(--text-2); font-size: 16px; line-height: 1.6; margin-top: 12px;">
+        The <strong>this.Wallet API</strong> allows you to interact with Ethereum-compatible networks 
+        through a secure <strong>JSON-RPC</strong> proxy. You can send requests to the configured RPC nodes 
+        and get back raw blockchain data.  
+      </p>
+
+      <h2 style="color: var(--text-1); margin-top: 28px;">Allowed Methods</h2>
+      <p style="color: var(--text-2); font-size: 15px; margin-bottom: 16px;">
+        For security and performance, the API only exposes a limited set of JSON-RPC methods during the MVP phase:
+      </p>
+
+      <table class="table" style="margin-top: 16px;">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Description</th>
+            <th style="width:120px; text-align:center;">Try</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>eth_chainId</code></td>
+            <td>Returns the current Ethereum chain ID (e.g. <code>0x1</code> for Mainnet).</td>
+            <td style="text-align:center;">
+              <a href="/eth-playground?method=eth_chainId" style="
+                display:inline-block; padding:8px 12px; border-radius:10px; text-decoration:none; font-weight:600;
+                border:1px solid rgba(0,140,255,0.6); color:var(--text-1); background:transparent;
+                transition:border-color .3s ease, box-shadow .3s ease, transform .1s ease;"
+                onmouseover="this.style.borderColor='rgb(0,140,255)'; this.style.boxShadow='0 0 8px rgba(0,140,255,0.6)';"
+                onmouseout="this.style.borderColor='rgba(0,140,255,0.6)'; this.style.boxShadow='none';"
+                onmousedown="this.style.transform='scale(0.98)';"
+                onmouseup="this.style.transform='scale(1)';"
+              >Test</a>
+            </td>
+          </tr>
+          <tr>
+            <td><code>eth_getBalance</code></td>
+            <td>Fetches the balance of a given address in wei.</td>
+            <td style="text-align:center;">
+              <a href="/eth-playground?method=eth_getBalance" style="
+                display:inline-block; padding:8px 12px; border-radius:10px; text-decoration:none; font-weight:600;
+                border:1px solid rgba(0,140,255,0.6); color:var(--text-1); background:transparent;
+                transition:border-color .3s ease, box-shadow .3s ease, transform .1s ease;"
+                onmouseover="this.style.borderColor='rgb(0,140,255)'; this.style.boxShadow='0 0 8px rgba(0,140,255,0.6)';"
+                onmouseout="this.style.borderColor='rgba(0,140,255,0.6)'; this.style.boxShadow='none';"
+                onmousedown="this.style.transform='scale(0.98)';"
+                onmouseup="this.style.transform='scale(1)';"
+              >Test</a>
+            </td>
+          </tr>
+          <tr>
+            <td><code>eth_call</code></td>
+            <td>Executes a read-only call to a smart contract without sending a transaction.</td>
+            <td style="text-align:center;">
+              <a href="/eth-playground?method=eth_call" style="
+                display:inline-block; padding:8px 12px; border-radius:10px; text-decoration:none; font-weight:600;
+                border:1px solid rgba(0,140,255,0.6); color:var(--text-1); background:transparent;
+                transition:border-color .3s ease, box-shadow .3s ease, transform .1s ease;"
+                onmouseover="this.style.borderColor='rgb(0,140,255)'; this.style.boxShadow='0 0 8px rgba(0,140,255,0.6)';"
+                onmouseout="this.style.borderColor='rgba(0,140,255,0.6)'; this.style.boxShadow='none';"
+                onmousedown="this.style.transform='scale(0.98)';"
+                onmouseup="this.style.transform='scale(1)';"
+              >Test</a>
+            </td>
+          </tr>
+          <tr>
+            <td><code>eth_estimateGas</code></td>
+            <td>Estimates the gas needed to execute a transaction.</td>
+            <td style="text-align:center;">
+              <a href="/eth-playground?method=eth_estimateGas" style="
+                display:inline-block; padding:8px 12px; border-radius:10px; text-decoration:none; font-weight:600;
+                border:1px solid rgba(0,140,255,0.6); color:var(--text-1); background:transparent;
+                transition:border-color .3s ease, box-shadow .3s ease, transform .1s ease;"
+                onmouseover="this.style.borderColor='rgb(0,140,255)'; this.style.boxShadow='0 0 8px rgba(0,140,255,0.6)';"
+                onmouseout="this.style.borderColor='rgba(0,140,255,0.6)'; this.style.boxShadow='none';"
+                onmousedown="this.style.transform='scale(0.98)';"
+                onmouseup="this.style.transform='scale(1)';"
+              >Test</a>
+            </td>
+          </tr>
+          <tr>
+            <td><code>eth_getTransactionCount</code></td>
+            <td>Returns the nonce for an address (number of sent transactions).</td>
+            <td style="text-align:center;">
+              <a href="/eth-playground?method=eth_getTransactionCount" style="
+                display:inline-block; padding:8px 12px; border-radius:10px; text-decoration:none; font-weight:600;
+                border:1px solid rgba(0,140,255,0.6); color:var(--text-1); background:transparent;
+                transition:border-color .3s ease, box-shadow .3s ease, transform .1s ease;"
+                onmouseover="this.style.borderColor='rgb(0,140,255)'; this.style.boxShadow='0 0 8px rgba(0,140,255,0.6)';"
+                onmouseout="this.style.borderColor='rgba(0,140,255,0.6)'; this.style.boxShadow='none';"
+                onmousedown="this.style.transform='scale(0.98)';"
+                onmouseup="this.style.transform='scale(1)';"
+              >Test</a>
+            </td>
+          </tr>
+          <tr>
+            <td><code>eth_sendRawTransaction</code></td>
+            <td>Broadcasts a signed transaction to the Ethereum network.</td>
+            <td style="text-align:center;">
+              <a href="/eth-playground?method=eth_sendRawTransaction" style="
+                display:inline-block; padding:8px 12px; border-radius:10px; text-decoration:none; font-weight:600;
+                border:1px solid rgba(0,140,255,0.6); color:var(--text-1); background:transparent;
+                transition:border-color .3s ease, box-shadow .3s ease, transform .1s ease;"
+                onmouseover="this.style.borderColor='rgb(0,140,255)'; this.style.boxShadow='0 0 8px rgba(0,140,255,0.6)';"
+                onmouseout="this.style.borderColor='rgba(0,140,255,0.6)'; this.style.boxShadow='none';"
+                onmousedown="this.style.transform='scale(0.98)';"
+                onmouseup="this.style.transform='scale(1)';"
+              >Test</a>
+            </td>
+          </tr>
+          <tr>
+            <td><code>net_version</code></td>
+            <td>Returns the current network ID in decimal (e.g. <code>1</code> for Mainnet).</td>
+            <td style="text-align:center;">
+              <a href="/eth-playground?method=net_version" style="
+                display:inline-block; padding:8px 12px; border-radius:10px; text-decoration:none; font-weight:600;
+                border:1px solid rgba(0,140,255,0.6); color:var(--text-1); background:transparent;
+                transition:border-color .3s ease, box-shadow .3s ease, transform .1s ease;"
+                onmouseover="this.style.borderColor='rgb(0,140,255)'; this.style.boxShadow='0 0 8px rgba(0,140,255,0.6)';"
+                onmouseout="this.style.borderColor='rgba(0,140,255,0.6)'; this.style.boxShadow='none';"
+                onmousedown="this.style.transform='scale(0.98)';"
+                onmouseup="this.style.transform='scale(1)';"
+              >Test</a>
+            </td>
+          </tr>
+          <tr>
+            <td><code>web3_clientVersion</code></td>
+            <td>Returns the name and version of the Ethereum client used by the node.</td>
+            <td style="text-align:center;">
+              <a href="/eth-playground?method=web3_clientVersion" style="
+                display:inline-block; padding:8px 12px; border-radius:10px; text-decoration:none; font-weight:600;
+                border:1px solid rgba(0,140,255,0.6); color:var(--text-1); background:transparent;
+                transition:border-color .3s ease, box-shadow .3s ease, transform .1s ease;"
+                onmouseover="this.style.borderColor='rgb(0,140,255)'; this.style.boxShadow='0 0 8px rgba(0,140,255,0.6)';"
+                onmouseout="this.style.borderColor='rgba(0,140,255,0.6)'; this.style.boxShadow='none';"
+                onmousedown="this.style.transform='scale(0.98)';"
+                onmouseup="this.style.transform='scale(1)';"
+              >Test</a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

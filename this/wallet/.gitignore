@@ -1,0 +1,35 @@
+# ─── System Files ─────────────────────────────
+.DS_Store
+**/.DS_Store
+*.log
+*.tmp
+
+# ─── General Ignore ───────────────────────────
+.env
+.vscode/
+.idea/
+
+# ─── Node (JavaScript / npm) ──────────────────
+wallet.npm/node_modules/
+wallet.npm/dist/
+wallet.npm/build/
+wallet.npm/coverage/
+wallet.npm/package-lock.json
+wallet.npm/yarn.lock
+
+# ─── Python (py) ─────────────────────────────
+wallet.pip/__pycache__/
+wallet.pip/**/*.pyc
+wallet.pip/**/*.pyo
+wallet.pip/**/*.egg-info/
+wallet.pip/dist/
+wallet.pip/build/
+wallet.pip/*.egg
+wallet.pip/venv/
+wallet.pip/.venv/
+wallet.pip/Pipfile.lock
+wallet.pip/poetry.lock
+
+# ─── Rust (crate) ─────────────────────────────
+wallet.crate/target/
+wallet.crate/Cargo.lock

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>all.this :: Modules</title>
+    <link rel="icon" href="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1765903003/all.this_sr55ml.webp" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap');
+
+        :root {
+            --background-color: #121212;
+            --surface-color: #1E1E1E;
+            --primary-text-color: #E0E0E0;
+            --secondary-text-color: #B0B0B0;
+            --accent-color: #00A3FF;
+            --border-color: #333333;
+            --code-bg-color: #2A2A2A;
+            --status-stable-color: #4CAF50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            min-height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--primary-text-color);
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 10px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        header {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: var(--secondary-text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        #search-input {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--primary-text-color);
+            padding: 8px 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            width: 280px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #search-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(0, 163, 255, 0.2);
+        }
+        
+        .logo {
+            max-width: 203px;
+            margin-bottom: 15px;
+        }
+
+        .title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .title span {
+            color: var(--accent-color);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--secondary-text-color);
+            margin-top: 8px;
+        }
+
+        .env-test {
+            max-width: 1000px;
+            margin: 0 auto 16px;
+            text-align: left;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .env-test-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .env-test-sub {
+            color: var(--secondary-text-color);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .env-test-code {
+            background: var(--code-bg-color);
+            padding: 10px;
+            border-radius: 10px;
+            overflow: auto;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.35;
+        }
+
+        .module-table-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            overflow-x: auto;
+        }
+
+        .module-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .module-table th, .module-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .module-table thead th {
+            font-weight: 700;
+            color: var(--primary-text-color);
+            background-color: var(--surface-color);
+        }
+
+        .module-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        
+        .module-table tbody tr:hover {
+            background-color: #2a2a2a;
+        }
+        
+        .module-table tbody tr.hidden {
+            display: none;
+        }
+
+        .module-table .module-name {
+            font-weight: 700;
+            color: var(--primary-text-color);
+            font-size: 1.05rem;
+        }
+        .module-name-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .module-version {
+            font-family: 'Roboto Mono', monospace;
+            color: var(--secondary-text-color);
+        }
+
+        tr.is-loaded .module-version {
+            color: var(--primary-text-color);
+        }
+
+        .loaded-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.18);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+        }
+
+        tr.is-loaded .loaded-dot {
+            background: var(--status-stable-color);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.18);
+        }
+
+        tr.is-loaded .module-name {
+            color: #ffffff;
+        }
+
+
+        .module-links {
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .link-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.03);
+            text-decoration: none;
+            color: var(--primary-text-color);
+            transition: transform 0.12s ease, border-color 0.2s ease, background-color 0.2s ease;
+        }
+
+        .link-icon:hover {
+            transform: translateY(-1px);
+            border-color: rgba(0, 163, 255, 0.5);
+            background: rgba(0, 163, 255, 0.08);
+        }
+
+        .link-icon .svg-icon {
+            width: 16px;
+            height: 16px;
+            display: block;
+        }
+
+        .link-icon[aria-disabled="true"],
+        .link-icon[href="#"] {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            text-align: center;
+            width: 100%;
+        }
+
+        footer a {
+            color: var(--secondary-text-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--primary-text-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <nav>
+                <div class="nav-links">
+                    <a href="https://www.npmjs.com/package/all.this" target="_blank" rel="noopener">Home</a>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Search modules...">
+                </div>
+            </nav>
+            <img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1765903003/all.this_sr55ml.webp" alt="all.this logo" class="logo">
+            <h1 class="title">all<span>.</span>this</h1>
+            <p class="subtitle">Module Index</p>
+        </header>
+
+        <main id="module-container">
+            <div class="env-test" style="margin-top: 8px;">
+                <div class="env-test-title">Browser module-load test</div>
+                <div class="env-test-sub">
+                    Verify module type loading for browser imports (UMD/IIFE globals like <code>window.GUI</code> / <code>window.me</code>).
+                </div>
+            </div>
+            <div class="module-table-wrapper">
+                <table class="module-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Version</th>
+                            <th>Links</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modules-tbody">
+                        <!-- Module rows will be injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <a href="https://neurons.me" target="_blank">© 2025 sui Gn. MIT LICENSE. admin@neurons.me</a>
+    </footer>
+
+    <script>
+
+        const modules = [
+            { name: 'this.GUI', key: 'GUI', description: 'UI framework for decentralized apps.', version: '1.3.44', install: 'npm i this.gui', docs: 'https://neurons.me/docs/this.gui', npm: 'https://www.npmjs.com/package/this.gui', github: 'https://github.com/neurons-me/this.gui' },
+            { name: 'this.me', key: 'me', description: 'Identity + session core for the all.this ecosystem.', version: '3.0.34', install: 'npm i this.me', docs: 'https://neurons.me/docs/this.me', npm: 'https://www.npmjs.com/package/this.me', github: 'https://github.com/neurons-me/this.me' },
+            { name: 'this.wallet', key: 'WALLET', description: 'Client-side wallet for digital assets.', version: '1.2.11', install: 'npm i this.wallet', docs: 'https://neurons.me/docs/this.wallet', npm: 'https://www.npmjs.com/package/this.wallet', github: 'https://github.com/neurons-me/this.wallet' },
+            { name: 'this.img', key: 'IMG', description: 'Client-side image manipulation.', version: '1.1.5', install: 'npm i this.img', docs: 'https://neurons.me/docs/this.img', npm: 'https://www.npmjs.com/package/this.img', github: 'https://github.com/neurons-me/this.img' },
+            { name: 'this.audio', key: 'AUDIO', description: 'Tools for audio playback and analysis.', version: '1.4.2', install: 'npm i this.audio', docs: 'https://neurons.me/docs/this.audio', npm: 'https://www.npmjs.com/package/this.audio', github: 'https://github.com/neurons-me/this.audio' },
+            { name: 'this.video', key: 'VIDEO', description: 'Utilities for video playback.', version: '1.1.0', install: 'npm i this.video', docs: 'https://neurons.me/docs/this.video', npm: 'https://www.npmjs.com/package/this.video', github: 'https://github.com/neurons-me/this.video' },
+            { name: 'this.dom', key: 'DOM', description: 'Declarative DOM manipulation library.', version: '1.6.0', install: 'npm i this.dom', docs: 'https://neurons.me/docs/this.dom', npm: 'https://www.npmjs.com/package/this.dom', github: 'https://github.com/neurons-me/this.dom' },
+            { name: 'this.text', key: 'TEXT', description: 'Advanced text processing utilities.', version: '1.2.3', install: 'npm i this.text', docs: 'https://neurons.me/docs/this.text', npm: 'https://www.npmjs.com/package/this.text', github: 'https://github.com/neurons-me/this.text' },
+            { name: 'this.env', key: 'ENV', description: 'Environment variable management.', version: '1.0.0', install: 'npm i this.env', docs: 'https://neurons.me/docs/this.env', npm: 'https://www.npmjs.com/package/this.env', github: 'https://github.com/neurons-me/this.env' },
+            { name: 'this.url', key: 'URL', description: 'URL parsing and manipulation library.', version: '1.3.1', install: 'npm i this.url', docs: 'https://neurons.me/docs/this.url', npm: 'https://www.npmjs.com/package/this.url', github: 'https://github.com/neurons-me/this.url' },
+            { name: 'this.pixel', key: 'PIXEL', description: 'Low-level pixel manipulation.', version: '1.0.9', install: 'npm i this.pixel', docs: 'https://neurons.me/docs/this.pixel', npm: 'https://www.npmjs.com/package/this.pixel', github: 'https://github.com/neurons-me/this.pixel' },
+            { name: 'this.dictionaries', key: 'DICTIONARIES', description: 'Collection of dictionaries and word lists.', version: '1.0.0', install: 'npm i this.dictionaries', docs: 'https://neurons.me/docs/this.dictionaries', npm: 'https://www.npmjs.com/package/this.dictionaries', github: 'https://github.com/neurons-me/this.dictionaries' },
+            { name: 'this.dir', key: 'DIR', description: 'Virtual directory and file system.', version: '1.0.0', install: 'npm i this.dir', docs: 'https://neurons.me/docs/this.dir', npm: 'https://www.npmjs.com/package/this.dir', github: 'https://github.com/neurons-me/this.dir' },
+            { name: 'this.document', key: 'DOCUMENT', description: 'Interact with document metadata.', version: '1.1.2', install: 'npm i this.document', docs: 'https://neurons.me/docs/this.document', npm: 'https://www.npmjs.com/package/this.document', github: 'https://github.com/neurons-me/this.document' },
+            { name: 'this.blockchain', key: 'BLOCKCHAIN', description: 'Utilities for blockchain interaction.', version: '1.0.0', install: 'npm i this.blockchain', docs: 'https://neurons.me/docs/this.blockchain', npm: 'https://www.npmjs.com/package/this.blockchain', github: 'https://github.com/neurons-me/this.blockchain' },
+        ];
+
+        const tbody = document.getElementById('modules-tbody');
+        
+        modules.forEach(module => {
+            const row = document.createElement('tr');
+            row.dataset.key = module.key;
+            row.innerHTML = `
+                <td>
+                  <span class="module-name-wrap">
+                    <span class="loaded-dot" title="Loaded state"></span>
+                    <span class="module-name">${module.name}</span>
+                  </span>
+                </td>
+                <td>
+                  <span class="module-version" data-expected="${module.version}" title="expected: ${module.version}">expecting ${module.version}</span>
+                </td>
+                <td>
+                    <div class="module-links">
+                        <a class="link-icon" href="${module.docs || '#'}" target="_blank" rel="noopener" title="Docs" aria-label="Docs">
+                            <svg class="svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                              <path fill="currentColor" d="M6 2h9l3 3v17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 1.5V6h2.5L14 3.5zM7 9h10v2H7V9zm0 4h10v2H7v-2zm0 4h7v2H7v-2z"/>
+                            </svg>
+                        </a>
+                        <a class="link-icon" href="${module.npm || '#'}" target="_blank" rel="noopener" title="npm" aria-label="npm">
+                            <svg class="svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                              <path fill="currentColor" d="M4 7v10h6v-8h4v8h2v-8h2v8h2V7H4zm2 2h2v6H6V9zm6 0h2v6h-2V9z"/>
+                            </svg>
+                        </a>
+                        <a class="link-icon" href="${module.github || '#'}" target="_blank" rel="noopener" title="GitHub" aria-label="GitHub">
+                            <svg class="svg-icon" viewBox="0 0 24 24" aria-hidden="true">
+                              <path fill="currentColor" d="M12 2C6.48 2 2 6.58 2 12.26c0 4.5 2.87 8.31 6.84 9.66.5.1.68-.22.68-.48v-1.7c-2.78.62-3.37-1.38-3.37-1.38-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.63.07-.63 1 .07 1.53 1.07 1.53 1.07.9 1.57 2.36 1.12 2.94.86.09-.67.35-1.12.63-1.38-2.22-.26-4.56-1.14-4.56-5.08 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.31.1-2.74 0 0 .84-.27 2.75 1.05.8-.23 1.65-.34 2.5-.35.85.01 1.7.12 2.5.35 1.9-1.32 2.74-1.05 2.74-1.05.55 1.43.2 2.48.1 2.74.64.72 1.03 1.63 1.03 2.75 0 3.95-2.35 4.82-4.59 5.07.36.32.68.95.68 1.92v2.85c0 .27.18.59.69.48A10.03 10.03 0 0 0 22 12.26C22 6.58 17.52 2 12 2z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        const searchInput = document.getElementById('search-input');
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = tbody.getElementsByTagName('tr');
+
+            Array.from(rows).forEach(row => {
+                const name = row.querySelector('.module-name')?.textContent?.toLowerCase() ?? '';
+                const isMatch = name.includes(searchTerm);
+                
+                if (isMatch) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+        });
+
+        // --- Optional autoload (no buttons). Default: autoload GUI only.
+        // Use ?autoload=0 to disable. Use ?autoload=GUI,me,all.this to choose.
+        const params = new URLSearchParams(window.location.search);
+        const autoloadRaw = params.get('autoload');
+        const AUTLOAD_DISABLED = autoloadRaw === '0' || autoloadRaw === 'false';
+        const AUTOLOAD_SET = (autoloadRaw && !AUTLOAD_DISABLED)
+          ? new Set(autoloadRaw.split(',').map(s => s.trim()).filter(Boolean))
+          : new Set(['GUI']);
+
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                // already present?
+                const existing = Array.from(document.scripts).find(s => s.src === src);
+                if (existing) {
+                    if (existing.dataset.loaded === '1') return resolve();
+                    existing.addEventListener('load', () => resolve());
+                    existing.addEventListener('error', () => reject(new Error('Failed to load: ' + src)));
+                    return;
+                }
+
+                const s = document.createElement('script');
+                s.src = src;
+                s.async = true;
+                s.dataset.loaded = '0';
+                s.onload = () => { s.dataset.loaded = '1'; resolve(); };
+                s.onerror = () => reject(new Error('Failed to load: ' + src));
+                document.head.appendChild(s);
+            });
+        }
+
+        function ensureReactGlobals() {
+            // Some UMD bundles compiled with the automatic JSX runtime expect a global for react/jsx-runtime.
+            // We provide a tiny shim so they can call `.jsx` / `.jsxs`.
+            const shim = {
+                jsx: (type, props, key) => React.createElement(type, { ...(props || {}), key }),
+                jsxs: (type, props, key) => React.createElement(type, { ...(props || {}), key }),
+                Fragment: React.Fragment,
+            };
+            window.ReactJSXRuntime = window.ReactJSXRuntime || shim;
+            window.ReactJsxRuntime = window.ReactJsxRuntime || shim;
+            window.jsxRuntime = window.jsxRuntime || shim;
+        }
+
+        async function autoload() {
+            if (AUTLOAD_DISABLED) return;
+
+            // Autoload GUI (standalone) without UI controls.
+            if (AUTOLOAD_SET.has('GUI')) {
+                try {
+                    await loadScript('https://unpkg.com/react@18/umd/react.production.min.js');
+                    await loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js');
+                    ensureReactGlobals();
+                    // Optional process.env shim for libs that reference it.
+                    window.process = window.process || { env: { NODE_ENV: 'production' } };
+                    await loadScript('https://cdn.jsdelivr.net/npm/this.gui@latest/dist/this.gui.umd.js');
+                } catch (e) {
+                    console.error('[autoload] GUI failed', e);
+                }
+            }
+
+            // Autoload all.this (optional)
+            if (AUTOLOAD_SET.has('all.this')) {
+                try {
+                    await loadScript('https://unpkg.com/all.this@latest/dist/all.this.iife.js');
+                } catch (e) {
+                    console.error('[autoload] all.this failed', e);
+                }
+            }
+        }
+
+        // Kick autoload early
+        autoload();
+
+
+        function isLoadedKey(key) {
+            // key 'me' means the root object exists
+            if (key === 'me') return typeof window.me !== 'undefined' && window.me !== null;
+
+            // Accept standalone GUI (UMD) as "loaded" even if the all.this bootstrap isn't present.
+            // This supports pages that only include: this.gui.umd.js (window.GUI)
+            if (key === 'GUI' || key === 'gui') {
+                const viaMe = typeof window.me !== 'undefined' && window.me && typeof window.me.GUI !== 'undefined';
+                const viaWindow = typeof window.GUI !== 'undefined' && window.GUI !== null;
+                return !!(viaMe || viaWindow);
+            }
+
+            return typeof window.me !== 'undefined' && window.me && typeof window.me[key] !== 'undefined';
+        }
+
+        function getLoadedVersion(key) {
+            try {
+                // If we're checking standalone GUI (UMD), try to read version from window.GUI.
+                if (key === 'GUI' || key === 'gui') {
+                    const gui = (typeof window.me !== 'undefined' && window.me && window.me.GUI)
+                        ? window.me.GUI
+                        : (typeof window.GUI !== 'undefined' ? window.GUI : null);
+
+                    if (gui) {
+                        const v = gui.version || gui.VERSION || gui.meta?.version;
+                        return v ? String(v) : null;
+                    }
+                }
+
+                if (typeof window.me === 'undefined' || !window.me) return null;
+
+                // Preferred: a centralized version map set by the booster
+                const map = window.me.__versions || window.me.versions || window.me.meta?.versions;
+                if (map && typeof map === 'object' && map[key]) return String(map[key]);
+
+                // Root version
+                if (key === 'me') {
+                    const v = window.me.version || window.me.VERSION || window.me.meta?.version;
+                    return v ? String(v) : null;
+                }
+
+                const cap = window.me[key];
+                if (!cap) return null;
+
+                // Common patterns
+                const v = cap.version || cap.VERSION || cap.meta?.version;
+                return v ? String(v) : null;
+            } catch {
+                return null;
+            }
+        }
+
+        function updateLoadedIndicators() {
+            const rows = tbody.getElementsByTagName('tr');
+            Array.from(rows).forEach(row => {
+                const key = row.dataset.key || '';
+                if (!key) return;
+                const versionEl = row.querySelector('.module-version');
+                const loaded = isLoadedKey(key);
+                if (loaded) row.classList.add('is-loaded');
+                else row.classList.remove('is-loaded');
+
+                if (versionEl) {
+                    // Expected version is stable and should never be derived from `title` (which changes as state updates).
+                    const expected = versionEl.getAttribute('data-expected') || versionEl.dataset.expected || '';
+
+                    if (!loaded) {
+                        // When not loaded, show the expected version as a hint.
+                        versionEl.textContent = expected ? `expecting ${expected}` : '—';
+                        versionEl.dataset.loadedVersion = '';
+                        versionEl.title = expected ? `expected: ${expected}` : 'not loaded';
+                    } else {
+                        const loadedV = getLoadedVersion(key);
+
+                        // Display preference:
+                        // - If we can read a real loaded version, show it.
+                        // - Otherwise show the expected version (so the table never prints "loaded" strings).
+                        const displayV = loadedV || expected || '—';
+                        versionEl.textContent = displayV;
+                        versionEl.dataset.loadedVersion = loadedV || '';
+
+                        if (expected && loadedV && expected !== loadedV) {
+                            versionEl.title = `loaded: ${loadedV} (expected: ${expected})`;
+                        } else if (loadedV) {
+                            versionEl.title = `loaded: ${loadedV}`;
+                        } else if (expected) {
+                            versionEl.title = `loaded (version unknown; expected: ${expected})`;
+                        } else {
+                            versionEl.title = 'loaded (version unknown)';
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initial check + periodic refresh (in case scripts load after initial paint)
+        updateLoadedIndicators();
+        setInterval(updateLoadedIndicators, 500);
+
+    </script>
+
+</body>
+</html>

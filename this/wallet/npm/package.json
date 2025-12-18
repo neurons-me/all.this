@@ -1,0 +1,34 @@
+{
+  "name": "this.wallet",
+  "version": "1.0.57",
+  "description": "This.wallet for this.me.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "test"
+  },
+  "keywords": [
+    "crypto",
+    "wallets"
+  ],
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neurons-me/this.wallet.git"
+  },
+  "homepage": "https://www.npmjs.com/package/this.wallet",
+  "docs": "https://suiGn.github.io/this.wallet",
+  "author": "suiGn",
+  "license": "MIT",
+  "repoType": "NPM Package",
+  "category": "dataformatter",
+  "dependencies": {
+    "bip32": "^4.0.0",
+    "bip39": "^3.1.0",
+    "bitcoinjs-lib": "^6.1.6",
+    "ecpair": "^2.1.0",
+    "ethers": "^6.15.0",
+    "stellar-sdk": "^12.2.0",
+    "tiny-secp256k1": "^2.2.3"
+  }
+}

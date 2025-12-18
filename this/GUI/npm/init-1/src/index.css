@@ -1,0 +1,16 @@
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  color: #1f2933;
+  background-color: #f5f7fb;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+.app-container {
+  max-width: 960px;
+  margin: 96px auto;
+  padding: 0 24px;
+}

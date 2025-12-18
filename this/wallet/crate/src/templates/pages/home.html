@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block head %}
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+{% endblock %}
+{% block body %}
+  <div class="container" style="margin-top: 4px;">
+    <section>
+      <div class="logo-title-container" style="text-align: center;">
+        <img src="/static/imgs/this.wallet.webp" alt="This.Wallet Logo" class="home-logo" width="203" height="203" style="display: block; margin: 0 auto;">
+          <h1 style="text-align: center;">.Wallet API</h1>
+      </div>
+
+      <div class="card-links" style="display: flex; justify-content: center; gap: 24px; margin-top: 42px; flex-wrap: wrap;">
+        <a href="/ethereum" class="card-link" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; padding: 24px; border: 1px solid #ddd; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 180px; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+          <img src="/static/imgs/icons/eth_crypto.png" alt="Ethereum" width="64" height="64" style="margin-bottom: 12px;">
+          <span style="font-size: 18px; font-weight: 600; color: white;">Ethereum</span>
+        </a>
+
+        <a href="/bitcoin" class="card-link" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; padding: 24px; border: 1px solid #ddd; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 180px; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+          <img src="/static/imgs/icons/bitcoin_crypto.png" alt="Bitcoin" width="64" height="64" style="margin-bottom: 12px;">
+          <span style="font-size: 18px; font-weight: 600; color: white;">Bitcoin</span>
+        </a>
+
+        <a href="/stellar" class="card-link" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; padding: 24px; border: 1px solid #ddd; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 180px; transition: transform 0.2s ease, box-shadow 0.2s ease;">
+          <img src="/static/imgs/icons/stellar-blockchain.svg" alt="Stellar" width="64" height="64" style="margin-bottom: 12px;">
+          <span style="font-size: 18px; font-weight: 600; color: white;">Stellar</span>
+        </a>
+
+      </div>
+    </section>
+  </div>
+{% endblock %}

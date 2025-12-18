@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en" class="site">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>{{ title }}</title>
+<link rel="stylesheet" href="/static/styles/css/main.css">
+  {% block head %}{% endblock %}
+</head>
+<body style="display: flex; flex-direction: column; min-height: 100vh;">
+  <div class="content-wrapper" style="flex: 1 0 auto; display: flex; flex-direction: column;">
+    {% include "components/navbar.html" %}
+
+    <main style="flex: 1 0 auto;">
+      {% block body %}{% endblock %}
+    </main>
+  </div>
+
+  {% include "components/footer.html" %}
+</body>
+</html>

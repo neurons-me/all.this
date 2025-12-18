@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block head %}
+  <title>{{ title | default(value="Supported EVM Networks | This.Wallet") }}</title>
+{% endblock %}
+
+{% block body %}
+<div class="container" style="margin-top: 4px;">
+  <div style="display: flex; gap: 24px; align-items: flex-start;">
+
+    {# Sidebar with methods + links, same as other ETH pages #}
+    {% include "components/Allowed_Methods_Sidebar.html" %}
+
+    <!-- Main content -->
+    <div style="flex: 1; min-width: 0;">
+      <h2 style="margin-bottom: 8px;">Supported EVM Networks</h2>
+      <p style="margin: 0 auto 16px; color: var(--text-2);">
+        These are the networks currently enabled in <strong>This.Wallet</strong>. The list is dynamic: it combines built‑in defaults
+        and any networks you add via environment variables like <code>PUBLIC_RPCS_&lt;CHAIN&gt;</code>.
+      </p>
+
+      <ul class="card" style="list-style:none; padding:16px; margin:0; display:grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap:12px;">
+        {% for n in networks %}
+          <li style="border:1px solid var(--border); border-radius:10px; padding:10px 12px; background: var(--bg-paper); display:flex; align-items:center; justify-content:space-between; gap:8px;">
+            <code style="font-size:14px;">{{ n }}</code>
+            <a class="btn" href="/eth-playground?method=eth_chainId" style="padding:6px 10px; font-size:12px;">Play</a>
+          </li>
+        {% else %}
+          <li style="color: var(--text-3);">No networks configured.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

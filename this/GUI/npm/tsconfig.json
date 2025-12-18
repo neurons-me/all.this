@@ -1,0 +1,69 @@
+{
+  "compilerOptions": {
+    // Target modern browsers; Vite/Rollup will transpile/bundle JS.
+    "target": "ES2020",
+    // Declarations build (types)
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist/types",
+    "declarationDir": "dist/types",
+    // NOTE: With `emitDeclarationOnly`, tsc will NOT output JS (only .d.ts).
+    // Module settings compatible with Vite + TS
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    // Quality-of-life
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["ES2020", "DOM"],
+    // Path aliases used by this.gui source
+    "baseUrl": "src",
+    "paths": {
+      "@/gui/atoms": ["gui/components/atoms"],
+      "@/gui/atoms/*": ["gui/components/atoms/*"],
+      "@/gui/molecules": ["gui/components/molecules"],
+      "@/gui/molecules/*": ["gui/components/molecules/*"],
+      "@/gui/organisms": ["gui/components/organisms"],
+      "@/gui/organisms/*": ["gui/components/organisms/*"],
+      "@/gui/generics": ["gui/components/generics"],
+      "@/gui/generics/*": ["gui/components/generics/*"],
+      "@/gui/components": ["gui/components"],
+      "@/gui/components/*": ["gui/components/*"],
+      "@/*": ["*"]
+    },
+
+    // IMPORTANT:
+    // - Keep this as just "node" for the build.
+    // - Remove "vite/client" to avoid leaking Vite-only types into published d.ts.
+    "types": ["node"]
+  },
+
+  // Only compile the library surface + src for type emission.
+  "include": ["index.ts", "src", "src/types/"],
+  // Never emit declarations for build outputs / dependencies
+  "exclude": [
+    "node_modules",
+    "dist",
+    "demo",
+    "stories",
+    "src/stories",
+    "**/*.stories.ts",
+    "**/*.stories.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "test",
+    "tests",
+    "__tests__",
+    "coverage",
+    ".storybook",
+    "storybook-static"
+  ]
+}

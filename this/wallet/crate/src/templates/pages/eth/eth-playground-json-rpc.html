@@ -1,0 +1,237 @@
+{% extends "layout.html" %}
+{% block head %}
+  <title>{{ title | default(value="This.Wallet Playground") }}</title>
+{% endblock %}
+{% block body %}
+  <div class="container" style="margin-top: 4px;">
+    <div style="display: flex; gap: 24px; align-items: flex-start;">
+      {% include "components/Allowed_Methods_Sidebar.html" %}
+      <!-- Main content -->
+      <div style="flex: 1; min-width: 0;">
+      <h3 style="max-width: 600px; margin: 16px auto;">
+      .Wallet [  {{ method | default(value="JSON-RPC Playground") }} ]
+      </h3>        
+      <p style="max-width: 600px; margin: 16px auto; color: var(--text-2);">
+          1. Select a blockchain network. </br>
+          2. Choose a method (like <code>eth_chainId</code>).</br>
+          3. Send a request.</br>
+          The API forwards your call to the configured upstream nodes and returns the raw response.
+        </p>
+        <div class="grid" style="max-width: 600px; margin: 0 auto;">
+          <div class="row">
+            <label>Chain:
+              <select id="chain" style="
+                width: 100%;
+                padding: 10px 12px;
+                font-size: 14px;
+                color: var(--text-1);
+                background: transparent;
+                border: 1px solid rgba(235, 235, 235, 0.653);
+                border-radius: 10px;
+                outline: none;
+                transition: border-color 0.3s ease, box-shadow 0.3s ease;
+              " onfocus="this.style.borderColor='rgb(0,255,200)'; this.style.boxShadow='0 0 8px rgba(0,255,200,0.6)'"
+                 onblur="this.style.borderColor='rgba(0,255,200,0.4)'; this.style.boxShadow='none'">
+              </select>
+            </label>
+          </div>
+          <div class="row">
+            <textarea id="body"
+              style="
+                width: 100%;
+                height: 121px;
+                padding: 12px;
+                font-size: 14px;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+                color: var(--text-1);
+                background: transparent;
+                border: 1px solid rgba(0, 255, 200, 0.4);
+                border-radius: 10px;
+                outline: none;
+                transition: border-color 0.3s ease, box-shadow 0.3s ease;
+                margin-top: 8px;
+              "
+              onfocus="this.style.borderColor='rgb(0,255,200)'; this.style.boxShadow='0 0 8px rgba(0,255,200,0.6)'"
+              onblur="this.style.borderColor='rgba(0,255,200,0.4)'; this.style.boxShadow='none'"
+            >{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}</textarea>
+          </div>
+          <div class="row">
+            <button id="run" style="
+              width: 100%;
+              padding: 12px;
+              margin-top: 10px;
+              font-size: 15px;
+              font-weight: 600;
+              color: var(--text-1);
+              background: transparent;
+              border: 1px solid rgba(235, 235, 235, 0.653); /* Futuristic blue */
+              border-radius: 10px;
+              cursor: pointer;
+              transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
+        ">
+      Run
+    </button>
+          </div>
+          <div class="row">
+            <pre id="out" style="
+              width: 100%;
+              max-height: 300px;
+              padding: 12px;
+              font-size: 14px;
+              font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+              color: var(--text-1);
+              background: transparent;
+              border: 1px solid rgba(0, 140, 255, 0.4); /* Different futuristic blue accent */
+              border-radius: 10px;
+              overflow-y: auto;
+              white-space: pre-wrap;
+              word-wrap: break-word;
+              transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            "
+            onfocus="this.style.borderColor='rgb(0,140,255)'; this.style.boxShadow='0 0 8px rgba(0,140,255,0.6)'"
+            onblur="this.style.borderColor='rgba(0,140,255,0.4)'; this.style.boxShadow='none'"
+            ></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const $ = s => document.querySelector(s);
+    const runBtn = $('#run');
+    const chainSelect = $('#chain');
+    chainSelect.innerHTML = '<option>Loading…</option>';
+    runBtn.disabled = true;
+
+    // Ensure sidebar "method" links preserve current ?chain=... in their href.
+    function rewriteMethodLinksWithChain(currentChain) {
+      // Matches links like /eth-playground?method=eth_... (with or without other params)
+      const links = document.querySelectorAll('a[href^="/eth-playground?method="]');
+      links.forEach(a => {
+        try {
+          const url = new URL(a.getAttribute('href'), window.location.origin);
+          const qs = url.searchParams;
+          if (currentChain) {
+            qs.set('chain', currentChain);
+          } else {
+            qs.delete('chain');
+          }
+          url.search = qs.toString();
+          a.setAttribute('href', url.pathname + '?' + url.searchParams.toString());
+        } catch (_) {
+          // ignore malformed hrefs
+        }
+      });
+    }
+
+    // Quick-start templates by method (matches your ALLOW_METHODS)
+    const methodTemplates = {
+      eth_chainId: { jsonrpc: '2.0', id: 1, method: 'eth_chainId', params: [] },
+      eth_getBalance: { jsonrpc: '2.0', id: 1, method: 'eth_getBalance', params: ['0x0000000000000000000000000000000000000000','latest'] },
+      eth_call: { jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: '0x0000000000000000000000000000000000000000', data: '0x' }, 'latest'] },
+      eth_estimateGas: { jsonrpc: '2.0', id: 1, method: 'eth_estimateGas', params: [{ to: '0x0000000000000000000000000000000000000000', data: '0x' }] },
+      eth_getTransactionCount: { jsonrpc: '2.0', id: 1, method: 'eth_getTransactionCount', params: ['0x0000000000000000000000000000000000000000','latest'] },
+      eth_sendRawTransaction: { jsonrpc: '2.0', id: 1, method: 'eth_sendRawTransaction', params: ['0x'] },
+      net_version: { jsonrpc: '2.0', id: 1, method: 'net_version', params: [] },
+      web3_clientVersion: { jsonrpc: '2.0', id: 1, method: 'web3_clientVersion', params: [] },
+    };
+
+    // Prefill the textarea if ?method= is present
+    const q = new URLSearchParams(location.search);
+    const qMethod = q.get('method');
+    if (qMethod && methodTemplates[qMethod]) {
+      $('#body').value = JSON.stringify(methodTemplates[qMethod], null, 2);
+    }
+
+    // Update header title to reflect selected method (if any)
+    (function updateHeaderTitle() {
+      const h = document.querySelector('h3');
+      if (!h) return;
+      const method = q.get('method');
+      const label = method && methodTemplates[method] ? method : 'JSON-RPC Playground';
+      h.textContent = `.Wallet [  ${label} ]`;
+    })();
+
+    async function loadChains() {
+      const FALLBACK = ['mainnet','sepolia','goerli','bnb','polygon'];
+      let networks = [];
+
+      try {
+        const res = await fetch('/evm-networks.json', { headers: { 'Accept': 'application/json' }});
+        if (res.ok) {
+          const data = await res.json();
+          // Accept either an array or an object with { networks: [...] }
+          if (Array.isArray(data)) {
+            networks = data;
+          } else if (data && Array.isArray(data.networks)) {
+            networks = data.networks;
+          }
+        } else {
+          console.warn('Networks fetch not ok:', res.status, res.statusText);
+        }
+      } catch (e) {
+        console.warn('Falling back to default networks due to fetch error:', e);
+      }
+
+      if (!Array.isArray(networks) || networks.length === 0) {
+        networks = FALLBACK;
+      }
+
+      // Dedupe and sort for a clean UI
+      networks = Array.from(new Set(networks)).sort();
+
+      // Populate the select
+      chainSelect.innerHTML = '';
+      for (const network of networks) {
+        const option = document.createElement('option');
+        option.value = network;
+        option.textContent = network;
+        chainSelect.appendChild(option);
+      }
+
+      // If URL has ?chain=..., preselect it if present; else leave first item
+      const qs = new URLSearchParams(location.search);
+      const desired = qs.get('chain');
+      if (desired && networks.includes(desired)) {
+        chainSelect.value = desired;
+      }
+
+      // Keep URL in sync with the selected chain (without reloading)
+      const effective = chainSelect.value;
+      if (effective) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('chain', effective);
+        history.replaceState(null, '', url.pathname + '?' + url.searchParams.toString());
+        // Also update sidebar links to carry the current chain
+        rewriteMethodLinksWithChain(effective);
+      }
+
+      // Enable Run button now that we have a chain list
+      runBtn.disabled = false;
+
+      // When user changes the chain, keep URL and sidebar links in sync
+      chainSelect.addEventListener('change', () => {
+        const chosen = chainSelect.value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('chain', chosen);
+        history.replaceState(null, '', url.pathname + '?' + url.searchParams.toString());
+        rewriteMethodLinksWithChain(chosen);
+      });
+    }
+
+    loadChains();
+
+    $('#run').onclick = async () => {
+      const chain = $('#chain').value;
+      let payload;
+      try { payload = JSON.parse($('#body').value); }
+      catch(e){ $('#out').textContent = 'JSON inválido: ' + e.message; return; }
+      const res = await fetch(`/rpc?chain=${chain}`, {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+      });
+      const text = await res.text();
+      try{ $('#out').textContent = JSON.stringify(JSON.parse(text), null, 2); }
+      catch{ $('#out').textContent = text; }
+    };
+  </script>
+{% endblock %}

@@ -1,0 +1,30 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "node_modules",
+    "dist",
+    "demo",
+    "stories",
+    "src/stories",
+    "**/*.stories.ts",
+    "**/*.stories.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "test",
+    "tests",
+    "__tests__",
+    "coverage",
+    ".storybook",
+    "storybook-static",
+    "src/gui/registry",
+    "src/gui/registry/**",
+    "src/registry",
+    "src/registry/**",
+    "src/gui/**/*.resolver.ts",
+    "src/gui/**/*.resolver.tsx",
+    "src/gui/Theme/catalog",
+    "src/gui/Theme/catalog/**"
+  ]
+}

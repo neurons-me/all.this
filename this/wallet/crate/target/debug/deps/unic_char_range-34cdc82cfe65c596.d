@@ -1,0 +1,17 @@
+/Users/suign/Desktop/Neuroverse/all.this/packages-src/this.wallet/wallet.crate/target/debug/deps/unic_char_range-34cdc82cfe65c596.d: /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/lib.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/pkg_info.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/iter.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/range.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/macros.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/step.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/iter_fused.rs
+
+/Users/suign/Desktop/Neuroverse/all.this/packages-src/this.wallet/wallet.crate/target/debug/deps/libunic_char_range-34cdc82cfe65c596.rlib: /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/lib.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/pkg_info.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/iter.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/range.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/macros.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/step.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/iter_fused.rs
+
+/Users/suign/Desktop/Neuroverse/all.this/packages-src/this.wallet/wallet.crate/target/debug/deps/libunic_char_range-34cdc82cfe65c596.rmeta: /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/lib.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/pkg_info.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/iter.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/range.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/macros.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/step.rs /Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/iter_fused.rs
+
+/Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/lib.rs:
+/Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/pkg_info.rs:
+/Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/iter.rs:
+/Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/range.rs:
+/Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/macros.rs:
+/Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/step.rs:
+/Users/suign/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/unic-char-range-0.9.0/src/iter_fused.rs:
+
+# env-dep:CARGO_PKG_DESCRIPTION=UNIC — Unicode Character Tools — Character Range and Iteration
+# env-dep:CARGO_PKG_NAME=unic-char-range
+# env-dep:CARGO_PKG_VERSION=0.9.0

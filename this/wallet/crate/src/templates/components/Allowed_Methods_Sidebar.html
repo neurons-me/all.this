@@ -1,0 +1,188 @@
+<aside style="width: 240px; align-self: stretch; border-right: 1px solid rgba(255,255,255,0.1);">
+  <style>
+    /* Sidebar active highlight */
+    .nav-link{
+      padding: 6px 10px;
+      border-left: 2px solid transparent;
+      border-radius: 8px;
+      transition: background .2s ease, border-color .2s ease;
+    }
+    .nav-link:hover{
+      background: rgba(255,255,255,0.04);
+    }
+    .nav-link.active{
+      border-left-color: #00ffc8;
+      background: rgba(0,255,200,0.06);
+    }
+    .method-link{
+      padding: 6px 10px;
+      border-left: 2px solid transparent;
+      border-radius: 8px;
+      transition: background .2s ease, border-color .2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .method-link:hover{
+      background: rgba(255,255,255,0.04);
+    }
+    .method-link.active{
+      border-left-color: #0099ff;
+      background: rgba(0,153,255,0.06);
+    }
+  </style>
+  <div style="position: sticky; top: 72px;">
+  <div style="text-align: center; margin-left: -69px; margin-bottom: 5px;">
+    <img src="/static/imgs/icons/eth_crypto.png" alt="Ethereum Icon" style="max-width: 64px; height: auto;">
+  </div>
+
+   <!-- Divider -->
+    <hr style="margin: 12px 0; border: 0; border-top: 1px solid rgba(255,255,255,0.1);" />
+      <a href="/eth/endpoints" style="color: var(--text-1); text-decoration: none; display: flex; align-items: center; gap: 6px;">
+        <span class="material-icons" style="font-size:18px; color:#00ffc8;">api</span>
+        API Endpoints
+      </a>
+ <!-- Divider -->
+    <hr style="margin: 12px 0; border: 0; border-top: 1px solid rgba(255,255,255,0.1);" />
+
+    <h5 style="margin: 0 0 8px;">
+  <!-- JSON-RPC intro link -->
+  <h5 style="margin: 0 0 8px;">
+    Supported Methods:
+  </h5>
+
+  <!-- Methods list -->
+  <nav>
+    <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;">
+      <li>
+        <a href="/eth-playground?method=eth_chainId" class="method-link" data-method="eth_chainId">
+          <span class="material-icons" style="font-size:18px; color:#00ffc8;">token</span>
+          eth_chainId
+        </a>
+      </li>
+      <li>
+        <a href="/eth-playground?method=net_version" class="method-link" data-method="net_version">
+          <span class="material-icons" style="font-size:18px; color:#00ffc8;">lan</span>
+          net_version
+        </a>
+      </li>
+      <li>
+        <a href="/eth-playground?method=web3_clientVersion" class="method-link" data-method="web3_clientVersion">
+          <span class="material-icons" style="font-size:18px; color:#00ffc8;">cloud</span>
+          web3_clientVersion
+        </a>
+      </li>
+      <li>
+        <a href="/eth-playground?method=eth_getBalance" class="method-link" data-method="eth_getBalance">
+          <span class="material-icons" style="font-size:18px; color:#00ffc8;">account_balance_wallet</span>
+          eth_getBalance
+        </a>
+      </li>
+      <li>
+        <a href="/eth-playground?method=eth_getTransactionCount" class="method-link" data-method="eth_getTransactionCount">
+          <span class="material-icons" style="font-size:18px; color:#00ffc8;">format_list_numbered</span>
+          eth_getTransactionCount
+        </a>
+      </li>
+      <li>
+        <a href="/eth-playground?method=eth_call" class="method-link" data-method="eth_call">
+          <span class="material-icons" style="font-size:18px; color:#00ffc8;">call_split</span>
+          eth_call
+        </a>
+      </li>
+      <li>
+        <a href="/eth-playground?method=eth_estimateGas" class="method-link" data-method="eth_estimateGas">
+          <span class="material-icons" style="font-size:18px; color:#00ffc8;">local_gas_station</span>
+          eth_estimateGas
+        </a>
+      </li>
+    </ul>
+
+    <!-- Divider -->
+    <hr style="margin: 12px 0; border: 0; border-top: 1px solid rgba(255,255,255,0.1);" />
+    <!-- Networks (dynamic) -->
+       <h5 style="margin: 0 0 8px;">
+        Networks:
+    </h5>
+    <a href="/evm-networks-page" style="color: var(--text-1); text-decoration: none; display: flex; align-items: center; gap: 6px;">
+      <span class="material-icons" style="font-size:18px; color:#00ffc8;">description</span>
+      Networks - Overview
+    </a>
+
+    {# Accept either `networks` from handlers or fall back to `chains` for backward-compat #}
+    {% set nets = networks | default(value=chains) %}
+    {% if nets is defined and nets | length > 0 %}
+      <ul style="list-style: none; padding: 0; margin: 0 0 8px; display: grid; gap: 6px;">
+        {% for n in nets %}
+          {# Map chain name to icon symbol used by cryptocurrency-icons #}
+          {% set sym = n %}
+          {% if n == "mainnet" or n == "sepolia" or n == "goerli" %}
+            {% set sym = "eth" %}
+          {% elif n == "bnb" %}
+            {% set sym = "bnb" %}
+          {% elif n == "polygon" %}
+            {% set sym = "matic" %}
+          {% endif %}
+          <li>
+            {% set is_active = current_chain is defined and current_chain == n %}
+            <a href="/eth-playground?chain={{ n }}"
+               class="nav-link{% if is_active %} active{% endif %}"
+               data-chain="{{ n }}"
+               style="display: flex; align-items: center; gap: 8px;">
+              <img src="https://unpkg.com/cryptocurrency-icons@0.18.1/32/color/{{ sym }}.png"
+                   alt="{{ n }} icon"
+                   style="width:18px;height:18px;border-radius:50%;background:#fff;"
+                   onerror="this.style.display='none';" />
+              {{ n }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="muted" style="color: var(--text-3); font-size: 0.9rem; margin-bottom: 8px;">
+        No networks detected.
+      </div>
+    {% endif %}
+
+    <!-- Divider -->
+    <hr style="margin: 12px 0; border: 0; border-top: 1px solid rgba(255,255,255,0.1);" />
+    <!-- Providers / Upstreams -->
+    <h5 style="margin: 0 0 8px;">
+      RPC Providers
+    </h5>
+     <a href="/json-rpc-overview" style="color: var(--text-1); text-decoration: none; display: flex; align-items: center; gap: 6px;">
+      <span class="material-icons" style="font-size:18px; color:#00ffc8;">description</span>
+      RPC - Overview</a>
+    <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;">
+      <li>
+        <a href="/dev/eth-upstreams" style="display: flex; align-items: center; gap: 8px;">
+          <span class="material-icons" style="font-size:18px; color:#00ffc8;">dns</span>
+          Upstream Nodes
+        </a>
+      </li>
+    </ul>
+
+  </nav>
+  <script>
+    (function(){
+      try{
+        var hasActive = document.querySelector('.nav-link.active');
+        if(!hasActive){
+          var p = new URLSearchParams(location.search);
+          var chain = p.get('chain');
+          if(chain){
+            var el = document.querySelector('a.nav-link[data-chain="'+chain+'"]');
+            if(el){ el.classList.add('active'); }
+          }
+        }
+        var p = new URLSearchParams(location.search);
+        var method = p.get('method');
+        if(method){
+          var el = document.querySelector('a.method-link[data-method="'+method+'"]');
+          if(el){ el.classList.add('active'); }
+        }
+      }catch(e){}
+    })();
+  </script>
+  </div>
+</aside>

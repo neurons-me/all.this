@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist/bin",
+    "rootDir": "bin",
+
+    "declaration": true,
+    "declarationMap": false,
+    "emitDeclarationOnly": false,
+    "declarationDir": "dist/bin"
+  },
+  "include": ["bin/**/*.ts"]
+}

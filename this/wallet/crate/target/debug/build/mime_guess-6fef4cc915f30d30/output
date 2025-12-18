@@ -1,0 +1,1 @@
+cargo:rustc-env=MIME_TYPES_GENERATED_PATH=/Users/suign/Desktop/Neuroverse/all.this/packages-src/this.wallet/wallet.crate/target/debug/build/mime_guess-6fef4cc915f30d30/out/mime_types_generated.rs

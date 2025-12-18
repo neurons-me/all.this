@@ -1,0 +1,13 @@
+[package]
+name = "this-gui"
+version = "0.1.1"
+authors = ["suiGn <admin@neurons.me>"]
+edition = "2021"
+description = "This.GUI Data Formatter"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/neurons-me/this.audio"
+homepage = "https://neurons.me"
+readme = "README.md"
+keywords = ["GUI", "Data"]
+categories = ["command-line-utilities", "encoding"]
+[dependencies]
