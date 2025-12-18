@@ -25,12 +25,6 @@
 <script>
   (function () {
     const GUI = window.GUI;
-
-    // Try to resolve the loaded version.
-    // 1) Prefer a version exposed by the bundle itself.
-    // 2) If using a pinned CDN version (this.gui@x.y.z), infer from the URL.
-    // 3) If using @latest, ask jsDelivr's metadata API for the latest published version.
-
     const GUI_VERSION =
       GUI?.version ||
       GUI?.VERSION ||
