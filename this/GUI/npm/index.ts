@@ -55,6 +55,11 @@ export { default as ThemeModeToggle } from '@/gui/Theme/ToggleMode/ToggleMode';
 export { default as Blockchain } from '@/gui/components/Blockchain/blockchain';
 export { default as HighLighter } from '@/gui/widgets/HighLighter/HighLighter';
 export { ThemesCatalog, Catalog } from '@/gui/Theme';
+export {
+  default as GUITools,
+  guiToolsElements,
+  guiToolsLeftSidebarConfig,
+} from '@/gui/molecules/menus/GUI-Tools/GUI-Tools';
 // 3) imports for the default surface
 import GuiProvider from '@/gui/Theme/GuiProvider';
 import Box from '@/gui/atoms/Box/Box';
@@ -69,6 +74,10 @@ import ThemeModeToggle from '@/gui/Theme/ToggleMode/ToggleMode';
 import Blockchain from '@/gui/components/Blockchain/blockchain';
 import HighLighter from '@/gui/widgets/HighLighter/HighLighter';
 import { ThemesCatalog } from '@/gui/Theme';
+import GUITools, {
+  guiToolsElements,
+  guiToolsLeftSidebarConfig,
+} from '@/gui/molecules/menus/GUI-Tools/GUI-Tools';
 // 4) default surface export
 // Keep this object SMALL (core primitives + a few top-level components) to avoid harming tree-shaking for named imports.
 // (If you later want GUI.atoms / GUI.molecules, do it via a separate entrypoint.)
@@ -89,5 +98,15 @@ const GUI = {
   ThemesCatalog,
   Catalog: ThemesCatalog,
 } as const;
+
+// Attach GUI Tools to the default/UMD surface under: GUI.menus['GUI-Tools']
+// (Use a string key because of the hyphen.)
+const _GUI_ANY = GUI as any;
+_GUI_ANY.menus = _GUI_ANY.menus || {};
+_GUI_ANY.menus['GUI-Tools'] = {
+  GUITools,
+  elements: guiToolsElements,
+  leftSidebarConfig: guiToolsLeftSidebarConfig,
+};
 
 export default GUI;

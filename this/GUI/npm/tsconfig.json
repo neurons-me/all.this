@@ -55,6 +55,6 @@
     "__tests__",
     "coverage",
     ".storybook",
-    "../../../../z.more/neurons-me.github.io/GUI-storybook"
+    "../../../../z.more/neurons-me.github.io/storybook-static"
   ]
 }
