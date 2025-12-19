@@ -2,13 +2,13 @@
 // A collection of theme manifests
 // and their associated modes (light/dark) with token paths.
 // It also provides utility functions to access and manipulate the theme catalog.
-import neuronsManifest from '../catalog/neurons/manifest';
-import ghostShellManifest from '../catalog/GhostShell/manifest';
-import PrinceOfDarknessManifest from '../catalog/PrinceOfDarkness/manifest';
-import muiManifest from '../catalog/MUI/manifest';
-import lunaManifest from '../catalog/LunaHex/manifest';
-import cherryByteManifest from '../catalog/CherryByte/manifest';
-import SeafoamManifest from '../catalog/Seafoam/manifest';
+import neuronsManifest from '../Catalog/themes/neurons/manifest';
+import ghostShellManifest from '../Catalog/themes/GhostShell/manifest';
+import PrinceOfDarknessManifest from '../Catalog/themes/PrinceOfDarkness/manifest';
+import muiManifest from '../Catalog/themes/MUI/manifest';
+import lunaManifest from '../Catalog/themes/LunaHex/manifest';
+import cherryByteManifest from '../Catalog/themes/CherryByte/manifest';
+import SeafoamManifest from '../Catalog/themes/Seafoam/manifest';
 import { FlatGuiTheme } from '@/types/theme'; //definiciones de tipos
 export const GuiThemes = [neuronsManifest, ghostShellManifest, PrinceOfDarknessManifest, muiManifest, lunaManifest, cherryByteManifest, SeafoamManifest];
 /*

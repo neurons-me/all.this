@@ -3,18 +3,26 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>.GUI</title>
-<!-- Tu favicon -->
+<title>this.GUI — Runtime</title>
 <link rel="icon" href="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761276578/this.gui.npm.png" />
-<!-- Estilos generados por Vite (copiados del build final) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/this.gui@latest/dist/this.gui.css" />
+<style>
+  /* Improve legibility when the Hero background image is used */
+  body { margin: 0; }
+  #root { min-height: 100vh; }
+  .onboard-shadow {
+    text-shadow: 0 2px 14px rgba(0,0,0,0.55);
+  }
+</style>
 </head>
 <body>
 <div id="root"></div>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/react@18/umd/react-jsx-runtime.production.min.js"></script>
-    <script>
+<script src="https://unpkg.com/react-router@6/umd/react-router.production.min.js"></script>
+<script src="https://unpkg.com/react-router-dom@6/umd/react-router-dom.production.min.js"></script>
+<script>
   window.process = {
     env: {
       NODE_ENV: "production"
@@ -49,7 +57,6 @@
 
     const RESOLVED_VERSION =
       GUI_VERSION || (CDN_VERSION && CDN_VERSION !== 'latest' ? CDN_VERSION : null);
-
     // For @latest: resolve actual version via jsDelivr metadata API.
     let LATEST_RESOLVED_VERSION = null;
     const resolveLatestFromJsDelivr = async () => {
@@ -92,6 +99,13 @@
     const GuiProvider = GUI.GuiProvider || GUI.GuiProvider?.default || GUI.default?.GuiProvider;
     const Hero = GUI.Hero || GUI.molecules?.Hero || GUI.molecules?.Hero2 || GUI.default?.Hero || GUI.default?.Hero2;
     const Box = GUI.Box || GUI.atoms?.Box || GUI.default?.atoms?.Box;
+    // Layout (ResponsiveUI shell) — optional.
+    const Layout =
+      GUI.Layout ||
+      GUI.default?.Layout ||
+      GUI.Theme?.Layout ||
+      GUI.default?.Theme?.Layout ||
+      null;
 
     // Basic fallback wrapper (no dependency on MUI components being present).
     function FallbackShell(props) {
@@ -132,51 +146,56 @@
 
     function DebugKeys() {
       const target = GUI?.default && typeof GUI.default === 'object' ? GUI.default : GUI;
+
       const keys = (() => {
         try {
-          // Reflect.ownKeys includes non-enumerable + symbols.
-          return Reflect.ownKeys(target).map(String).sort();
+          return Object.keys(target).sort();
         } catch (e) {
-          try {
-            return Object.getOwnPropertyNames(target).sort();
-          } catch (e2) {
-            return [];
-          }
+          return [];
         }
       })();
 
+      const hasDefault = !!GUI?.default;
+      const hasGuiProvider = !!(GUI?.GuiProvider || GUI?.default?.GuiProvider);
+
       const meta = {
-        'window.GUI type': typeof GUI,
-        'window.GUI isArray': Array.isArray(GUI),
-        'window.GUI has default': !!GUI?.default,
-        'resolved version': RESOLVED_VERSION || null,
-        'cdn version token': CDN_VERSION || null,
-        'latest resolved (api)': LATEST_RESOLVED_VERSION || null,
+        loaded: !!GUI,
+        hasDefault,
+        hasGuiProvider
       };
+
+      const lines = [];
+      lines.push(`GUI loaded: ${meta.loaded ? '✅ yes' : '❌ no'}`);
+      lines.push(`GUI has default export: ${meta.hasDefault ? '✅ yes' : '—'}`);
+      lines.push(`GuiProvider available: ${meta.hasGuiProvider ? '✅ yes' : '—'}`);
+      lines.push('');
+      lines.push(`Exports (${keys.length}):`);
+      lines.push(keys.length ? keys.join(', ') : '(none)');
 
       return React.createElement(
         'pre',
         {
           style: {
             marginTop: 14,
-            padding: 12,
+            padding: 14,
             borderRadius: 12,
-            background: 'rgba(0,0,0,0.35)',
+            background: '#0b1020',
+            color: '#e6edf6',
+            border: '1px solid rgba(255,255,255,0.10)',
             overflow: 'auto',
-            fontSize: 12,
-            lineHeight: 1.35,
-            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+            fontSize: 12.5,
+            lineHeight: 1.55,
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+            fontFamily:
+              'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
           },
         },
-        'debug:\n' +
-          JSON.stringify(meta, null, 2) +
-          '\n\n' +
-          'exports keys (' + keys.length + '):\n' +
-          (keys.length ? keys.join(', ') : '(none)')
+        lines.join('\n')
       );
     }
 
-    function Content() {
+   function Content() {
       const inner = React.createElement(
         CenterCard,
         null,
@@ -185,18 +204,32 @@
           alt: 'this.GUI',
           style: { width: 220, maxWidth: '70vw', height: 'auto', display: 'block', margin: '0 auto 14px' },
         }),
-        React.createElement('div', { style: { fontSize: 18, fontWeight: 700, letterSpacing: '-0.2px' } }, '.GUI Runtime Environment'),
-        React.createElement('div', { id: 'version-line', style: { opacity: 0.85, marginTop: 6, fontSize: 13 } }, 'version: ' + VERSION_LABEL),
-        React.createElement('div', { style: { opacity: 0.78, marginTop: 6 } }, 'Standalone Test Page. UMD bundle → window.GUI'),
+        React.createElement(
+          'div',
+          { className: 'onboard-shadow', style: { fontSize: 18, fontWeight: 800, letterSpacing: '-0.2px', color: '#f3f6fb' } },
+          '.GUI — Browser Runtime'
+        ),
+        React.createElement(
+          'div',
+          { id: 'version-line', style: { opacity: 0.95, marginTop: 6, fontSize: 13, color: '#cfe3ff' } },
+          'CDN Version: ' + VERSION_LABEL
+        ),
+        React.createElement(
+          'div',
+          { style: { opacity: 0.92, marginTop: 6, color: 'rgba(243,246,251,0.90)' } },
+          'UMD build as ',
+          React.createElement('code', { style: { color: '#9ece6a' } }, 'window.GUI')
+        ),
         React.createElement(DebugKeys, null)
       );
 
       // Prefer using GUI Hero if available, but keep it optional.
+      // NOTE: If Layout is present, it wraps the whole page outside of Content().
       if (Hero) {
         return React.createElement(
           Hero,
           {
-            backgroundSrc: 'https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761149344/this.me_kx1ura.jpg',
+            backgroundSrc: 'https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760775368/1cb1d36b58024a2b3ff2be667366d09e78110bea1e5ef72174aedd6174a1bbcc_hs2tpc.png',
             backgroundType: 'image',
             blur: 'light',
             customColor: 'rgba(13, 36, 52, 0.70)',
@@ -213,13 +246,40 @@
       return React.createElement(FallbackShell, null, inner);
     }
 
+    // Build the main page body.
+    const pageBody = React.createElement(Content, null);
+
+    // If Layout exists, render a ResponsiveUI shell with a LeftSidebar.
+    // NOTE: Layout stories show it accepts `leftSidebarConfig` and `topBarConfig`.
+    const pageWithLayout = Layout
+      ? React.createElement(
+          Layout,
+          {
+            leftSidebarConfig: {
+              initialView: 'rail',
+              elements: [
+                { type: 'link', props: { label: 'Home', icon: 'home', href: 'https://neurons-me.github.io/' } },
+                { type: 'link', props: { label: 'Storybook', icon: 'auto_stories', href: 'https://neurons-me.github.io/GUI-storybook/' } },
+                { type: 'link', props: { label: 'Themes', icon: 'palette', href: 'https://neurons-me.github.io/themes.html' } },
+                { type: 'link', props: { label: 'GitHub', icon: 'code', href: 'https://github.com/neurons-me/this.GUI' } },
+                { type: 'link', props: { label: 'npm', icon: 'package_2', href: 'https://www.npmjs.com/package/this.gui' } },
+                { type: 'link', props: { label: 'all.this', icon: 'hub', href: 'https://neurons-me.github.io/all.this' } }
+              ]
+            },
+            // Many Layout implementations render their own content region; we also pass children
+            // so it works if Layout supports `props.children`.
+            children: pageBody,
+          }
+        )
+      : pageBody;
+
     const App = GuiProvider
-      ? React.createElement(GuiProvider, { theme: 'dark' }, React.createElement(Content, null))
-      : React.createElement(FallbackShell, null, React.createElement(Content, null));
+      ? React.createElement(GuiProvider, { theme: 'dark' }, pageWithLayout)
+      : React.createElement(FallbackShell, null, pageWithLayout);
     const root = ReactDOM.createRoot(rootEl);
     root.render(App);
     console.log('[GUI] ✅ Standalone render complete.');
-    // If using @latest and the bundle doesn't expose a version, resolve it via jsDelivr API and re-render once.
+    // If using @latest and the bundle doesn't expose a version, resolve it via jsDelivr API and update the label.
     (async () => {
       if (RESOLVED_VERSION || CDN_VERSION !== 'latest') return;
       const v = await resolveLatestFromJsDelivr();
@@ -233,30 +293,19 @@
         } catch (e) {}
       }
 
-      // Update the on-page label without rebuilding the whole app.
       const el = document.getElementById('version-line');
-      if (el) el.textContent = 'version: ' + VERSION_LABEL;
+      if (el) el.textContent = 'CDN Version: ' + VERSION_LABEL;
 
-      // Also log it for clarity.
       console.log('[GUI] Resolved @latest via jsDelivr API:', VERSION_LABEL);
     })();
   })();
 </script>
-  <!-- Links -->
-  <div style="padding:18px 12px; text-align:center; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; opacity:0.9;">
-    <div style="margin-bottom:6px;">
-      <a href="https://neurons-me.github.io/" target="_blank" rel="noopener" style="color:#8bbcff; text-decoration:none;">
-        ← Back to neurons-me.github.io
-      </a>
-    </div>
-    <div style="margin-bottom:10px;">
-      <a href="https://neurons-me.github.io/this.GUI/" target="_blank" rel="noopener" style="color:#8bbcff; text-decoration:none;">
-        this.GUI page
-      </a>
-    </div>
-    <a href="https://neurons.me" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:10px; text-decoration:none;">
-      <img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760629056/neurons-grey_hxjcom.png" alt="neurons.me" style="height:34px; width:auto; display:block;" />
-    </a>
-  </div>
-  </body>
+
+<!-- Links -->
+<div style="padding:18px 12px; text-align:center; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; opacity:0.9;">
+  <a href="https://neurons.me" rel="noopener" style="display:inline-flex; align-items:center; gap:10px; text-decoration:none;">
+    <img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760629056/neurons-grey_hxjcom.png" alt="neurons.me" style="height:34px; width:auto; display:block;" />
+  </a>
+</div>
+</body>
 </html>

@@ -6,12 +6,16 @@ export { getInitialThemeId, usePersistentThemeId } from './utils/persistence';
 // Theme context and provider
 export { ThemeContext, useThemeContext } from '@/gui/contexts/ThemeContext';
 export { default as GuiProvider } from './GuiProvider';
-// Theme catalog access
+// Theme catalog UI (components)
+export { default as ThemesCatalog } from './Catalog/Catalog';
+// Back-compat / simple docs API (some pages expect `window.GUI.Catalog`)
+export { default as Catalog } from './Catalog/Catalog';
+
 export {
   GuiThemes,
   FlatGuiThemes,
   getGuiThemes,
   getFlatGuiThemes,
   getGuiTheme,
-  getFlatGuiTheme,
+  getFlatGuiTheme
 } from './utils/catalog';

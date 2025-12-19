@@ -25,19 +25,18 @@
     // Path aliases used by this.gui source
     "baseUrl": "src",
     "paths": {
-      "@/gui/atoms": ["gui/components/atoms"],
-      "@/gui/atoms/*": ["gui/components/atoms/*"],
-      "@/gui/molecules": ["gui/components/molecules"],
-      "@/gui/molecules/*": ["gui/components/molecules/*"],
-      "@/gui/organisms": ["gui/components/organisms"],
-      "@/gui/organisms/*": ["gui/components/organisms/*"],
-      "@/gui/generics": ["gui/components/generics"],
-      "@/gui/generics/*": ["gui/components/generics/*"],
+      "@/gui/atoms": ["gui/atoms"],
+      "@/gui/atoms/*": ["gui/atoms/*"],
+      "@/gui/molecules": ["gui/molecules"],
+      "@/gui/molecules/*": ["gui/molecules/*"],
+      "@/gui/Theme": ["gui/Theme"],
+      "@/gui/Theme/*": ["gui/Theme/*"],
       "@/gui/components": ["gui/components"],
       "@/gui/components/*": ["gui/components/*"],
+      "@/stories": ["gui/components"],
+      "@/stories/*": ["gui/components/*"],
       "@/*": ["*"]
     },
-
     // IMPORTANT:
     // - Keep this as just "node" for the build.
     // - Remove "vite/client" to avoid leaking Vite-only types into published d.ts.
@@ -51,19 +50,11 @@
     "node_modules",
     "dist",
     "demo",
-    "stories",
-    "src/stories",
-    "**/*.stories.ts",
-    "**/*.stories.tsx",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
     "test",
     "tests",
     "__tests__",
     "coverage",
     ".storybook",
-    "storybook-static"
+    "../../../../z.more/neurons-me.github.io/GUI-storybook"
   ]
 }

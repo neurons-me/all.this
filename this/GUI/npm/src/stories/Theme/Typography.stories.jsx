@@ -172,7 +172,7 @@ function TypographyDetails() {
 }
 
 export default {
-  title: 'Theme/Typography',
+  title: 'GUI/Theme/Typography',
   tags: ['autodocs'],
   parameters: {
     docs: {

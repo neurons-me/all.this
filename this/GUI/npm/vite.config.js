@@ -23,9 +23,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@/gui/atoms': resolve(__dirname, 'src/gui/components/atoms'),
-      '@/gui/molecules': resolve(__dirname, 'src/gui/components/molecules'),
-      '@/gui/organisms': resolve(__dirname, 'src/gui/components/organisms'),
+      '@/gui/atoms': resolve(__dirname, 'src/gui/atoms'),
+      '@/gui/molecules': resolve(__dirname, 'src/gui/molecules'),
       '@/gui/components': resolve(__dirname, 'src/gui/components'),
       '@': resolve(__dirname, 'src'),
     },
@@ -35,7 +34,7 @@ export default defineConfig({
     lib: {
       entry: {
         index: resolve(__dirname, 'index.ts'),
-        atoms: resolve(__dirname, 'src/gui/components/atoms/index.ts'),
+        atoms: resolve(__dirname, 'src/gui/atoms/index.ts'),
       },
       name: 'GUI',
       fileName: (format, entryName) => {
