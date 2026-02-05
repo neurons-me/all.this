@@ -67,6 +67,11 @@ export function makeMuiTheme(themeTokens: any, modeTokens: any, mode: 'light' | 
   const borderDefault =
     pick<string | undefined>(g, ['border', 'default'], undefined) ??
     (mode === 'dark' ? 'rgb(45,45,55)' : 'rgba(0,0,0,0.08)');
+  // Text/icon color that sits on top of `primary.main` (e.g. contained primary buttons).
+  // If not provided by tokens, fall back to a dark surface color for readability.
+  const onPrimary =
+    pick<string | undefined>(c, ['onPrimary'], undefined) ??
+    pick<string>(c, ['background', 'nav'], mode === 'dark' ? '#1a2928' : '#111');
   // Extended tokens
   const semantic = modeTokens?.extendedColors || modeTokens?.semantic || {};
   const gradients = semantic?.gradients || {};
@@ -84,7 +89,10 @@ export function makeMuiTheme(themeTokens: any, modeTokens: any, mode: 'light' | 
     // so we cast to any to avoid fighting MUI's strict palette types.
     palette: {
       mode,
-      primary: { main: pick(c, ['primary'], '#1976d2') },
+      primary: {
+        main: pick(c, ['primary'], '#1976d2'),
+        contrastText: onPrimary,
+      },
       secondary: { main: pick(c, ['secondary'], '#9c27b0') },
       icon: { main: pick(c, ['icon'], '#5e5e5e') },
       background: {
@@ -217,6 +225,12 @@ export function makeMuiTheme(themeTokens: any, modeTokens: any, mode: 'light' | 
         defaultProps: { disableElevation: true },
         styleOverrides: {
           root: ({ theme }) => ({ borderRadius: theme.shape.borderRadius }),
+          containedPrimary: ({ theme }) => ({
+            color: theme.palette.primary.contrastText,
+            '& .MuiButton-startIcon, & .MuiButton-endIcon': {
+              color: theme.palette.primary.contrastText,
+            },
+          }),
           sizeLarge: { padding: '12px 20px' },
           sizeMedium: { padding: '10px 18px' },
           sizeSmall: { padding: '8px 14px' },
@@ -257,6 +271,8 @@ export function makeMuiTheme(themeTokens: any, modeTokens: any, mode: 'light' | 
             fontFamily: theme.typography.fontFamily,
             backgroundColor: theme.palette.background.default,
             color: theme.palette.text.primary,
+            WebkitFontSmoothing: 'antialiased',
+            MozOsxFontSmoothing: 'grayscale',
           },
           a: {
             color: theme.palette.link.main,

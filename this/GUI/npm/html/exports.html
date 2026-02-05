@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>.GUI — UMD Exports</title>
+    <link
+      rel="icon"
+      href="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761276578/this.gui.npm.png"
+    />
+    <!-- Local CSS (preferred for repo demo) -->
+    <link rel="stylesheet" href="../dist/styles.css" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+
+    <!-- React UMD globals (required by this.gui runtime mount) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- IMPORTANT: provide the JSX runtime global for react-jsx builds -->
+    <script src="https://unpkg.com/react@18/umd/react-jsx-runtime.production.min.js"></script>
+
+    <!-- process.env shim (some bundles read process.env.NODE_ENV) -->
+    <script>
+      window.process = window.process || { env: {} };
+      window.process.env = window.process.env || {};
+      if (!('NODE_ENV' in window.process.env)) window.process.env.NODE_ENV = 'production';
+    </script>
+
+    <!-- Local UMD build -->
+    <script src="../dist/this.gui.umd.js"></script>
+
+    <script>
+      (function () {
+        const GUI = window.GUI;
+        const rootEl = document.getElementById('root');
+
+        if (!rootEl) return;
+
+        if (!GUI) {
+          rootEl.innerHTML =
+            '<div class="fallback err">❌ window.GUI not found. Check your UMD script path.</div>';
+          return;
+        }
+
+        if (typeof GUI.mount !== 'function') {
+          rootEl.innerHTML =
+            '<div class="fallback err">❌ window.GUI exists, but GUI.mount is missing</div>';
+          return;
+        }
+
+        // Sidebar config (same shape as your runtime examples)
+       const leftSidebarConfig = {
+          initialView: 'rail',
+           elements: [
+                { type: 'link', props: { label: 'Home', icon: 'home', href: '../../index.html' } },
+                { type: 'link', props: { label: '.GUI', icon: 'widgets', href: './index.html' } },
+                { type: 'link', props: { label: 'Themes', icon: 'palette', href: './themes.html' } },
+                { type: 'link', props: { label: 'Exports', icon: 'schema', href: './exports.html',}},
+                { type: 'link', props: { label: 'Storybook', icon: 'auto_stories', href: 'https://neurons-me.github.io/storybook-static/' } },
+                { type: 'link', props: { label: 'GitHub', icon: 'code', href: 'https://github.com/neurons-me/this.GUI' } },
+                { type: 'link', props: { label: 'npm', icon: 'package_2', href: 'https://www.npmjs.com/package/this.gui' } }
+              ]
+        };
+
+        // Helpers (same logic as the old exports.html)
+        function keysOf(x) {
+          try {
+            return x && typeof x === 'object' ? Object.keys(x).sort() : null;
+          } catch {
+            return null;
+          }
+        }
+
+        function describeValue(v) {
+          if (v == null) return String(v);
+          if (Array.isArray(v)) return 'array';
+          const t = typeof v;
+          if (t === 'function') return 'function';
+          if (t === 'object') {
+            try {
+              const $$ = v.$$typeof;
+              if ($$) return 'react(' + String($$) + ')';
+            } catch {}
+            return 'object';
+          }
+          return t;
+        }
+
+        function surfaceLines(title, obj) {
+          const ks = keysOf(obj);
+          if (!ks) return [`${title}: null / not an object`];
+          const lines = ks.map((k) => `${k}: ${describeValue(obj[k])}`);
+          return [`# ${title} (${ks.length})`, ...lines, ''];
+        }
+
+        // Gather export surfaces
+        const surfaces = [
+          ['window.GUI (root)', GUI],
+          ['window.GUI.atoms', GUI.atoms],
+          ['window.GUI.Atoms', GUI.Atoms],
+          ['window.GUI.molecules', GUI.molecules],
+          ['window.GUI.Molecules', GUI.Molecules],
+          ['window.GUI.components', GUI.components],
+          ['window.GUI.Components', GUI.Components],
+          ['window.GUI.widgets', GUI.widgets],
+          ['window.GUI.Widgets', GUI.Widgets],
+          ['window.GUI.menus', GUI.menus],
+          ['window.GUI.Menus', GUI.Menus],
+        ];
+
+        const rootCount = (keysOf(GUI) || []).length;
+        const defCount = (keysOf(GUI.default) || []).length;
+        const version =
+          GUI.version ||
+          GUI.VERSION ||
+          GUI.__version ||
+          GUI.__VERSION__ ||
+          (GUI.default && (GUI.default.version || GUI.default.VERSION)) ||
+          null;
+
+        const ok = rootCount > 0;
+
+        // Added helper and counts for surface counts card grid
+        const countKeys = (obj) => (keysOf(obj) || []).length;
+
+        const atomsCount = countKeys(GUI.atoms || GUI.Atoms);
+        const moleculesCount = countKeys(GUI.molecules || GUI.Molecules);
+        const componentsCount = countKeys(GUI.components || GUI.Components);
+        const widgetsCount = countKeys(GUI.widgets || GUI.Widgets);
+        const menusCount = countKeys(GUI.menus || GUI.Menus);
+        const themeCount = countKeys(GUI.Theme);
+
+        // Build a readable report string
+        const report = [
+          `✅ window.GUI loaded: ${ok}`,
+          version ? `version: ${version}` : `version: (unknown)`,
+          `root keys: ${rootCount}`,
+          `default keys: ${defCount}`,
+          '',
+        ];
+
+        for (const [name, obj] of surfaces) {
+          report.push(...surfaceLines(name, obj));
+        }
+
+        const reportText = report.join('\n');
+
+        // Render as a this.GUI app
+        const spec = {
+          type: 'Layout',
+          props: {
+            leftSidebarConfig,
+          },
+          children: [
+            {
+              type: 'Page',
+              props: {
+                title: 'this.GUI — UMD Exports',
+                subtitle:
+                  'Live inspection of window.GUI surfaces from the local UMD bundle (root/atoms/molecules/widgets/components/menus).',
+              },
+              children: [
+                {
+                  type: 'Box',
+                  props: {
+                    sx: {
+                      mt: 2,
+                      display: 'grid',
+                      gridTemplateColumns: { xs: '1fr', lg: '420px 1fr' },
+                      gap: 2,
+                      alignItems: 'start',
+                    },
+                  },
+                  children: [
+                    {
+                      type: 'Box',
+                      props: {
+                        sx: {
+                          p: 2,
+                          borderRadius: 2,
+                          backgroundColor: 'background.paper',
+                          border: '1px solid',
+                          borderColor: 'divider',
+                        },
+                      },
+                      children: [
+                        {
+                          type: 'Typography',
+                          props: { variant: 'h6', sx: { fontWeight: 800, mb: 0.5 } },
+                          children: ['Summary'],
+                        },
+                        {
+                          type: 'Typography',
+                          props: { variant: 'body2', sx: { color: 'text.secondary', mb: 2 } },
+                          children: [
+                            'This page reads from window.GUI and prints the public surfaces so you can confirm what your UMD bundle is exposing.',
+                          ],
+                        },
+                        {
+                          type: 'Box',
+                          props: {
+                            sx: {
+                              display: 'grid',
+                              gridTemplateColumns: '1fr',
+                              gap: 1,
+                              mt: 1,
+                            },
+                          },
+                          children: [
+                            {
+                              type: 'Paper',
+                              props: { sx: { p: 1.25, borderRadius: 2, border: '1px solid', borderColor: 'divider', backgroundColor: 'background.paper' } },
+                              children: [
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'caption', sx: { opacity: 0.7 } },
+                                  children: ['loaded'],
+                                },
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'body1', sx: { fontWeight: 800 } },
+                                  children: [ok ? '✅ true' : '⚠️ false'],
+                                },
+                              ],
+                            },
+                            {
+                              type: 'Paper',
+                              props: { sx: { p: 1.25, borderRadius: 2, border: '1px solid', borderColor: 'divider', backgroundColor: 'background.paper' } },
+                              children: [
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'caption', sx: { opacity: 0.7 } },
+                                  children: ['version'],
+                                },
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'body1', sx: { fontWeight: 800 } },
+                                  children: [version || '(unknown)'],
+                                },
+                              ],
+                            },
+                            {
+                              type: 'Paper',
+                              props: { sx: { p: 1.25, borderRadius: 2, border: '1px solid', borderColor: 'divider', backgroundColor: 'background.paper' } },
+                              children: [
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'caption', sx: { opacity: 0.7 } },
+                                  children: ['root keys'],
+                                },
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'body1', sx: { fontWeight: 800 } },
+                                  children: [String(rootCount)],
+                                },
+                              ],
+                            },
+                            {
+                              type: 'Paper',
+                              props: { sx: { p: 1.25, borderRadius: 2, border: '1px solid', borderColor: 'divider', backgroundColor: 'background.paper' } },
+                              children: [
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'caption', sx: { opacity: 0.7 } },
+                                  children: ['default keys'],
+                                },
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'body1', sx: { fontWeight: 800 } },
+                                  children: [String(defCount)],
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                        {
+                          type: 'Typography',
+                          props: { variant: 'h6', sx: { fontWeight: 800, mt: 3, mb: 1 } },
+                          children: ['Surface Counts'],
+                        },
+                        {
+                          type: 'Box',
+                          props: {
+                            sx: {
+                              display: 'grid',
+                              gridTemplateColumns: 'repeat(3, 1fr)',
+                              gap: 1,
+                            },
+                          },
+                          children: [
+                            {
+                              type: 'Paper',
+                              props: { sx: { p: 1.25, borderRadius: 2, border: '1px solid', borderColor: 'divider', backgroundColor: 'background.paper' } },
+                              children: [
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'caption', sx: { opacity: 0.7 } },
+                                  children: ['atoms'],
+                                },
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'body1', sx: { fontWeight: 800 } },
+                                  children: [String(atomsCount)],
+                                },
+                              ],
+                            },
+                            {
+                              type: 'Paper',
+                              props: { sx: { p: 1.25, borderRadius: 2, border: '1px solid', borderColor: 'divider', backgroundColor: 'background.paper' } },
+                              children: [
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'caption', sx: { opacity: 0.7 } },
+                                  children: ['molecules'],
+                                },
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'body1', sx: { fontWeight: 800 } },
+                                  children: [String(moleculesCount)],
+                                },
+                              ],
+                            },
+                            {
+                              type: 'Paper',
+                              props: { sx: { p: 1.25, borderRadius: 2, border: '1px solid', borderColor: 'divider', backgroundColor: 'background.paper' } },
+                              children: [
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'caption', sx: { opacity: 0.7 } },
+                                  children: ['components'],
+                                },
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'body1', sx: { fontWeight: 800 } },
+                                  children: [String(componentsCount)],
+                                },
+                              ],
+                            },
+                            {
+                              type: 'Paper',
+                              props: { sx: { p: 1.25, borderRadius: 2, border: '1px solid', borderColor: 'divider', backgroundColor: 'background.paper' } },
+                              children: [
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'caption', sx: { opacity: 0.7 } },
+                                  children: ['widgets'],
+                                },
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'body1', sx: { fontWeight: 800 } },
+                                  children: [String(widgetsCount)],
+                                },
+                              ],
+                            },
+                            {
+                              type: 'Paper',
+                              props: { sx: { p: 1.25, borderRadius: 2, border: '1px solid', borderColor: 'divider', backgroundColor: 'background.paper' } },
+                              children: [
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'caption', sx: { opacity: 0.7 } },
+                                  children: ['menus'],
+                                },
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'body1', sx: { fontWeight: 800 } },
+                                  children: [String(menusCount)],
+                                },
+                              ],
+                            },
+                            {
+                              type: 'Paper',
+                              props: { sx: { p: 1.25, borderRadius: 2, border: '1px solid', borderColor: 'divider', backgroundColor: 'background.paper' } },
+                              children: [
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'caption', sx: { opacity: 0.7 } },
+                                  children: ['Theme'],
+                                },
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'body1', sx: { fontWeight: 800 } },
+                                  children: [String(themeCount)],
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                        {
+                          type: 'Typography',
+                          props: {
+                            variant: 'caption',
+                            sx: { mt: 2, display: 'block', color: 'text.secondary' },
+                          },
+                          children: [
+                            'Tip: open DevTools console to see raw objects logged under [UMD].',
+                          ],
+                        },
+                      ],
+                    },
+                    {
+                      type: 'CodeBlock',
+                      props: {
+                        title: 'exports.txt',
+                        language: 'txt',
+                        variant: 'dark',
+                        showLineNumbers: true,
+                        wrapLongLines: true,
+                        code: reportText,
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        };
+
+        try {
+          GUI.mount(spec, '#root');
+        } catch (err) {
+          const msg = err && err.message ? err.message : String(err);
+          rootEl.innerHTML =
+            '<div class="fallback err">❌ mount failed: ' + msg + '</div>';
+        }
+      })();
+    </script>
+  </body>
+</html>

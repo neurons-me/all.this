@@ -1,4 +1,4 @@
-import type { RegistryEntry } from '@/gui/registry/types';
+import type { RegistryEntry } from '@/Registry/types';
 import Footer from './Footer';
 import type { FooterElement } from './Footer.types';
 

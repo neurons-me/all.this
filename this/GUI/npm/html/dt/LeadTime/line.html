@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>this.GUI — Lead Time Grid (runtime)</title>
+    <link
+      rel="icon"
+      href="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761276578/this.gui.npm.png"
+    />
+
+    <!-- Local CSS (expects styles.css next to this file in dist/) -->
+    <link rel="stylesheet" href="./dist/styles.css" />
+    <link rel="stylesheet" href="./dist/material-symbols.css" />
+    <link
+      rel="preload"
+      href="./dist/material-symbols-rounded.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+  </head>
+
+  <body>
+    <div id="root"></div>
+
+    <!-- React UMD globals (required by runtime mount) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react-jsx-runtime.production.min.js"></script>
+
+    <!-- Dataset (STATIC) -->
+    <!-- NOTE: data.js must set ONE of these globals:
+         - window.LeadTimeDataset = [...]  (recommended)
+         - window.rows = [...]
+         - window.LeadTimeRows = [...]
+    -->
+    <script src="./data.js"></script>
+
+    <!-- Local UMD build (expects this.gui.umd.js next to this file in dist/) -->
+    <script src="./dist/this.gui.umd.js"></script>
+
+    <script>
+      (function () {
+        const GUI = window.GUI;
+        const rootEl = document.getElementById('root');
+        if (!rootEl) return;
+
+        const fail = (msg) => {
+          rootEl.innerHTML =
+            '<div class="fallback">' +
+            '<h2>❌ this.GUI runtime error</h2>' +
+            '<p>' +
+            msg +
+            '</p>' +
+            '<p>Make sure these files exist next to this HTML:</p>' +
+            '<ul>' +
+            '<li><code>dist/styles.css</code></li>' +
+            '<li><code>dist/this.gui.umd.js</code></li>' +
+            '<li><code>dist/material-symbols-rounded.woff2</code> (font)</li>' +
+            '<li><code>data.js</code> (dataset)</li>' +
+            '</ul>' +
+            '</div>';
+        };
+
+        if (!GUI) return fail('window.GUI not found. Did you load <code>this.gui.umd.js</code>?');
+        if (!window.React || !window.ReactDOM) {
+          return fail(
+            'React globals not found. Did you load <code>react</code> and <code>react-dom</code> UMD scripts?'
+          );
+        }
+
+        // --- Data (STATIC JS) ---
+        const rows =
+          window.LeadTimeDataset ||
+          window.LeadTimeRows ||
+          window.rows ||
+          [];
+
+        if (!Array.isArray(rows) || rows.length === 0) {
+          console.warn('[LeadTimes] Dataset missing/empty. Ensure data.js defines window.LeadTimeDataset = [...]');
+        }
+
+        // --- this.GUI components guaranteed by your root exports ---
+        const Box = GUI.Box || GUI.atoms?.Box || GUI.Atoms?.Box;
+        const Paper = GUI.Paper || GUI.atoms?.Paper || GUI.Atoms?.Paper;
+        const Typography = GUI.Typography || GUI.atoms?.Typography || GUI.Atoms?.Typography;
+        const TextField = GUI.TextField || GUI.atoms?.TextField || GUI.Atoms?.TextField;
+        const Button = GUI.Button || GUI.atoms?.Button || GUI.Atoms?.Button;
+        const Layout = GUI.Layout || GUI.theme?.Layout || GUI.ThemeRuntime?.Layout || null;
+        const Theme = GUI.Theme || GUI.theme?.Theme || GUI.ThemeRuntime?.Theme || null;
+        const Page = GUI.molecules?.Page || GUI.Molecules?.Page || GUI.Page || null;
+
+        if (!Box || !Paper || !Typography || !TextField || !Button) {
+          return fail(
+            'Missing required exports on window.GUI. Need <code>Box</code>, <code>Paper</code>, <code>Typography</code>, <code>TextField</code>, <code>Button</code>.'
+          );
+        }
+
+        const unique = (arr) => Array.from(new Set(arr)).filter(Boolean).sort();
+
+        const applyFilter = (inputRows, partialSel) => {
+          return (inputRows || []).filter((r) => {
+            if (partialSel.Vendor && r.vendor !== partialSel.Vendor) return false;
+            if (partialSel.Product && r.product !== partialSel.Product) return false;
+            if (partialSel.Program && r.program !== partialSel.Program) return false;
+            if (partialSel.Node && r.node !== partialSel.Node) return false;
+            if (partialSel.Scenario && r.scenario !== partialSel.Scenario) return false;
+            return true;
+          });
+        };
+
+        const resolveLeadTime = (inputRows, sel) => {
+          if (!sel.Vendor || !sel.Product || !sel.Program || !sel.Node || !sel.Scenario) return null;
+          const matches = applyFilter(inputRows, sel);
+          const nums = matches.map((m) => Number(m.leadTime)).filter((n) => Number.isFinite(n));
+          if (nums.length === 0) return null;
+          const min = Math.min(...nums);
+          const max = Math.max(...nums);
+          return { min, max, label: min === max ? String(min) : `${min}–${max}` };
+        };
+
+        function LeadTimeGrid() {
+          const React = window.React;
+
+          // Each cube is a step in the chain.
+          const [cubes, setCubes] = React.useState([
+            { id: 1, sel: { Vendor: '', Product: '', Program: '', Node: '', Scenario: '' } },
+          ]);
+
+          const addCube = () => {
+            setCubes((prev) => {
+              const last = prev[prev.length - 1];
+              const nextId = (prev[prev.length - 1]?.id || 0) + 1;
+
+              // "Chained" default: carry Vendor/Product/Program forward (common in line planning)
+              const carry = last?.sel || { Vendor: '', Product: '', Program: '', Node: '', Scenario: '' };
+
+              return prev.concat([
+                {
+                  id: nextId,
+                  sel: {
+                    Vendor: carry.Vendor || '',
+                    Product: carry.Product || '',
+                    Program: carry.Program || '',
+                    Node: '',
+                    Scenario: '',
+                  },
+                },
+              ]);
+            });
+          };
+
+          const removeCube = (id) => {
+            setCubes((prev) => {
+              const next = prev.filter((c) => c.id !== id);
+              return next.length ? next : prev; // never remove last
+            });
+          };
+
+          const updateSel = (id, key, value) => {
+            setCubes((prev) =>
+              prev.map((c) => {
+                if (c.id !== id) return c;
+
+                // cascade reset downstream to avoid invalid combos
+                if (key === 'Vendor') {
+                  return { ...c, sel: { Vendor: value, Product: '', Program: '', Node: '', Scenario: '' } };
+                }
+                if (key === 'Product') {
+                  return { ...c, sel: { ...c.sel, Product: value, Program: '', Node: '', Scenario: '' } };
+                }
+                if (key === 'Program') {
+                  return { ...c, sel: { ...c.sel, Program: value, Node: '', Scenario: '' } };
+                }
+                if (key === 'Node') {
+                  return { ...c, sel: { ...c.sel, Node: value, Scenario: '' } };
+                }
+                if (key === 'Scenario') {
+                  return { ...c, sel: { ...c.sel, Scenario: value } };
+                }
+                return c;
+              })
+            );
+          };
+
+          const Cube = ({ cube, index }) => {
+            const sel = cube.sel;
+
+            const vendorOptions = unique(rows.map((r) => r.vendor));
+
+            const rowsAfterVendor = applyFilter(rows, {
+              ...sel,
+              Product: '',
+              Program: '',
+              Node: '',
+              Scenario: '',
+            });
+            const productOptions = unique(rowsAfterVendor.map((r) => r.product));
+
+            const rowsAfterProduct = applyFilter(rows, { ...sel, Program: '', Node: '', Scenario: '' });
+            const programOptions = unique(rowsAfterProduct.map((r) => r.program));
+
+            const rowsAfterProgram = applyFilter(rows, { ...sel, Node: '', Scenario: '' });
+            const nodeOptions = unique(rowsAfterProgram.map((r) => r.node));
+
+            const rowsAfterNode = applyFilter(rows, { ...sel, Scenario: '' });
+            const scenarioOptions = unique(rowsAfterNode.map((r) => r.scenario));
+
+            const lt = resolveLeadTime(rows, sel);
+
+            const Field = (label, value, options, disabled) =>
+              React.createElement(
+                Box,
+                { sx: { display: 'flex', flexDirection: 'column', gap: 0.75 } },
+                React.createElement(Typography, { variant: 'subtitle2' }, label),
+                React.createElement(
+                  TextField,
+                  {
+                    size: 'small',
+                    select: true,
+                    fullWidth: true,
+                    disabled,
+                    value: value || '',
+                    onChange: (e) => updateSel(cube.id, label, e?.target?.value || ''),
+                    SelectProps: { native: true },
+                  },
+                  React.createElement('option', { value: '' }, `(Select ${label})`),
+                  ...(options || []).map((opt) =>
+                    React.createElement('option', { key: `${cube.id}-${label}-${opt}`, value: opt }, opt)
+                  )
+                )
+              );
+
+            return React.createElement(
+              Paper,
+              {
+                elevation: 0,
+                sx: {
+                  p: 2,
+                  borderRadius: 3,
+                  border: '1px solid rgba(255,255,255,0.14)',
+                  background: 'rgba(0,0,0,0.10)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 1.25,
+                  minHeight: 260,
+                },
+              },
+              React.createElement(
+                Box,
+                { sx: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 } },
+                React.createElement(
+                  Box,
+                  { sx: { display: 'flex', alignItems: 'baseline', gap: 1 } },
+                  React.createElement(Typography, { variant: 'h6', sx: { fontWeight: 900 } }, `Step ${index + 1}`),
+                  React.createElement(
+                    Typography,
+                    { variant: 'caption', sx: { opacity: 0.75 } },
+                    'Vendor → Product → Program → Node → Scenario'
+                  )
+                ),
+                cubes.length > 1
+                  ? React.createElement(
+                      Button,
+                      {
+                        variant: 'text',
+                        size: 'small',
+                        onClick: () => removeCube(cube.id),
+                        startIcon: React.createElement('span', { className: 'material-symbols-rounded' }, 'close'),
+                      },
+                      'Remove'
+                    )
+                  : null
+              ),
+
+              React.createElement(
+                Box,
+                {
+                  sx: {
+                    display: 'grid',
+                    gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                    gap: 1.25,
+                  },
+                },
+                Field('Vendor', sel.Vendor, vendorOptions, false),
+                Field('Product', sel.Product, productOptions, !sel.Vendor),
+                Field('Program', sel.Program, programOptions, !sel.Product),
+                Field('Node', sel.Node, nodeOptions, !sel.Program),
+                Field('Scenario', sel.Scenario, scenarioOptions, !sel.Node)
+              ),
+
+              React.createElement(
+                Box,
+                {
+                  sx: {
+                    mt: 0.5,
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    justifyContent: 'space-between',
+                    gap: 2,
+                  },
+                },
+                React.createElement(Typography, { variant: 'subtitle2', sx: { opacity: 0.9 } }, 'Lead Time'),
+                React.createElement(
+                  Typography,
+                  { variant: 'h6', sx: { fontWeight: 900 } },
+                  lt ? `${lt.label} days` : '—'
+                )
+              )
+            );
+          };
+
+          // Total lead time (sum of resolved mins; if you prefer max or range, we can change)
+          const totals = cubes
+            .map((c) => resolveLeadTime(rows, c.sel))
+            .filter(Boolean);
+          const totalMin = totals.length ? totals.reduce((acc, t) => acc + t.min, 0) : null;
+          const totalMax = totals.length ? totals.reduce((acc, t) => acc + t.max, 0) : null;
+          const totalLabel = !totals.length ? '—' : totalMin === totalMax ? `${totalMin} days` : `${totalMin}–${totalMax} days`;
+
+          const Header = React.createElement(
+            Box,
+            {
+              sx: {
+                display: 'flex',
+                alignItems: { xs: 'flex-start', md: 'center' },
+                justifyContent: 'space-between',
+                gap: 2,
+                flexDirection: { xs: 'column', md: 'row' },
+              },
+            },
+            React.createElement(
+              Box,
+              null,
+              React.createElement(Typography, { variant: 'h5', sx: { fontWeight: 950 } }, 'Lead Time Grid'),
+              React.createElement(
+                Typography,
+                { variant: 'body2', sx: { opacity: 0.75, mt: 0.5 } },
+                'Add cubes (+) to build a chained plan. Each cube resolves one lead time.'
+              )
+            ),
+            React.createElement(
+              Box,
+              { sx: { display: 'flex', alignItems: 'center', gap: 1.25 } },
+              React.createElement(
+                Paper,
+                {
+                  elevation: 0,
+                  sx: {
+                    px: 1.5,
+                    py: 1,
+                    borderRadius: 999,
+                    border: '1px solid rgba(255,255,255,0.14)',
+                    background: 'rgba(0,0,0,0.10)',
+                  },
+                },
+                React.createElement(
+                  Box,
+                  { sx: { display: 'flex', alignItems: 'baseline', gap: 1.25 } },
+                  React.createElement(Typography, { variant: 'caption', sx: { opacity: 0.75 } }, 'Total'),
+                  React.createElement(Typography, { variant: 'h6', sx: { fontWeight: 950 } }, totalLabel)
+                )
+              ),
+              React.createElement(
+                Button,
+                {
+                  variant: 'contained',
+                  onClick: addCube,
+                  startIcon: React.createElement('span', { className: 'material-symbols-rounded' }, 'add'),
+                },
+                'Add Cube'
+              )
+            )
+          );
+
+          const Grid = React.createElement(
+            Box,
+            {
+              sx: {
+                mt: 2,
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                gap: 2,
+              },
+            },
+            cubes.map((cube, idx) => React.createElement(Cube, { key: cube.id, cube, index: idx }))
+          );
+
+          const Body = React.createElement(
+            Box,
+            {
+              sx: {
+                p: { xs: 2, md: 3 },
+              },
+            },
+            Header,
+            Grid
+          );
+
+          if (Page) {
+            return React.createElement(Page, {
+              title: 'Lead Time Grid',
+              subtitle: 'Build chained cubes and sum lead times',
+              children: Body,
+            });
+          }
+
+          return Body;
+        }
+
+        const leftSidebarConfig = {
+          initialView: 'rail',
+          elements: [
+            { type: 'link', 
+            props: { label: 'Node', icon: 'view_in_ar', href: './node.html' } },
+            {
+              type: 'link',
+              props: { label: 'Line', icon: 'device_hub', href: './line.html' },
+            },
+            { type: 'link', 
+              props: { label: 'Catalog (local)', icon: 'palette', href: './catalog.html' } },
+
+          ],
+        };
+
+        const AppBody = Layout
+          ? window.React.createElement(Layout, { leftSidebarConfig }, window.React.createElement(LeadTimeGrid, null))
+          : window.React.createElement(LeadTimeGrid, null);
+
+        const App = Theme
+          ? window.React.createElement(Theme, { initialMode: 'dark', initialThemeId: 'neurons.me' }, AppBody)
+          : AppBody;
+
+        try {
+          const root = window.ReactDOM.createRoot(rootEl);
+          root.render(App);
+          console.log('[LeadTimes] ✅ Rendered Lead Time Grid');
+        } catch (err) {
+          const msg = err && err.message ? err.message : String(err);
+          fail('render failed: ' + msg);
+        }
+      })();
+    </script>
+  </body>
+</html>

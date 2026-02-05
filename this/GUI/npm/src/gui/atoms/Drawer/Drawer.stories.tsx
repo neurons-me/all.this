@@ -23,7 +23,7 @@ The **Drawer** primitive is a thin wrapper over MUI's \`MuiDrawer\`. It preserve
 ## Features
 - Variants: \`temporary\`, \`persistent\`, \`permanent\`.
 - Anchors: \`left\`, \`right\`, \`top\`, \`bottom\`.
-- Works with This.GUI theme (via \`GuiProvider\`).
+- Works with This.GUI theme (via the \`Theme\` provider).
 - Accepts \`sx\` and \`PaperProps\` for styling the surface.
 
 > Note: For \`temporary\` drawers, you control visibility with the \`open\` prop and \`onClose\`.  

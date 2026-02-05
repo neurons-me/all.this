@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>this.GUI — Themes Catalog</title>
+    <link
+      rel="icon"
+      href="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761276578/this.gui.npm.png"
+    />
+
+    <!-- Local CSS (expects styles.css next to this file in dist/) -->
+    <link rel="stylesheet" href="./dist/styles.css" />
+    <link rel="stylesheet" href="./dist/material-symbols.css" />
+    <link rel="preload" href="./dist/material-symbols-rounded.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+
+  <body>
+    <div id="root"></div>
+
+    <!-- React UMD globals (required by runtime mount) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react-jsx-runtime.production.min.js"></script>
+
+    <!-- Local UMD build (expects this.gui.umd.js next to this file in dist/) -->
+    <script src="./dist/this.gui.umd.js"></script>
+
+    <script>
+      (function () {
+        const GUI = window.GUI;
+        const rootEl = document.getElementById('root');
+        if (!rootEl) return;
+
+        // Friendly diagnostics
+        const fail = (msg) => {
+          rootEl.innerHTML =
+            '<div class="fallback">' +
+            '<h2>❌ this.GUI runtime error</h2>' +
+            '<p>' + msg + '</p>' +
+            '<p>Make sure these files exist next to this HTML:</p>' +
+            '<ul>' +
+            '<li><code>styles.css</code></li>' +
+            '<li><code>this.gui.umd.js</code></li>' +
+            '<li><code>material-symbols-rounded.woff2</code> (font)</li>' +
+            '</ul>' +
+            '</div>';
+        };
+
+        if (!GUI) return fail('window.GUI not found. Did you load <code>this.gui.umd.js</code>?');
+        if (typeof GUI.mount !== 'function') return fail('window.GUI exists, but <code>GUI.mount</code> is missing.');
+
+        // Sidebar config
+       const leftSidebarConfig = {
+          initialView: 'rail',
+          elements: [
+            { type: 'link', 
+            props: { label: 'Node', icon: 'view_in_ar', href: './node.html' } },
+            {
+              type: 'link',
+              props: { label: 'Line', icon: 'device_hub', href: './line.html' },
+            },
+            { type: 'link', 
+              props: { label: 'Catalog (local)', icon: 'palette', href: './catalog.html' } },
+
+          ],
+        };
+
+        // --- Example 1: Mount a “real” component directly (imperative / composable runtime)
+        // This uses actual React components exported on window.GUI.
+        //
+        // NOTE: This expects `ThemesCatalog` to exist on window.GUI (it is exported from index.ts).
+        // If your export is named slightly differently, adjust below.
+        const ThemesCatalog =
+          GUI.ThemesCatalog ||
+          (GUI.Theme && (GUI.Theme.ThemesCatalog || GUI.Theme.Catalog || GUI.Theme.Catalogs)) ||
+          (GUI.theme && (GUI.theme.ThemesCatalog || GUI.theme.Catalog || GUI.theme.Catalogs)) ||
+          null;
+
+        if (!ThemesCatalog) {
+          return fail(
+            'ThemesCatalog export not found on <code>window.GUI</code>. Expected <code>GUI.ThemesCatalog</code> (or <code>GUI.Theme.ThemesCatalog</code>).'
+          );
+        }
+
+        const pageSpec = {
+          type: 'Layout',
+          props: { leftSidebarConfig },
+          children: [
+            {
+              type: 'Page',
+              props: {
+                title: 'this.GUI — Themes Catalog',
+                subtitle: 'Catalog',
+              },
+              children: [
+                // Render ONLY the catalog
+                window.React.createElement(ThemesCatalog, {
+                  key: 'themes-catalog',
+                  variant: 'grid',
+                  minimal: true,
+                }),
+              ],
+            },
+          ],
+        };
+
+        // Mount via this.GUI runtime (providers are handled by mount.ts)
+        try {
+          GUI.mount(pageSpec, '#root', { showUnknown: true });
+        } catch (err) {
+          const msg = err && err.message ? err.message : String(err);
+          fail('mount failed: ' + msg);
+        }
+      })();
+    </script>
+  </body>
+</html>

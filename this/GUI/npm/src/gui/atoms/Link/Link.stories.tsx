@@ -16,7 +16,7 @@ const meta: Meta<typeof Link> = {
     docs: {
       description: {
         component: `
-The **Link** primitive is a thin wrapper over MUI's \`MuiLink\` that supports **both** external links (\`href\`) and internal routing (\`to\`) using **react-router-dom**. It integrates with **This.GUI** theming via \`GuiProvider\`.
+The **Link** primitive is a thin wrapper over MUI's \`MuiLink\` that supports **both** external links (\`href\`) and internal routing (\`to\`) using **react-router-dom**. It integrates with **This.GUI** theming via the \`Theme\` provider.
 
 ---
 ## Features

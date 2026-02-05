@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>.GUI — Examples.</title>
+    <link rel="icon" href="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761276578/this.gui.npm.png"/>
+    <!-- Local CSS (preferred for repo demo). If you want CDN, swap to jsDelivr like your standalone. -->
+    <link rel="stylesheet" href="../dist/styles.css" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- React UMD globals (required by runtime mount) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react-jsx-runtime.production.min.js"></script>
+    <!-- Local UMD build -->
+    <script src="../dist/this.gui.umd.js"></script>
+
+    <script>
+      (function () {
+        const GUI = window.GUI;
+        const rootEl = document.getElementById('root');
+        const leftSidebarConfig = {
+          initialView: 'rail',
+          elements: [
+                { type: 'link', props: { label: 'Home', icon: 'home', href: '../../index.html' } },
+                { type: 'link', props: { label: '.GUI', icon: 'widgets', href: './index.html' } },
+                { type: 'link', props: { label: 'Themes', icon: 'palette', href: './themes.html' } },
+                { type: 'link', props: { label: 'Exports', icon: 'schema', href: './exports.html',}},
+                { type: 'link', props: { label: 'Storybook', icon: 'auto_stories', href: 'https://neurons-me.github.io/storybook-static/' } },
+                { type: 'link', props: { label: 'GitHub', icon: 'code', href: 'https://github.com/neurons-me/this.GUI' } },
+                { type: 'link', props: { label: 'npm', icon: 'package_2', href: 'https://www.npmjs.com/package/this.gui' } }
+              ]
+        };
+
+// We build the spec first, then inject the JSON string into CodeBlock.
+// This keeps the page “renderer-first” (GuiNode → renderWithGUI → ReactDOM).
+  const spec = {
+    type: 'Layout',
+        props: {
+          leftSidebarConfig,
+          },
+        children: [
+          {
+            type: 'Page',
+              props: { title: 'this.GUI — Runtime (JSON → renderer → UI)' },
+              children: [
+                {
+                  type: 'Box',
+                  props: {
+                    sx: {
+                      mt: 2,
+                      display: 'grid',
+                      gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                      gap: 2,
+                      alignItems: 'start',
+                    },
+                  },
+                  children: [
+                    {
+                      type: 'Box',
+                      props: {
+                        sx: {
+                          p: 2,
+                          borderRadius: 2,
+                          border: '1px dashed',
+                          borderColor: 'divider',
+                          backgroundColor: 'background.paper',
+                        },
+                      },
+                      children: [
+                        {
+                          type: 'Typography',
+                          props: { variant: 'overline', sx: { letterSpacing: 0.6, color: 'text.secondary' } },
+                          children: ['Examples'],
+                        },
+                        {
+                          type: 'Typography',
+                          props: { variant: 'h5', sx: { fontWeight: 800, lineHeight: 1.15 } },
+                          children: ['this.GUI — Building Blocks'],
+                        },
+                        {
+                          type: 'Typography',
+                          props: { variant: 'body2', sx: { mt: 0.75, color: 'text.secondary' } },
+                          children: [
+                            'A small gallery of atoms and molecules rendered from JSON. Use this to verify exports + theme wiring.',
+                          ],
+                        },
+
+                        // Quick actions row
+                        {
+                          type: 'Box',
+                          props: {
+                            sx: {
+                              mt: 2,
+                              display: 'flex',
+                              gap: 1,
+                              flexWrap: 'wrap',
+                              alignItems: 'center',
+                            },
+                          },
+                          children: [
+                            { type: 'Button', props: { variant: 'contained' }, children: ['Primary'] },
+                            { type: 'Button', props: { variant: 'outlined' }, children: ['Outlined'] },
+                            { type: 'Button', props: { variant: 'text' }, children: ['Text'] },
+                            {
+                              type: 'Link',
+                              props: { href: 'https://www.npmjs.com/package/this.gui', target: '_blank', rel: 'noreferrer' },
+                              children: ['Open npm'],
+                            },
+                          ],
+                        },
+
+                        // Cards / Papers grid
+                        {
+                          type: 'Box',
+                          props: {
+                            sx: {
+                              mt: 2,
+                              display: 'grid',
+                              gap: 1.5,
+                              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+                            },
+                          },
+                          children: [
+                            {
+                              type: 'Paper',
+                              props: { sx: { p: 1.5, borderRadius: 2 } },
+                              children: [
+                                { type: 'Typography', props: { variant: 'subtitle1', sx: { fontWeight: 700 } }, children: ['Typography'] },
+                                {
+                                  type: 'Typography',
+                                  props: { variant: 'body2', sx: { mt: 0.5, color: 'text.secondary' } },
+                                  children: ['h1/h2/h3 → body → caption. All theme-aware.'],
+                                },
+                                {
+                                  type: 'Box',
+                                  props: { sx: { mt: 1 } },
+                                  children: [
+                                    { type: 'Typography', props: { variant: 'h6' }, children: ['Header (h6)'] },
+                                    { type: 'Typography', props: { variant: 'body2' }, children: ['Body text example.'] },
+                                    {
+                                      type: 'Typography',
+                                      props: { variant: 'caption', sx: { color: 'text.secondary' } },
+                                      children: ['Caption • secondary'],
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                            {
+                              type: 'Paper',
+                              props: { sx: { p: 1.5, borderRadius: 2 } },
+                              children: [
+                                { type: 'Typography', props: { variant: 'subtitle1', sx: { fontWeight: 700 } }, children: ['Inputs'] },
+                                {
+                                  type: 'Box',
+                                  props: { sx: { mt: 1, display: 'flex', flexDirection: 'column', gap: 1 } },
+                                  children: [
+                                    {
+                                      type: 'TextField',
+                                      props: { label: 'Username', placeholder: 'sui.gn', fullWidth: true },
+                                    },
+                                    {
+                                      type: 'TextField',
+                                      props: { label: 'Email', placeholder: 'jabellae@gmail.com', fullWidth: true },
+                                    },
+                                    {
+                                      type: 'TextField',
+                                      props: { label: 'Message', placeholder: 'Write something…', fullWidth: true, multiline: true, rows: 3 },
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                            {
+                              type: 'Paper',
+                              props: { sx: { p: 1.5, borderRadius: 2 } },
+                              children: [
+                                { type: 'Typography', props: { variant: 'subtitle1', sx: { fontWeight: 700 } }, children: ['Avatars'] },
+                                {
+                                  type: 'Box',
+                                  props: { sx: { mt: 1, display: 'flex', alignItems: 'center', gap: 1 } },
+                                  children: [
+                                    {
+                                      type: 'Box',
+                                      props: {
+                                        sx: {
+                                          width: 42,
+                                          height: 42,
+                                          borderRadius: '50%',
+                                          overflow: 'hidden',
+                                          border: '1px solid',
+                                          borderColor: 'divider',
+                                          backgroundColor: 'background.default',
+                                        },
+                                      },
+                                      children: [
+                                        {
+                                          type: 'Box',
+                                          props: {
+                                            component: 'img',
+                                            src: 'https://res.cloudinary.com/dkwnxf6gm/image/upload/w_96/v1761276578/this.gui.npm.png',
+                                            alt: 'GUI',
+                                            sx: { width: '100%', height: '100%', objectFit: 'cover' },
+                                          },
+                                        },
+                                      ],
+                                    },
+                                    {
+                                      type: 'Box',
+                                      props: { sx: { flex: 1 } },
+                                      children: [
+                                        { type: 'Typography', props: { variant: 'subtitle2', sx: { fontWeight: 700 } }, children: ['neurons.me'] },
+                                        {
+                                          type: 'Typography',
+                                          props: { variant: 'caption', sx: { color: 'text.secondary' } },
+                                          children: ['Theme-aware identity header'],
+                                        },
+                                      ],
+                                    },
+                                    { type: 'Button', props: { variant: 'outlined', size: 'small' }, children: ['Follow'] },
+                                  ],
+                                },
+                              ],
+                            },
+                            {
+                              type: 'Paper',
+                              props: { sx: { p: 1.5, borderRadius: 2 } },
+                              children: [
+                                { type: 'Typography', props: { variant: 'subtitle1', sx: { fontWeight: 700 } }, children: ['Layout / Grid'] },
+                                {
+                                  type: 'Box',
+                                  props: {
+                                    sx: {
+                                      mt: 1,
+                                      display: 'grid',
+                                      gridTemplateColumns: 'repeat(3, 1fr)',
+                                      gap: 1,
+                                    },
+                                  },
+                                  children: [
+                                    { type: 'Box', props: { sx: { p: 1, borderRadius: 1.5, bgcolor: 'background.default', border: '1px solid', borderColor: 'divider' } }, children: [
+                                      { type: 'Typography', props: { variant: 'caption', sx: { color: 'text.secondary' } }, children: ['Card A'] },
+                                      { type: 'Typography', props: { variant: 'subtitle2', sx: { fontWeight: 700 } }, children: ['Atoms'] },
+                                    ] },
+                                    { type: 'Box', props: { sx: { p: 1, borderRadius: 1.5, bgcolor: 'background.default', border: '1px solid', borderColor: 'divider' } }, children: [
+                                      { type: 'Typography', props: { variant: 'caption', sx: { color: 'text.secondary' } }, children: ['Card B'] },
+                                      { type: 'Typography', props: { variant: 'subtitle2', sx: { fontWeight: 700 } }, children: ['Molecules'] },
+                                    ] },
+                                    { type: 'Box', props: { sx: { p: 1, borderRadius: 1.5, bgcolor: 'background.default', border: '1px solid', borderColor: 'divider' } }, children: [
+                                      { type: 'Typography', props: { variant: 'caption', sx: { color: 'text.secondary' } }, children: ['Card C'] },
+                                      { type: 'Typography', props: { variant: 'subtitle2', sx: { fontWeight: 700 } }, children: ['Components'] },
+                                    ] },
+                                  ],
+                                },
+                              ],
+                            },
+                          ],
+                        },
+
+                        // Footer note
+                        {
+                          type: 'Typography',
+                          props: { variant: 'caption', sx: { display: 'block', mt: 2, color: 'text.secondary' } },
+                          children: [
+                            'Everything above is rendered from the JSON spec on the right. Try editing the spec and reloading.',
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        };
+
+        // Mount via this.GUI runtime (providers are handled by mount.ts)
+        try {
+          GUI.mount(spec, '#root');
+        } catch (err) {
+          const msg = err && err.message ? err.message : String(err);
+          rootEl.innerHTML =
+            '<div style="font-family:ui-sans-serif,system-ui;padding:24px">❌ mount failed: ' +
+            msg +
+            '</div>';
+        }
+      })();
+    </script>
+  </body>
+</html>

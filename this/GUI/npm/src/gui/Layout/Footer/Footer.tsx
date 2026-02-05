@@ -232,21 +232,12 @@ export default function Footer(props: FooterProps) {
         }
       : {
           position: 'static',
-          left: `${insetLeft}px`,
-          right: `${insetRight}px`,
+          ml: `${insetLeft}px`,
+          mr: `${insetRight}px`,
           width: `calc(100% - ${horizontalInset}px)`,
           transition: 'margin-left 0.3s ease, margin-right 0.3s ease, width 0.3s ease',
         }),
   } as const;
-
-  const flowBarSx = !isFixed
-    ? ({
-        ml: `${insetLeft}px`,
-        mr: `${insetRight}px`,
-        width: `calc(100% - ${horizontalInset}px)`,
-        transition: 'margin-left 0.3s ease, margin-right 0.3s ease, width 0.3s ease',
-      } as SxProps<Theme>)
-    : undefined;
 
   return (
     <Bar
@@ -256,7 +247,7 @@ export default function Footer(props: FooterProps) {
       data-testid={dataTestId}
       position={position}
       elevation={elevation}
-      sx={sxN(baseBarSx as SxProps<Theme>, flowBarSx, sx, appBarSx)}
+      sx={sxN(baseBarSx as SxProps<Theme>, sx, appBarSx)}
     >
       <Toolbar
         ref={toolbarRef}

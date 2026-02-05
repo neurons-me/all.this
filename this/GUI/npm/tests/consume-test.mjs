@@ -33,7 +33,7 @@ runTest("Test 1: Core bundle exports", async () => {
   const coreBundle = await import(path.resolve(__dirname, "../dist/this.gui.es.js"));
   assert.ok(coreBundle.default, "Default export should exist");
   assert.ok(coreBundle.default.version, "Version should be exported");
-  assert.ok(coreBundle.default.GuiProvider, "GuiProvider should be exported");
+  assert.ok(coreBundle.default.Theme, "Theme should be exported");
   assert.ok(coreBundle.default.atoms, "atoms should be exported");
 });
 
@@ -60,7 +60,7 @@ runTest("Test 2: Consumption without react-router-dom", async () => {
     import assert from "assert";
 
     assert.ok(GUI.version, "Version should be accessible");
-    assert.ok(GUI.GuiProvider, "GuiProvider should be accessible");
+    assert.ok(GUI.Theme, "Theme should be accessible");
     assert.ok(!GUI.QRouter, "QRouter should not be accessible in core bundle");
   `;
   fs.writeFileSync(path.join(tempDir, "test.mjs"), testFile);
@@ -101,4 +101,3 @@ runTest("Test 3: Consumption of router subpath", async () => {
 
   fs.rmSync(tempDir, { recursive: true, force: true });
 });
-

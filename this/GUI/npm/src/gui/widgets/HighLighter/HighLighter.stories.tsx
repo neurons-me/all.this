@@ -9,7 +9,7 @@ import HighLighter, {
 } from '@/gui/widgets/HighLighter/HighLighter';
 
 const meta: Meta<typeof HighLighter> = {
-  title: 'Organisms/HighLighter',
+  title: 'Widgets/HighLighter',
   component: HighLighter,
   parameters: {
     layout: 'centered',

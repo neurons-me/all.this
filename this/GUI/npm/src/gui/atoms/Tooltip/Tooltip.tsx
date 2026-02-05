@@ -10,7 +10,7 @@
  *
  * Notes:
  * - Tooltip is NOT polymorphic (no `component` prop).
- * - Works seamlessly with This.GUI theme through GuiProvider.
+ * - Works seamlessly with This.GUI theme through the Theme provider.
  *
  * Examples:
  *   &lt;Tooltip title="Hello"&gt;&lt;Button&gt;Hover me&lt;/Button&gt;&lt;/Tooltip&gt;

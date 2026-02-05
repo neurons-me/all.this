@@ -5,7 +5,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@/gui/atoms/ListItemText/ListItemText';
 import ListItemIcon from './ListItemIcon';
 import Icon from '@/gui/Theme/Icon/Icon';
-import GuiProvider from '@/gui/Theme/GuiProvider';
+import Theme from '@/gui/Theme/Theme';
 
 const meta: Meta<typeof ListItemIcon> = {
   title: 'Atoms/Organization/ListItemIcon',
@@ -13,11 +13,11 @@ const meta: Meta<typeof ListItemIcon> = {
   tags: ['autodocs'],
   decorators: [
     (Story) => (
-      <GuiProvider>
+      <Theme>
         <div style={{ padding: 16, minHeight: 260, maxWidth: 520 }}>
           <Story />
         </div>
-      </GuiProvider>
+      </Theme>
     ),
   ],
   parameters: {

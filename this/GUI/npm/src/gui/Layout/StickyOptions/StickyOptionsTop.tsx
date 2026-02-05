@@ -201,7 +201,7 @@ const StickyOptionsTop = ({
   }, [reserveSpace]);
 
   const topOffsetCSS = typeof topOffset === 'number' ? `${topOffset}px` : String(topOffset);
-  // Read insets directly from GUI theme (source of truth set by GuiProvider / components)
+  // Read insets directly from GUI theme (source of truth set by Theme / components)
   const insetLeft = Math.max(0, Number(muiTheme?.layout?.insets?.left ?? 0));
   const insetRight = Math.max(0, Number(muiTheme?.layout?.insets?.right ?? 0));
   const navPx = Math.max(0, Number(muiTheme?.layout?.insets?.nav ?? 0));

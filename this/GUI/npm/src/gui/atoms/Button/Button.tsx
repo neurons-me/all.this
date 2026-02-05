@@ -17,21 +17,49 @@ export type Iconish = ReactNode | string | undefined;
 export type ButtonProps = Omit<MuiButtonProps, 'startIcon' | 'endIcon'> & {
   startIcon?: Iconish;
   endIcon?: Iconish;
+  /** Convenience alias for the native `aria-label` attribute.
+   *  - Use a string for icon-only buttons.
+   *  - Use `false` to explicitly opt out when the button already has visible text.
+   */
+  ariaLabel?: string | false;
 };
 function resolveIcon(node: Iconish): ReactNode | null {
   if (!node) return null;
   return typeof node === 'string' ? <Icon name={node} fontSize={18} /> : node;
 }
 const ButtonImpl = React.forwardRef<any, ButtonProps>(function Button(
-  { startIcon, endIcon, ...rest },
+  { startIcon, endIcon, ariaLabel, ...rest },
   ref
 ) {
+  const nativeAriaLabel = (rest as any)['aria-label'] as string | undefined;
+  const resolvedAriaLabel =
+    nativeAriaLabel ?? (typeof ariaLabel === 'string' ? ariaLabel : undefined);
+
+  if (process.env.NODE_ENV !== 'production') {
+    const hasTextChild =
+      typeof (rest as any).children === 'string' ||
+      typeof (rest as any).children === 'number' ||
+      (Array.isArray((rest as any).children) &&
+        (rest as any).children.some(
+          (c: any) => typeof c === 'string' || typeof c === 'number'
+        ));
+
+    const isIconOnly = !hasTextChild && (startIcon || endIcon || (rest as any).children);
+    if (isIconOnly && !resolvedAriaLabel) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[this.gui/Button] Icon-only button should include an accessible label via `aria-label` or `ariaLabel`. '
+      );
+    }
+  }
+
   return (
     <MuiButton
       ref={ref}
+      {...rest}
+      aria-label={resolvedAriaLabel}
       startIcon={resolveIcon(startIcon)}
       endIcon={resolveIcon(endIcon)}
-      {...rest}
     />
   );
 }) as unknown as OverridableComponent<ButtonTypeMap<{}, 'button'>>;

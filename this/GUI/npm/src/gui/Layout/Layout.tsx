@@ -55,7 +55,7 @@ function Layout({
                 {...(typeof leftSidebarConfig === 'object' ? leftSidebarConfig : {})}
               />
             )}
-<Content>
+<Content disableInsetPadding>
   {children ?? <Namespace />}
 </Content>
             {hasRightSidebar && (

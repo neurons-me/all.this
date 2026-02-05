@@ -1,8 +1,9 @@
-import React from "react";
-import type { Meta, StoryFn, StoryObj } from "@storybook/react";
-import Layout from "./Layout";
-import Page from "@/gui//molecules/Page/Page";
-import ThemeModeToggle from "@/gui/Theme/ToggleMode/ToggleMode";
+import React from 'react';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
+import Layout from './Layout';
+import Page from '@/gui/molecules/Page/Page';
+import { Box, Typography } from '@/gui/atoms';
+import ThemeModeToggle from '@/gui/Theme/ToggleMode/ToggleMode';
 const meta: Meta<typeof Layout> = {
   title: "GUI/Layout",
   component: Layout,
@@ -15,7 +16,7 @@ The **Layout** component wires the responsive shell used across This.GUI demos. 
 ---
 ## Features
 - **Context wiring** – wraps children with the required providers (LeftSidebar, RightSidebar) so hooks and insets work automatically.
-- **Composable regions** – optional \`topBarConfig\`, \`leftSidebarConfig\`, \`rightSidebarConfig\`, and \`footerConfig\` let you enable only what you need.
+- **Composable regions** – optional \`TopBar\`, \`LeftSideBar\`, \`RightSideBar\`, and \`Footer\` let you enable only what you need.
 - **Inset aware** – whenever a sidebar expands or collapses, the layout updates theme insets so the TopBar/Footer and main content stay aligned.
 - **Story-friendly** – serves as an orchestration helper in Storybook; in production you can lift the same pattern to your app shell.
 
@@ -25,7 +26,7 @@ The **Layout** component wires the responsive shell used across This.GUI demos. 
 {
   "type": "Layout",
   "props": {
-    "topBarConfig": {
+    "TopBar": {
       "title": "Workspace",
       "elementsRight": [
         {
@@ -36,7 +37,7 @@ The **Layout** component wires the responsive shell used across This.GUI demos. 
         }
       ]
     },
-    "leftSidebarConfig": {
+    "LeftSideBar": {
       "elements": [
         {
           "type": "link",
@@ -64,7 +65,8 @@ The **Layout** component wires the responsive shell used across This.GUI demos. 
         }
       ]
     },
-    "footerConfig": {
+    "RightSideBar": { "elements": [] },
+    "Footer": {
       "brandLabel": "Neuroverse",
       "centerElements": [
         {
@@ -106,19 +108,19 @@ Use the layout as a shell around your routes or dashboard pages. Pass config obj
 function DashboardPage() {
   return (
     <Layout
-      topBarConfig={{
+      TopBar={{
         title: "Analytics",
         elementsRight: [
           { type: "action", props: { element: <ThemeModeToggle variant="minimal" /> } },
         ],
       }}
-      leftSidebarConfig={{
+      LeftSideBar={{
         elements: [
           { type: "link", props: { label: "Overview", icon: "home" } },
           { type: "link", props: { label: "Reports", icon: "insights" } },
         ],
       }}
-      rightSidebarConfig={{
+      RightSideBar={{
         elements: [
           { type: "link", props: { label: "Alerts", icon: "notifications" } },
         ],
@@ -132,12 +134,18 @@ function DashboardPage() {
 
 ---
 ## Notes
-- Config objects mirror the props of the individual components (TopBar, LeftSidebar, RightSidebar, Footer). Anything you can pass there can be forwarded through the layout.
+- Props objects mirror the props of the individual components (TopBar, LeftSidebar, RightSidebar, Footer). (Legacy \`*Config\` props are still supported.)
 - Set a config to \`false\` (or omit it) to exclude that region entirely.
 - Children render in document order beneath any enabled sidebars/top bar – for sticky layouts remember to add padding or section containers as shown below.
 `,
       },
     },
+  },
+  argTypes: {
+    TopBar: { control: 'object' },
+    LeftSideBar: { control: 'object' },
+    RightSideBar: { control: 'object' },
+    Footer: { control: 'object' },
   },
 };
 
@@ -145,21 +153,65 @@ export default meta;
 
 const Template: StoryFn<React.ComponentProps<typeof Layout>> = (args) => (
   <Layout {...args}>
-    <div
-      style={{
-        minHeight: "120vh",
-        padding: "72px 24px 120px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 16,
+    <Box
+      sx={{
+        minHeight: '120vh',
+        p: 3,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
       }}
     >
-      <h2>Responsive Layout Demo</h2>
-      <p>
+      <Typography variant="h5" sx={{ fontWeight: 700 }}>
+        Responsive Layout Demo
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 720 }}>
         Resize the viewport or toggle sidebars to observe how insets are coordinated.
-        The content block is intentionally tall to show how fixed bars interact with scrolling.
-      </p>
-    </div>
+        This content is intentionally tall to show how fixed bars interact with scrolling.
+      </Typography>
+
+      <Box
+        sx={{
+          mt: 1,
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' },
+          gap: 2,
+        }}
+      >
+        <Box sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
+            Insets-aware
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            This block uses theme tokens and lets Layout/Content handle spacing.
+          </Typography>
+        </Box>
+        <Box sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
+            Sidebar coordination
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Expand/collapse sidebars and confirm content stays aligned.
+          </Typography>
+        </Box>
+        <Box sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>
+            Scroll behavior
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Layout keeps the main area scrollable without manual padding hacks.
+          </Typography>
+        </Box>
+      </Box>
+
+      <Box sx={{ mt: 2 }}>
+        {Array.from({ length: 18 }).map((_, i) => (
+          <Typography key={i} variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            Row {i + 1} — filler content to demonstrate scrolling within the Layout content area.
+          </Typography>
+        ))}
+      </Box>
+    </Box>
   </Layout>
 );
 
@@ -168,7 +220,7 @@ type Story = StoryObj<typeof Layout>;
 export const TopOnly: Story = {
   render: Template,
   args: {
-    topBarConfig: {
+    TopBar: {
       title: "Neuroverse",
       elementsRight: [
         {
@@ -179,9 +231,9 @@ export const TopOnly: Story = {
         },
       ],
     },
-    leftSidebarConfig: false,
-    rightSidebarConfig: false,
-    footerConfig: false,
+    LeftSideBar: false,
+    RightSideBar: false,
+    Footer: false,
   },
 };
 
@@ -189,7 +241,7 @@ export const TopWithLeftSidebar: Story = {
   render: Template,
   args: {
     ...TopOnly.args,
-    leftSidebarConfig: {
+    LeftSideBar: {
       elements: [
         { type: "link", props: { label: "Overview", icon: "dashboard" } },
         {
@@ -215,7 +267,7 @@ export const TopWithLeftAndRight: Story = {
   render: Template,
   args: {
     ...TopWithLeftSidebar.args,
-    rightSidebarConfig: {
+    RightSideBar: {
       elements: [
         { type: "link", props: { label: "Activity", icon: "history" } },
         { type: "action", props: { label: "Export", icon: "download" } },
@@ -228,7 +280,7 @@ export const FullShellWithFooter: Story = {
   render: Template,
   args: {
     ...TopWithLeftAndRight.args,
-    footerConfig: {
+    Footer: {
       brandLabel: "Neuroverse",
       brandLogo: "https://neurons.me/neurons.me.png",
       centerElements: [
@@ -247,10 +299,10 @@ export const FullShellWithFooter: Story = {
 export const ContentOnly: Story = {
   render: Template,
   args: {
-    topBarConfig: false,
-    leftSidebarConfig: false,
-    rightSidebarConfig: false,
-    footerConfig: false,
+    TopBar: false,
+    LeftSideBar: false,
+    RightSideBar: false,
+    Footer: false,
   },
 };
 
@@ -258,31 +310,33 @@ export const ContentOnly: Story = {
 export const LayoutWithPage: Story = {
   render: () => (
     <Layout
-      topBarConfig={{ title: 'Neuroverse Workspace' }}
-      leftSidebarConfig={{
+      TopBar={{ title: 'Neuroverse Workspace' }}
+      LeftSideBar={{
         elements: [
           { type: 'link', props: { label: 'Home', icon: 'home' } },
           { type: 'link', props: { label: 'Analytics', icon: 'insights' } },
         ],
       }}
-      rightSidebarConfig={{
+      RightSideBar={{
         elements: [
           { type: 'link', props: { label: 'Chat', icon: 'chat' } },
         ],
       }}
-      footerConfig={{
+      Footer={{
         brandLabel: 'Neuroverse',
         centerElements: [
           { type: 'link', props: { label: 'Docs', icon: 'menu_book' } },
         ],
       }}
     >
-      <Page background="linear-gradient(135deg, #0a192f, #172a45)" padding={4}>
-        <h2 style={{ color: 'white', marginBottom: 16 }}>Page inside Layout</h2>
-        <p style={{ color: 'white', maxWidth: 600 }}>
+      <Page padding={4}>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 2 }}>
+          Page inside Layout
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 720 }}>
           This example shows how a Page component can be used inside the responsive Layout,
           automatically adapting to inset updates from the TopBar, sidebars, and Footer.
-        </p>
+        </Typography>
       </Page>
     </Layout>
   ),

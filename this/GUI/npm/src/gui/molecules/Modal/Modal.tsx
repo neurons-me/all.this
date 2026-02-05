@@ -14,17 +14,7 @@ try {
   );
 }
 
-interface ModalProps {
-  open: boolean;
-  title?: string;
-  onClose: () => void;
-  children?: React.ReactNode;
-  width?: number | string;
-  height?: number | string;
-  blurBackground?: boolean;
-  xyz?: { x?: number; y?: number; z?: number };
-  insets?: { top?: number; right?: number; bottom?: number; left?: number };
-}
+import type { ModalProps } from './Modal.types';
 
 const Modal: React.FC<ModalProps> = ({
   open,

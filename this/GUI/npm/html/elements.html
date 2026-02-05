@@ -1,0 +1,461 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>this.GUI — Atoms Table</title>
+  <link rel="icon" href="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761276578/this.gui.npm.png" />
+  <!-- Prefer the non-redundant CSS name if published; if not available, swap back to this.gui.css -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/this.gui@latest/dist/styles.css" crossorigin="anonymous" />
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    window.process = { env: { NODE_ENV: "production" } };
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/this.gui@latest/dist/this.gui.umd.js" crossorigin="anonymous"></script>
+
+  <script>
+    (function () {
+      const GUI = window.GUI;
+
+      // --- Version (best-effort) -------------------------------------------------
+      const GUI_VERSION =
+        GUI?.version ||
+        GUI?.VERSION ||
+        GUI?.__version ||
+        GUI?.__VERSION__ ||
+        GUI?.default?.version ||
+        GUI?.default?.VERSION ||
+        null;
+
+      const CDN_VERSION = (() => {
+        try {
+          const urls = [];
+          document.querySelectorAll('script[src]').forEach((s) => urls.push(s.src));
+          document.querySelectorAll('link[href]').forEach((l) => urls.push(l.href));
+          for (const url of urls) {
+            const m = url.match(/\/npm\/this\.gui@([^/]+)\//);
+            if (m && m[1]) return m[1];
+          }
+        } catch (e) {}
+        return null;
+      })();
+
+      const RESOLVED_VERSION =
+        GUI_VERSION || (CDN_VERSION && CDN_VERSION !== 'latest' ? CDN_VERSION : null);
+
+      let VERSION_LABEL = RESOLVED_VERSION
+        ? RESOLVED_VERSION
+        : CDN_VERSION === 'latest'
+          ? 'latest'
+          : 'unknown';
+
+      try {
+        document.title = RESOLVED_VERSION ? `.GUI v${RESOLVED_VERSION} — Atoms` : `.GUI (${VERSION_LABEL}) — Atoms`;
+      } catch (e) {}
+
+      // --- Guard ---------------------------------------------------------------
+      if (!GUI) {
+        const rootEl = document.getElementById('root');
+        if (rootEl) rootEl.innerHTML = '<div style="font-family:sans-serif;padding:24px;">❌ window.GUI not found</div>';
+        return;
+      }
+
+      // --- Resolve exports (best-effort) --------------------------------------
+      const GuiProvider = GUI.GuiProvider || GUI.GuiProvider?.default || GUI.default?.GuiProvider;
+      const Layout =
+        GUI.Layout ||
+        GUI.default?.Layout ||
+        GUI.Theme?.Layout ||
+        GUI.default?.Theme?.Layout ||
+        null;
+
+      const atomsObj = GUI.atoms || GUI.default?.atoms || null;
+
+      // --- Helpers -------------------------------------------------------------
+      const h = React.createElement;
+
+      function safeKeys(obj) {
+        try {
+          return obj ? Object.keys(obj).sort() : [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function isRenderable(x) {
+        return typeof x === 'function' || (x && typeof x === 'object');
+      }
+
+      function FallbackShell(props) {
+        return h(
+          'div',
+          {
+            style: {
+              minHeight: '100vh',
+              padding: '22px',
+              fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif',
+              background: '#070b14',
+              color: '#e9f2ff',
+            },
+          },
+          props.children
+        );
+      }
+
+      function TopBar(props) {
+        return h(
+          'div',
+          {
+            style: {
+              position: 'sticky',
+              top: 0,
+              zIndex: 10,
+              padding: '14px 14px',
+              margin: '-22px -22px 18px -22px',
+              background: 'linear-gradient(180deg, rgba(7,11,20,0.95), rgba(7,11,20,0.75))',
+              backdropFilter: 'blur(10px)',
+              borderBottom: '1px solid rgba(255,255,255,0.08)',
+            },
+          },
+          props.children
+        );
+      }
+
+      function Pill(props) {
+        return h(
+          'span',
+          {
+            style: {
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '6px 10px',
+              borderRadius: 999,
+              border: '1px solid rgba(255,255,255,0.10)',
+              background: 'rgba(255,255,255,0.04)',
+              fontSize: 12,
+              color: 'rgba(233,242,255,0.90)',
+            },
+          },
+          props.children
+        );
+      }
+
+      function Input(props) {
+        return h('input', {
+          ...props,
+          style: {
+            width: 'min(560px, 92vw)',
+            padding: '10px 12px',
+            borderRadius: 12,
+            border: '1px solid rgba(255,255,255,0.12)',
+            background: 'rgba(255,255,255,0.05)',
+            color: '#e9f2ff',
+            outline: 'none',
+            fontSize: 13,
+            ...props.style,
+          },
+        });
+      }
+
+      function Grid(props) {
+        return h(
+          'div',
+          {
+            style: {
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: 12,
+              alignItems: 'stretch',
+              ...props.style,
+            },
+          },
+          props.children
+        );
+      }
+
+      function Card(props) {
+        return h(
+          'div',
+          {
+            style: {
+              borderRadius: 16,
+              border: '1px solid rgba(255,255,255,0.10)',
+              background: 'rgba(255,255,255,0.03)',
+              overflow: 'hidden',
+              minHeight: 140,
+              display: 'flex',
+              flexDirection: 'column',
+            },
+          },
+          props.children
+        );
+      }
+
+      function CardHeader(props) {
+        return h(
+          'div',
+          {
+            style: {
+              padding: '10px 12px',
+              borderBottom: '1px solid rgba(255,255,255,0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 10,
+              background: 'rgba(255,255,255,0.02)',
+            },
+          },
+          props.children
+        );
+      }
+
+      function Code(props) {
+        return h(
+          'code',
+          {
+            style: {
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+              fontSize: 12,
+              color: '#7cebff',
+              opacity: 0.95,
+            },
+          },
+          props.children
+        );
+      }
+
+      function Small(props) {
+        return h(
+          'div',
+          {
+            style: {
+              fontSize: 12,
+              opacity: 0.78,
+              color: 'rgba(233,242,255,0.82)',
+            },
+          },
+          props.children
+        );
+      }
+
+      function PreviewArea(props) {
+        return h(
+          'div',
+          {
+            style: {
+              padding: 12,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: 96,
+              gap: 10,
+            },
+          },
+          props.children
+        );
+      }
+
+      function tryRender(Component, name) {
+        // IMPORTANT: Keep props conservative so we don't crash components that require heavy config.
+        // If a component throws, we show a minimal placeholder.
+        try {
+          if (!isRenderable(Component)) return h('div', null, '—');
+
+          // Heuristics for safer previews
+          const lower = String(name || '').toLowerCase();
+          const props = {};
+
+          if (lower.includes('button')) {
+            props.children = name || 'Button';
+          }
+          if (lower.includes('icon')) {
+            props.name = 'crosshair';
+          }
+          if (lower.includes('text') || lower.includes('typography')) {
+            props.children = `${name} preview`;
+          }
+          if (lower.includes('chip')) {
+            props.label = name;
+          }
+          if (lower.includes('tooltip')) {
+            props.title = 'Tooltip';
+            props.children = h('span', { style: { padding: 6 } }, 'Hover');
+          }
+
+          // Common safe defaults
+          props.key = name;
+
+          return h(Component, props);
+        } catch (e) {
+          return h(
+            'div',
+            { style: { fontSize: 12, opacity: 0.8, padding: 10, textAlign: 'center' } },
+            '⚠️ render failed'
+          );
+        }
+      }
+
+      function Section(props) {
+        return h(
+          'section',
+          { style: { marginTop: 18 } },
+          h(
+            'div',
+            { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 } },
+            h('h2', { style: { margin: 0, fontSize: 16, letterSpacing: '-0.2px' } }, props.title),
+            h(Small, null, props.count + ' items')
+          ),
+          h('div', { style: { height: 10 } }),
+          props.children
+        );
+      }
+
+      function FamilyGrid(props) {
+        const { familyName, dataObj, filterText } = props;
+        const keys = safeKeys(dataObj);
+        const filtered = keys.filter((k) => !filterText || k.toLowerCase().includes(filterText.toLowerCase()));
+
+        return h(
+          Section,
+          { title: familyName, count: filtered.length },
+          h(
+            Grid,
+            null,
+            filtered.map((name) => {
+              const Component = dataObj?.[name];
+              return h(
+                Card,
+                { key: familyName + ':' + name },
+                h(
+                  CardHeader,
+                  null,
+                  h('div', null, h('div', { style: { fontWeight: 800, fontSize: 13 } }, name), h(Code, null, `${familyName.toLowerCase()}.${name}`)),
+                  h(
+                    'button',
+                    {
+                      onClick: () => {
+                        try {
+                          navigator.clipboard?.writeText(`${familyName.toLowerCase()}.${name}`);
+                        } catch (e) {}
+                      },
+                      style: {
+                        cursor: 'pointer',
+                        borderRadius: 10,
+                        border: '1px solid rgba(255,255,255,0.10)',
+                        background: 'rgba(255,255,255,0.04)',
+                        color: 'rgba(233,242,255,0.92)',
+                        padding: '6px 10px',
+                        fontSize: 12,
+                      },
+                      title: 'Copy path',
+                    },
+                    'Copy'
+                  )
+                ),
+                h(PreviewArea, null, tryRender(Component, name))
+              );
+            })
+          )
+        );
+      }
+
+      function Content() {
+        const [q, setQ] = React.useState('');
+
+        const atomsCount = safeKeys(atomsObj).length;
+
+        const header = h(
+          TopBar,
+          null,
+          h(
+            'div',
+            { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' } },
+            h(
+              'div',
+              { style: { display: 'flex', alignItems: 'center', gap: 12 } },
+              h('img', {
+                src: 'https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760629119/this.gui.neurons.me_mkapde.png',
+                alt: 'this.GUI',
+                style: { height: 28, width: 'auto', display: 'block' },
+              }),
+              h('div', null,
+                h('div', { style: { fontSize: 14, fontWeight: 900, letterSpacing: '-0.2px' } }, '.GUI — Atoms Table'),
+                h('div', { style: { fontSize: 12, opacity: 0.85 } }, 'CDN Version: ' + VERSION_LABEL)
+              )
+            ),
+            h(
+              'div',
+              { style: { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' } },
+              h(Pill, null, 'Atoms: ', h('b', null, atomsCount))
+            )
+          ),
+          h('div', { style: { height: 10 } }),
+          h(Input, {
+            value: q,
+            placeholder: 'Filter by name… (e.g. Button, Icon, Tooltip)',
+            onChange: (e) => setQ(e.target.value || ''),
+          })
+        );
+
+        const body = h(
+          'div',
+          null,
+          atomsObj ? h(FamilyGrid, { familyName: 'Atoms', dataObj: atomsObj, filterText: q }) : null,
+          (!atomsObj)
+            ? h(
+                'div',
+                { style: { marginTop: 18, opacity: 0.9 } },
+                'No atoms export found on window.GUI. Check your UMD exports.'
+              )
+            : null
+        );
+
+        return h('div', null, header, body);
+      }
+
+      const pageBody = h(Content, null);
+
+      const pageWithLayout = Layout
+        ? h(
+            Layout,
+            {
+              leftSidebarConfig: {
+                initialView: 'rail',
+                elements: [
+                { type: 'link', props: { label: 'Home', icon: 'home', href: '../../index.html' } },
+                { type: 'link', props: { label: '.GUI', icon: 'widgets', href: './index.html' } },
+                { type: 'link', props: { label: 'Themes', icon: 'palette', href: './themes.html' } },
+                { type: 'link', props: { label: 'Exports', icon: 'schema', href: './exports.html',}},
+                { type: 'link', props: { label: 'Storybook', icon: 'auto_stories', href: 'https://neurons-me.github.io/storybook-static/' } },
+                { type: 'link', props: { label: 'GitHub', icon: 'code', href: 'https://github.com/neurons-me/this.GUI' } },
+                { type: 'link', props: { label: 'npm', icon: 'package_2', href: 'https://www.npmjs.com/package/this.gui' } }
+              ]
+              },
+              children: pageBody,
+            }
+          )
+        : pageBody;
+
+      const App = GuiProvider
+        ? h(GuiProvider, { initialMode: 'dark', initialThemeId: 'neurons.me' }, pageWithLayout)
+        : h(FallbackShell, null, pageWithLayout);
+
+      const rootEl = document.getElementById('root');
+      const root = ReactDOM.createRoot(rootEl);
+      root.render(App);
+
+      console.log('[GUI] ✅ Elements table render complete.');
+    })();
+  </script>
+</body>
+</html>

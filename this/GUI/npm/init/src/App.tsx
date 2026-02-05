@@ -8,7 +8,7 @@ import "./index.css";
 // Prefer importing from `this.gui` so consumers start in the same semantics
 // they will use in the final product.
 import {
-  GuiProvider,
+  Theme,
   Box,
   Typography,
   Button,
@@ -105,8 +105,8 @@ function Welcome() {
 
 export default function App() {
   return (
-    <GuiProvider theme="dark">
+    <Theme initialMode="dark">
       <Welcome />
-    </GuiProvider>
+    </Theme>
   );
 }

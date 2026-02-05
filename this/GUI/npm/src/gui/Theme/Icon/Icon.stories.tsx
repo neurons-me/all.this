@@ -156,6 +156,11 @@ export const CommonIcons: Story = {
 };
 
 export const FilledVsOutlined: Story = {
+  args: {
+    name: "",
+    iconColor: "#2d58a3"
+  },
+
   parameters: {
     docs: {
       description: {
@@ -163,6 +168,7 @@ export const FilledVsOutlined: Story = {
       },
     },
   },
+
   render: () => (
     <div style={{ padding: 24, display: 'flex', gap: 28, alignItems: 'center' }}>
       <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
@@ -174,7 +180,7 @@ export const FilledVsOutlined: Story = {
         <span style={{ fontSize: 12, opacity: 0.85 }}>fill=1</span>
       </div>
     </div>
-  ),
+  )
 };
 
 export const WeightRamp: Story = {

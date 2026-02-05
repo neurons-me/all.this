@@ -1,4 +1,5 @@
 import React from 'react';
+import ThemeModeToggle from '@/gui/Theme/ToggleMode/ToggleMode';
 
 /**
  * GUI Tools
@@ -19,7 +20,19 @@ export type GUIToolsLinkElement = {
   };
 };
 
-export type GUIToolsElements = GUIToolsLinkElement[];
+export type GUIToolsActionElement = {
+  type: 'action';
+  props: {
+    // Optional metadata (some renderers show label/icon for actions)
+    label?: string;
+    icon?: string;
+    // The actual rendered element
+    element: React.ReactNode;
+  };
+};
+
+export type GUIToolsElement = GUIToolsLinkElement | GUIToolsActionElement;
+export type GUIToolsElements = GUIToolsElement[];
 
 /**
  * The canonical sidebar elements used by .GUI docs/runtime pages.
@@ -49,20 +62,21 @@ export const guiToolsElements: GUIToolsElements = [
       href: 'https://neurons-me.github.io/this.GUI',
     },
   },
-  {
-    type: 'link',
-    props: {
-      label: 'Storybook',
-      icon: 'auto_stories',
-      href: 'https://neurons-me.github.io/storybook-static/',
-    },
-  },
+  
   {
     type: 'link',
     props: {
       label: 'Themes',
       icon: 'palette',
-      href: 'https://neurons-me.github.io/this.GUI/themes/',
+      href: 'https://neurons-me.github.io/themes.html',
+    },
+  },
+    {
+    type: 'link',
+    props: {
+      label: 'Storybook',
+      icon: 'auto_stories',
+      href: 'https://neurons-me.github.io/storybook-static/',
     },
   },
   {
@@ -79,6 +93,16 @@ export const guiToolsElements: GUIToolsElements = [
       label: 'npm',
       icon: 'package_2',
       href: 'https://www.npmjs.com/package/this.gui',
+    },
+  },
+  {
+    type: 'action',
+    props: {
+      label: 'Theme',
+      icon: 'contrast',
+      element: (
+        <ThemeModeToggle variant="minimal" show="icons" iconSize="small" />
+      ),
     },
   },
 ];

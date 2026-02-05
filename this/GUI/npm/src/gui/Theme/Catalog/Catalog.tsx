@@ -31,9 +31,18 @@ function getPreviewSwatches(item: ThemeManifest) {
   }
   return swatches;
 }
-export default function ThemesCatalog({ sx, variant = 'grid' }: ThemesCatalogProps = {}) {
+export default function ThemesCatalog({
+  sx,
+  variant = 'grid',
+  hideDescription = false,
+  hideAuthor = false,
+  minimal = false,
+}: ThemesCatalogProps = {}) {
   const themes = getGuiThemes();
   const { setMode, mode: activeMode, themeId, setThemeId } = useThemeContext();
+  const effectiveHideDescription = minimal ? true : hideDescription;
+  const effectiveHideAuthor = minimal ? true : hideAuthor;
+  const isMinimal = Boolean(minimal);
   if (!themes || themes.length === 0) {
     return <Typography>No themes available.</Typography>;
   }
@@ -43,11 +52,28 @@ export default function ThemesCatalog({ sx, variant = 'grid' }: ThemesCatalogPro
     const light = Boolean(theme.mode?.light);
     const dark = Boolean(theme.mode?.dark);
     const isDarkSelected = activeMode === 'dark';
+    // Helper: selectTheme logic (same as Checkbox onChange)
+    function selectTheme() {
+      if (typeof setThemeId === 'function') {
+        setThemeId(theme.themeId ?? '');
+      }
+      if (typeof setMode === 'function') {
+        const fallbackMode: 'light' | 'dark' = theme.defaultMode === 'dark' ? 'dark' : 'light';
+        setMode(fallbackMode);
+      }
+    }
+    // Keyboard handler for card
+    function handleCardKeyDown(e: React.KeyboardEvent) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectTheme();
+      }
+    }
     return (
       <Box sx={{ position: 'relative' }}>
         <Card
           sx={{
-            p: 1,
+            p: isMinimal ? 0.75 : 1,
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
@@ -55,14 +81,35 @@ export default function ThemesCatalog({ sx, variant = 'grid' }: ThemesCatalogPro
             border: (theme.mode.light as any).palette?.primary?.main
               ? `1px solid ${(theme.mode.light as any).palette.primary.main}`
               : '1px solid rgba(0,0,0,0.04)',
-            borderRadius: 1.5,
+            borderRadius: isMinimal ? 1.25 : 1.5,
             boxShadow: 'none',
             height: '100%',
-            gap: 0.25,
+            gap: isMinimal ? 0.15 : 0.25,
+            minWidth: 0,
+            cursor: 'pointer',
+            transition: 'transform 120ms ease, box-shadow 120ms ease',
+            '&:hover': { transform: 'translateY(-1px)' },
+            '&:active': { transform: 'translateY(0px)' },
           }}
+          onClick={selectTheme}
+          role="button"
+          tabIndex={0}
+          onKeyDown={handleCardKeyDown}
         >
           <CardHeader
-            sx={{ mb: 0, '& .MuiCardHeader-content': { overflow: 'hidden' } }}
+            sx={{
+              mb: 0,
+              py: isMinimal ? 0.25 : undefined,
+              '& .MuiCardHeader-content': { overflow: 'hidden' },
+              '& .MuiCardHeader-title': {
+                fontSize: isMinimal ? 14 : undefined,
+                lineHeight: isMinimal ? 1.15 : undefined,
+              },
+              '& .MuiCardHeader-subheader': {
+                fontSize: isMinimal ? 11 : undefined,
+                lineHeight: isMinimal ? 1.1 : undefined,
+              },
+            }}
             avatar={
               theme.badgeUrl ? (
                 <Avatar src={theme.badgeUrl} alt={theme.themeName} />
@@ -71,15 +118,22 @@ export default function ThemesCatalog({ sx, variant = 'grid' }: ThemesCatalogPro
               )
             }
             title={theme.themeName}
-            subheader={theme.author}
+            subheader={effectiveHideAuthor ? undefined : theme.author}
           />
-          <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'wrap', mt: 1 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              gap: isMinimal ? 0.5 : 0.75,
+              flexWrap: 'wrap',
+              mt: isMinimal ? 0.75 : 1,
+            }}
+          >
             {getPreviewSwatches(theme).map((sw, i) => (
               <Tooltip key={`${theme.themeId}-swatch-${i}`} title={sw.label}>
                 <Box
                   sx={{
-                    width: 14,
-                    height: 14,
+                    width: isMinimal ? 12 : 14,
+                    height: isMinimal ? 12 : 14,
                     borderRadius: 1,
                     ...(String(sw.value).includes('gradient')
                       ? { background: sw.value }
@@ -90,33 +144,36 @@ export default function ThemesCatalog({ sx, variant = 'grid' }: ThemesCatalogPro
               </Tooltip>
             ))}
           </Box>
-          <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
+          <Box sx={{ position: 'absolute', top: isMinimal ? 6 : 8, right: isMinimal ? 6 : 8 }}>
             <Checkbox
               size="small"
               color="primary"
               checked={theme.themeId === themeId}
-              onChange={() => {
-                if (typeof setThemeId === 'function') {
-                  setThemeId(theme.themeId ?? '');
-                }
-                if (typeof setMode === 'function') {
-                  const fallbackMode: 'light' | 'dark' = theme.defaultMode === 'dark' ? 'dark' : 'light';
-                  setMode(fallbackMode);
-                }
-              }}
+              onChange={selectTheme}
+              onClick={(e) => e.stopPropagation()}
               sx={{
-                p: 0.5,
+                p: isMinimal ? 0.35 : 0.5,
                 backgroundColor: 'background.paper',
                 borderRadius: 1,
               }}
             />
           </Box>
-          <CardContent sx={{ p: 0.75, pt: 0.25 }}>
-            <Typography variant="body2" color="text.secondary">
-              {theme.description}
-            </Typography>
+          <CardContent sx={{ p: isMinimal ? 0.6 : 0.75, pt: isMinimal ? 0.2 : 0.25 }}>
+            {!effectiveHideDescription && (
+              <Typography variant="body2" color="text.secondary">
+                {theme.description}
+              </Typography>
+            )}
             {theme.themeId === themeId && (
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 0.5, mb: 0.25 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
+                  mt: isMinimal ? 0.35 : 0.5,
+                  mb: isMinimal ? 0.15 : 0.25,
+                }}
+              >
                 <Icon name="light_mode" style={{ opacity: light ? 1 : 0.4 }} />
                 <MuiSwitch
                   size="small"
@@ -155,9 +212,24 @@ export default function ThemesCatalog({ sx, variant = 'grid' }: ThemesCatalogPro
   }
 
   return (
-    <Grid container spacing={2} sx={sx}>
+    <Grid container spacing={isMinimal ? 1.5 : 2} sx={sx}>
       {themes.map((theme: ThemeManifest) => (
-        <Grid item key={theme.themeId} xs={12} sm={6} md={4} lg={3}>
+        <Grid
+          item
+          key={theme.themeId}
+          xs={6}
+          sm={6}
+          md={4}
+          lg={3}
+          xl={3}
+          sx={{
+            // Keep 2 columns as early as possible, but avoid overlap on ultra-narrow screens.
+            '@media (max-width: 360px)': {
+              flexBasis: '100%',
+              maxWidth: '100%',
+            },
+          }}
+        >
           <ThemeCard theme={theme} />
         </Grid>
       ))}

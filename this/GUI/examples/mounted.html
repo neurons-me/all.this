@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>this.GUI — Blank</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+    <script>window.process = window.process || { env: { NODE_ENV: 'production' } };</script>
+    <script src="https://cdn.jsdelivr.net/npm/this.gui@latest/dist/this.gui.umd.js" crossorigin="anonymous"></script>
+    <script>
+    const app = document.getElementById('root');
+    GUI.mount(app, { type: 'Home', props: {} }, {});
+    </script>
+  </body>
+</html>

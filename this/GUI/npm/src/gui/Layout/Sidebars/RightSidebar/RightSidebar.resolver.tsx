@@ -1,4 +1,4 @@
-import type { RegistryEntry } from '@/gui/registry/types';
+import type { RegistryEntry } from '@/Registry/types';
 import RightSidebar from './RightSidebar';
 import type { RightSidebarElement } from './RightSidebar.types';
 

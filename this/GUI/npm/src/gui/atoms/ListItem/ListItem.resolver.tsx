@@ -1,7 +1,7 @@
 // src/gui/atoms/ListItem/ListItem.resolver.tsx
 import * as React from 'react';
 import ListItem from './ListItem';
-import type { RegistryEntry, ResolveCtx } from '@/gui/registry/types';
+import type { RegistryEntry, ResolveCtx } from '@/Registry/types';
 import type { SxProps, Theme } from '@mui/material/styles';
 import { ensureNodeId } from '@/gui/utils/nodeID';
 

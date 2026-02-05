@@ -1,6 +1,6 @@
 // src/types/theme.d.ts
 import '@mui/material/styles';
-// Module augmentation so TS knows about our theme extensions injected by GuiProvider
+// Module augmentation so TS knows about our theme extensions injected by Theme
 declare module '@mui/material/styles' {
   /** Insets reported at runtime by NavBar/Drawers and read by layout components */
   interface Insets {
@@ -14,7 +14,7 @@ declare module '@mui/material/styles' {
   /** Runtime theme (what useTheme() returns) */
   interface Theme {
     layout: { insets: Insets };
-    /** Callback to update insets; injected by GuiProvider */
+    /** Callback to update insets; injected by Theme */
     updateInsets?: (next: Partial<Insets>) => void;
     /** Optional legacy field for back-compat (some code reads theme.insets) */
     insets?: Partial<Insets>;
@@ -88,7 +88,7 @@ export interface FlatGuiTheme {
   tokens: string | Record<string, any>;
 }
 
-// GuiContextValue types (from GuiProvider)
+// GuiContextValue types (from Theme)
 export type GuiContextValue = {
   themeId: string;
   setThemeId: (id: string) => void;
@@ -149,7 +149,7 @@ declare module '@mui/material/styles' {
     layout: {
       insets: { left: number; right: number; top: number; bottom: number; nav: number };
     };
-    /** Callback exposed by GuiProvider to update insets at runtime. */
+    /** Callback exposed by Theme to update insets at runtime. */
     updateInsets?: (v: Partial<{ left: number; right: number; top: number; bottom: number; nav: number }>) => void;
     /** Bag for tokens that don't map 1:1 to MUI. */
     custom?: {

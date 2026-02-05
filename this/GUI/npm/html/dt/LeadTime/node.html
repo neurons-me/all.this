@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>this.GUI — Lead Time Table (runtime)</title>
+    <link
+      rel="icon"
+      href="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761276578/this.gui.npm.png"
+    />
+
+    <!-- Local CSS (expects styles.css next to this file in dist/) -->
+    <link rel="stylesheet" href="./dist/styles.css" />
+    <link rel="stylesheet" href="./dist/material-symbols.css" />
+    <link rel="preload" href="./dist/material-symbols-rounded.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <!-- React UMD globals (required by runtime mount) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react-jsx-runtime.production.min.js"></script>
+    <!-- Local UMD build (expects this.gui.umd.js next to this file in dist/) -->
+    <script src="./dist/this.gui.umd.js"></script>
+    <script src="./data.js"></script>
+
+    <script>
+      (function () {
+        const GUI = window.GUI;
+        const rootEl = document.getElementById('root');
+        if (!rootEl) return;
+
+        const fail = (msg) => {
+          rootEl.innerHTML =
+            '<div class="fallback">' +
+            '<h2>❌ this.GUI runtime error</h2>' +
+            '<p>' +
+            msg +
+            '</p>' +
+            '<p>Make sure these files exist next to this HTML:</p>' +
+            '<ul>' +
+            '<li><code>styles.css</code></li>' +
+            '<li><code>this.gui.umd.js</code></li>' +
+            '<li><code>material-symbols-rounded.woff2</code> (font)</li>' +
+            '</ul>' +
+            '</div>';
+        };
+
+        if (!GUI) return fail('window.GUI not found. Did you load <code>this.gui.umd.js</code>?');
+        if (!window.React || !window.ReactDOM) {
+          return fail('React globals not found. Did you load <code>react</code> and <code>react-dom</code> UMD scripts?');
+        }
+
+        // --- Data (real rows) ---
+        // Static load (file:// friendly). ./data.js should set: window.LEADTIME_ROWS = [...]
+        const rows = window.LEADTIME_ROWS || window.rows || [];
+        if (!Array.isArray(rows) || rows.length === 0) {
+          console.warn('[LeadTimes] No rows loaded. Did ./data.js load and define window.LEADTIME_ROWS?');
+        }
+
+        // --- this.GUI components guaranteed by your root exports ---
+        const Box = GUI.Box || GUI.atoms?.Box || GUI.Atoms?.Box;
+        const Typography = GUI.Typography || GUI.atoms?.Typography || GUI.Atoms?.Typography;
+        const TextField = GUI.TextField || GUI.atoms?.TextField || GUI.Atoms?.TextField;
+        const Paper = GUI.Paper || GUI.atoms?.Paper || GUI.Atoms?.Paper;
+        const Layout = GUI.Layout || GUI.theme?.Layout || GUI.ThemeRuntime?.Layout || null;
+        const Page = GUI.molecules?.Page || GUI.Molecules?.Page || GUI.Page || null;
+        const CodeBlock = GUI.CodeBlock || GUI.molecules?.CodeBlock || GUI.Molecules?.CodeBlock || null;
+        const Theme = GUI.Theme || GUI.theme?.Theme || GUI.ThemeRuntime?.Theme || null;
+
+        if (!Box || !Typography || !TextField || !Paper) {
+          return fail(
+            'Missing required exports. Need <code>Box</code>, <code>Typography</code>, <code>TextField</code>, <code>Paper</code> on window.GUI.'
+          );
+        }
+
+        const unique = (arr) => Array.from(new Set(arr)).filter(Boolean).sort();
+
+        function LeadTimeCube() {
+          const React = window.React;
+
+          const [sel, setSel] = React.useState({
+            Vendor: '',
+            Product: '',
+            Program: '',
+            Node: '',
+            Scenario: '',
+          });
+
+          // --- Calendar outputs (derived from Lead Time) ---
+          const isoToday = (() => {
+            const d = new Date();
+            // local date -> YYYY-MM-DD
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+          })();
+
+          const [startDate, setStartDate] = React.useState(isoToday);
+          const [endDate, setEndDate] = React.useState(isoToday);
+          const [dateAnchor, setDateAnchor] = React.useState('start'); // 'start' | 'end'
+
+          const parseISO = (iso) => {
+            if (!iso) return null;
+            const [y, m, d] = String(iso).split('-').map((x) => Number(x));
+            if (!y || !m || !d) return null;
+            return new Date(y, m - 1, d);
+          };
+
+          const formatISO = (date) => {
+            if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '';
+            const pad = (n) => String(n).padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+          };
+
+          const addDays = (iso, days) => {
+            const d = parseISO(iso);
+            if (!d || !Number.isFinite(days)) return '';
+            d.setDate(d.getDate() + Number(days));
+            return formatISO(d);
+          };
+
+          const subDays = (iso, days) => {
+            const d = parseISO(iso);
+            if (!d || !Number.isFinite(days)) return '';
+            d.setDate(d.getDate() - Number(days));
+            return formatISO(d);
+          };
+
+          // Helpers: filter rows by current selection
+          const applyFilter = (inputRows, partialSel) => {
+            return inputRows.filter((r) => {
+              if (partialSel.Vendor && r.vendor !== partialSel.Vendor) return false;
+              if (partialSel.Product && r.product !== partialSel.Product) return false;
+              if (partialSel.Program && r.program !== partialSel.Program) return false;
+              if (partialSel.Node && r.node !== partialSel.Node) return false;
+              if (partialSel.Scenario && r.scenario !== partialSel.Scenario) return false;
+              return true;
+            });
+          };
+
+          const rowsAfterVendor = applyFilter(rows, { ...sel, Product: '', Program: '', Node: '', Scenario: '' });
+          const vendorOptions = unique(rows.map((r) => r.vendor));
+          const productOptions = unique(rowsAfterVendor.map((r) => r.product));
+          const rowsAfterProduct = applyFilter(rows, { ...sel, Program: '', Node: '', Scenario: '' });
+          const programOptions = unique(rowsAfterProduct.map((r) => r.program));
+          const rowsAfterProgram = applyFilter(rows, { ...sel, Node: '', Scenario: '' });
+          const nodeOptions = unique(rowsAfterProgram.map((r) => r.node));
+          const rowsAfterNode = applyFilter(rows, { ...sel, Scenario: '' });
+          const scenarioOptions = unique(rowsAfterNode.map((r) => r.scenario));
+          const finalRows = applyFilter(rows, sel);
+          const leadTimes = finalRows.map((r) => Number(r.leadTime)).filter((n) => Number.isFinite(n));
+          const leadTimeLabel = (() => {
+            if (!sel.Vendor || !sel.Product || !sel.Program || !sel.Node || !sel.Scenario) return '—';
+            if (leadTimes.length === 0) return 'No match';
+            const min = Math.min(...leadTimes);
+            const max = Math.max(...leadTimes);
+            return min === max ? `${min} days` : `${min}–${max} days`;
+          })();
+
+          // A single numeric lead time for date math. If a range exists, we use the minimum.
+          const leadDays = (() => {
+            if (!sel.Vendor || !sel.Product || !sel.Program || !sel.Node || !sel.Scenario) return null;
+            if (leadTimes.length === 0) return null;
+            const min = Math.min(...leadTimes);
+            return Number.isFinite(min) ? min : null;
+          })();
+
+          // Keep Start/End dates locked to Lead Time difference when leadDays is resolved.
+          React.useEffect(() => {
+            if (!Number.isFinite(leadDays)) return;
+            // First time leadDays resolves, ensure endDate is aligned to startDate
+            // (or startDate aligned to endDate depending on last edited field).
+            if (dateAnchor === 'end') {
+              const nextStart = subDays(endDate || isoToday, leadDays);
+              if (nextStart && nextStart !== startDate) setStartDate(nextStart);
+              return;
+            }
+
+            const nextEnd = addDays(startDate || isoToday, leadDays);
+            if (nextEnd && nextEnd !== endDate) setEndDate(nextEnd);
+          }, [leadDays, startDate, endDate, dateAnchor]);
+          const setCascade = (key, value) => {
+            // Cascade reset downstream to avoid invalid combinations
+            if (key === 'Vendor') {
+              setSel({ Vendor: value, Product: '', Program: '', Node: '', Scenario: '' });
+              return;
+            }
+            if (key === 'Product') {
+              setSel((p) => ({ ...p, Product: value, Program: '', Node: '', Scenario: '' }));
+              return;
+            }
+            if (key === 'Program') {
+              setSel((p) => ({ ...p, Program: value, Node: '', Scenario: '' }));
+              return;
+            }
+            if (key === 'Node') {
+              setSel((p) => ({ ...p, Node: value, Scenario: '' }));
+              return;
+            }
+            if (key === 'Scenario') {
+              setSel((p) => ({ ...p, Scenario: value }));
+              return;
+            }
+          };
+
+          const dimensions = {
+            nodes: unique(rows.map((r) => r.node)),
+            scenarios: unique(rows.map((r) => r.scenario)),
+            vendors: unique(rows.map((r) => r.vendor)),
+            products: unique(rows.map((r) => r.product)),
+            programs: unique(rows.map((r) => r.program)),
+          };
+
+          const Field = (label, value, options, disabled) =>
+            React.createElement(
+              Box,
+              { sx: { display: 'flex', flexDirection: 'column', gap: 0.75 } },
+              React.createElement(Typography, { variant: 'subtitle2' }, label),
+              React.createElement(TextField, {
+                size: 'small',
+                select: true,
+                fullWidth: true,
+                disabled,
+                value: value || '',
+                onChange: (e) => setCascade(label, e?.target?.value || ''),
+                SelectProps: { native: true },
+              },
+                React.createElement('option', { value: '' }, `(Select ${label})`),
+                ...(options || []).map((opt) => React.createElement('option', { key: `${label}-${opt}`, value: opt }, opt))
+              )
+            );
+
+          const TableLike = () =>
+            React.createElement(
+              Paper,
+              {
+                variant: 'outlined',
+                sx: {
+                  mt: 1.5,
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  bgcolor: 'background.paper',
+                },
+              },
+              React.createElement(
+                Box,
+                {
+                  sx: {
+                    display: 'grid',
+                    gridTemplateColumns: '1.2fr 1fr 1fr 1fr 1fr 0.9fr',
+                    gap: 0,
+                    px: 1.5,
+                    py: 1,
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                  },
+                },
+                ['Vendor', 'Product', 'Program', 'Scenario', 'Node', 'Lead Time'].map((h) =>
+                  React.createElement(Typography, { key: h, variant: 'caption', sx: { fontWeight: 800, opacity: 0.9 } }, h)
+                )
+              ),
+              (finalRows.length ? finalRows : applyFilter(rows, sel)).slice(0, 40).map((r, idx) =>
+                React.createElement(
+                  Box,
+                  {
+                    key: `row-${idx}`,
+                    sx: {
+                      display: 'grid',
+                      gridTemplateColumns: '1.2fr 1fr 1fr 1fr 1fr 0.9fr',
+                      px: 1.5,
+                      py: 1,
+                      borderBottom: idx === finalRows.length - 1 ? 'none' : '1px solid',
+                      borderColor: 'divider',
+                      opacity: 0.95,
+                    },
+                  },
+                  React.createElement(Typography, { variant: 'body2' }, r.vendor),
+                  React.createElement(Typography, { variant: 'body2' }, r.product),
+                  React.createElement(Typography, { variant: 'body2' }, r.program),
+                  React.createElement(Typography, { variant: 'body2' }, r.scenario),
+                  React.createElement(Typography, { variant: 'body2' }, r.node),
+                  React.createElement(Typography, { variant: 'body2', sx: { fontWeight: 800 } }, String(r.leadTime))
+                )
+              )
+            );
+
+          const Main = React.createElement(
+            Box,
+            {
+              sx: {
+                mt: 2,
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', md: '1.2fr 0.8fr' },
+                gap: 2,
+                alignItems: 'start',
+              },
+            },
+            // Left
+            React.createElement(
+              Box,
+              { sx: { display: 'flex', flexDirection: 'column', gap: 1.5 } },
+              React.createElement(
+                Paper,
+                {
+                  variant: 'outlined',
+                  sx: {
+                    p: 2,
+                    borderRadius: 2,
+                    bgcolor: 'background.paper',
+                  },
+                },
+                React.createElement(
+                  Box,
+                  {
+                    sx: {
+                      display: 'grid',
+                      gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                      gap: 1.25,
+                    },
+                  },
+                  Field('Vendor', sel.Vendor, vendorOptions, false),
+                  Field('Product', sel.Product, productOptions, !sel.Vendor),
+                  Field('Program', sel.Program, programOptions, !sel.Product),
+                  Field('Node', sel.Node, nodeOptions, !sel.Program),
+                  Field('Scenario', sel.Scenario, scenarioOptions, !sel.Node)
+                ),
+                React.createElement(
+                  Box,
+                  { sx: { mt: 1.25, display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 2 } },
+                  React.createElement(Typography, { variant: 'subtitle2', sx: { opacity: 0.9 } }, 'Lead Time'),
+                  React.createElement(Typography, { variant: 'h6', sx: { fontWeight: 900 } }, leadTimeLabel)
+                )
+                ,
+                React.createElement(
+                  Paper,
+                  {
+                    variant: 'outlined',
+                    sx: {
+                      mt: 1.25,
+                      p: 1.5,
+                      borderRadius: 2,
+                      bgcolor: 'background.default',
+                      display: 'grid',
+                      gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' },
+                      gap: 1.25,
+                    },
+                  },
+                  React.createElement(
+                    Box,
+                    { sx: { display: 'flex', flexDirection: 'column', gap: 0.75 } },
+                    React.createElement(Typography, { variant: 'subtitle2' }, 'Start Date'),
+                    React.createElement(TextField, {
+                      size: 'small',
+                      type: 'date',
+                      fullWidth: true,
+                      value: startDate || '',
+                      disabled: !Number.isFinite(leadDays),
+                      onChange: (e) => {
+                        const v = e?.target?.value || '';
+                        setDateAnchor('start');
+                        setStartDate(v);
+                        if (Number.isFinite(leadDays)) setEndDate(addDays(v, leadDays));
+                      },
+                      InputLabelProps: { shrink: true },
+                    })
+                  ),
+                  React.createElement(
+                    Box,
+                    { sx: { display: 'flex', flexDirection: 'column', gap: 0.75 } },
+                    React.createElement(Typography, { variant: 'subtitle2' }, 'End Date'),
+                    React.createElement(TextField, {
+                      size: 'small',
+                      type: 'date',
+                      fullWidth: true,
+                      value: endDate || '',
+                      disabled: !Number.isFinite(leadDays),
+                      onChange: (e) => {
+                        const v = e?.target?.value || '';
+                        setDateAnchor('end');
+                        setEndDate(v);
+                        if (Number.isFinite(leadDays)) setStartDate(subDays(v, leadDays));
+                      },
+                      InputLabelProps: { shrink: true },
+                    })
+                  ),
+                  React.createElement(
+                    Box,
+                    { sx: { gridColumn: { xs: '1 / -1', md: '1 / -1' } } },
+                    React.createElement(
+                      Typography,
+                      { variant: 'caption', sx: { opacity: 0.75, display: 'block' } },
+                      Number.isFinite(leadDays)
+                        ? `Locked to Lead Time (${leadDays} days). Edit either date — the other stays ${leadDays} days apart.`
+                        : 'Select Vendor → Product → Program → Node → Scenario to enable dates.'
+                    )
+                  )
+                )
+              ),
+              React.createElement(Typography, { variant: 'subtitle2', sx: { mt: 1 } }, 'Data:'),
+              React.createElement(TableLike, null)
+            ),
+            // Right
+            React.createElement(
+              Paper,
+              {
+                variant: 'outlined',
+                sx: {
+                  p: 2,
+                  borderRadius: 2,
+                  bgcolor: 'background.paper',
+                },
+              },
+              React.createElement(Typography, { variant: 'subtitle2', sx: { mb: 1 } }),
+              CodeBlock
+                ? React.createElement(CodeBlock, {
+                    title: 'Dataset Preview',
+                    language: 'json',
+                    variant: 'dark',
+                    showLineNumbers: true,
+                    wrapLongLines: true,
+                    code: JSON.stringify(dimensions, null, 2),
+                  })
+                : React.createElement(
+                    Box,
+                    null,
+                    React.createElement(Typography, { variant: 'caption', sx: { opacity: 0.75, mb: 0.75, display: 'block' } }, 'Dataset Preview'),
+                    React.createElement(
+                      Box,
+                      {
+                        sx: {
+                          p: 2,
+                          borderRadius: 2,
+                          fontFamily:
+                            'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                          fontSize: 12,
+                          opacity: 0.9,
+                          whiteSpace: 'pre-wrap',
+                          wordBreak: 'break-word',
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          bgcolor: 'background.default',
+                        },
+                      },
+                      JSON.stringify(dimensions, null, 2)
+                    )
+                  )
+            )
+          );
+
+          if (Page) {
+            return React.createElement(Page, {
+              title: 'Lead Time Cube',
+              subtitle: 'Pick Vendor → Product → Program → Node → Scenario to resolve lead time',
+              children: Main,
+            });
+          }
+
+          return React.createElement(
+            Box,
+            null,
+            React.createElement(Typography, { variant: 'h5', sx: { fontWeight: 900 } }, 'Lead Time Cube'),
+            React.createElement(Typography, { variant: 'body2', sx: { opacity: 0.8, mt: 0.5 } }, 'Cascading selectors'),
+            Main
+          );
+        }
+
+        const leftSidebarConfig = {
+          initialView: 'rail',
+          elements: [
+            { type: 'link', props: { label: 'Node', icon: 'view_in_ar', href: './node.html' } },
+            {
+              type: 'link',
+              props: { label: 'Line', icon: 'device_hub', href: './line.html' },
+            },
+          ],
+          footerElements: [
+            { type: 'link', props: { label: 'Catalog (local)', icon: 'palette', href: './catalog.html' } },
+          ],
+        };
+
+        const AppBody = Layout
+          ? window.React.createElement(Layout, { leftSidebarConfig }, window.React.createElement(LeadTimeCube, null))
+          : window.React.createElement(LeadTimeCube, null);
+
+        const App = Theme
+          ? window.React.createElement(Theme, { initialMode: 'dark', initialThemeId: 'neurons.me' }, AppBody)
+          : AppBody;
+
+        try {
+          const root = window.ReactDOM.createRoot(rootEl);
+          root.render(App);
+          console.log('[LeadTimes] ✅ Rendered Lead Time Cube');
+        } catch (err) {
+          const msg = err && err.message ? err.message : String(err);
+          fail('render failed: ' + msg);
+        }
+      })();
+    </script>
+  </body>
+</html>

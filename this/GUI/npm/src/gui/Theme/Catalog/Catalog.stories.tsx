@@ -109,6 +109,9 @@ It fetches all theme configurations from the \`getGuiThemes()\` utility and disp
 ## Props
 - \`variant?: 'grid' | 'list'\` — controls layout format. Defaults to \`grid\`.
 - \`sx?: SxProps\` — accepts style overrides via MUI’s \`sx\` prop.
+- \`hideDescription?: boolean\` — hide the theme description text inside each card.
+- \`hideAuthor?: boolean\` — hide the theme author text inside each card.
+- \`minimal?: boolean\` — compact view (equivalent to \`hideAuthor\` + \`hideDescription\`).
 
 ---
 ## Basic Usage
@@ -138,9 +141,24 @@ This component is ideal for apps that allow users to select their visual theme f
       options: ['grid', 'list'],
       description: 'Choose layout variant',
     },
+    hideDescription: {
+      control: { type: 'boolean' },
+      description: 'Hide the theme description text inside each card',
+    },
+    hideAuthor: {
+      control: { type: 'boolean' },
+      description: 'Hide the theme author text inside each card',
+    },
+    minimal: {
+      control: { type: 'boolean' },
+      description: 'Compact view (hides both author and description)',
+    },
   },
   args: {
     variant: 'grid',
+    hideDescription: false,
+    hideAuthor: false,
+    minimal: false,
   },
 };
 
@@ -158,5 +176,21 @@ export const ListVariant: Story = {
   name: 'List layout',
   args: {
     variant: 'list',
+  },
+};
+
+export const NoDescriptions: Story = {
+  name: 'No descriptions',
+  args: {
+    variant: 'grid',
+    hideDescription: true,
+  },
+};
+
+export const Minimal: Story = {
+  name: 'Minimal (no author, no description)',
+  args: {
+    variant: 'grid',
+    minimal: true,
   },
 };

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import GuiProvider from '@/gui/Theme/GuiProvider';
+import Theme from '@/gui/Theme/Theme';
 import Icon from '@/gui/Theme/Icon/Icon';
 import ThemeModeToggle from '@/gui/Theme/ToggleMode/ToggleMode';
 import {
@@ -38,17 +38,16 @@ export const EnsureMaterialSymbols = () => {
     const link = document.createElement('link');
     link.setAttribute('data-gui-material-symbols', '1');
     link.rel = 'stylesheet';
-    link.href =
-      'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0&display=swap';
+    link.href = `${import.meta.env.BASE_URL}material-symbols.css`;
     document.head.appendChild(link);
   }, []);
 
   return null;
 };
 
-export default function Home() {
+const Home = () => {
   return (
-  <GuiProvider>
+  <Theme>
   <EnsureMaterialSymbols />
   <Box
     sx={{
@@ -76,9 +75,10 @@ export default function Home() {
       <Typography variant="h2" sx={{ fontWeight: 700, letterSpacing: '-0.04em', mb: 1 }}>
         .GUI
       </Typography>
-      <Typography sx={{ maxWidth: 640, fontSize: '1.1rem', lineHeight: 1.4, mb: 3 }}>
-        Designed by neurons.me in Veracruz.
+      <Typography variant="h4" sx={{ fontWeight: 500, opacity: 0.85, mb: 2 }}>
+      Composable, Declarative and Imperative.
       </Typography>
+   
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
         <Button 
         variant="contained" 
@@ -108,7 +108,6 @@ export default function Home() {
 </Button>
       </Stack>
     </Box>
-
     <Box component="section" sx={{ px: { xs: 2, md: 4 }, pb: 6 }}>
       <Typography variant="h4" sx={{ mb: 2 }}>
         Layout preview
@@ -220,17 +219,16 @@ export default function Home() {
           <Typography variant="caption">Footer</Typography>
           <Stack direction="row" spacing={1} alignItems="center">
             <Link href="https://neurons.me" underline="hover">
-              Docs
+            Docs
             </Link>
             <Divider orientation="vertical" flexItem />
             <Link href="https://neurons.me" underline="hover">
-              Support
+            Support
             </Link>
           </Stack>
         </Box>
       </Paper>
     </Box>
-
     <Box component="section" sx={{ px: { xs: 2, md: 4 }, pb: 8 }}>
       <Typography variant="h4" sx={{ mb: 2 }}>
         Component sampler
@@ -263,7 +261,6 @@ export default function Home() {
             </Stack>
           </CardContent>
         </Card>
-
         <Card variant="outlined">
           <CardHeader title="Inputs & toggles" />
           <CardContent>
@@ -276,7 +273,6 @@ export default function Home() {
             </Stack>
           </CardContent>
         </Card>
-
         <Card variant="outlined">
           <CardHeader title="Lists & navigation" />
           <CardContent>
@@ -298,7 +294,6 @@ export default function Home() {
             </List>
           </CardContent>
         </Card>
-
         <Card variant="outlined">
           <CardHeader title="Grid layouts" />
           <CardContent>
@@ -322,7 +317,6 @@ export default function Home() {
             </Grid>
           </CardContent>
         </Card>
-
         <Card variant="outlined">
           <CardHeader title="Avatars & tooltips" />
           <CardContent>
@@ -346,7 +340,6 @@ export default function Home() {
             </Stack>
           </CardContent>
         </Card>
-
         <Card variant="outlined">
           <CardHeader title="Data display" />
           <CardContent>
@@ -379,7 +372,6 @@ export default function Home() {
         </Card>
       </Box>
     </Box>
-
     <Box component="section" sx={{ px: { xs: 2, md: 4 }, pb: 8 }}>
       <Typography variant="h4" sx={{ mb: 2 }}>
         Patterns
@@ -387,7 +379,6 @@ export default function Home() {
       <Typography variant="body2" sx={{ maxWidth: 860, opacity: 0.85, mb: 2 }}>
         Quick, copy/paste-friendly examples of common patterns used across This.GUI.
       </Typography>
-
       <Box
         sx={{
           display: 'grid',
@@ -415,7 +406,6 @@ export default function Home() {
             </Stack>
           </CardContent>
         </Card>
-
         <Card variant="outlined">
           <CardHeader title="Actions + feedback" subheader="Tooltip, loading, disabled" />
           <CardContent>
@@ -448,7 +438,6 @@ export default function Home() {
             </Stack>
           </CardContent>
         </Card>
-
         <Card variant="outlined">
           <CardHeader title="Navigation row" subheader="Link + secondary text" />
           <CardContent>
@@ -467,10 +456,9 @@ export default function Home() {
                   </ListItemButton>
                 </ListItem>
               ))}
-            </List>
-          </CardContent>
+          </List>
+        </CardContent>
         </Card>
-
         <Card variant="outlined">
           <CardHeader title="Declarative layout (mental model)" subheader="Think: config → shell" />
           <CardContent>
@@ -501,28 +489,25 @@ export default function Home() {
     }
   }
 }`}</Typography>
-            </Paper>
+          </Paper>
           </CardContent>
         </Card>
       </Box>
     </Box>
-
     <Box component="section" sx={{ px: { xs: 2, md: 4 }, pb: 10 }}>
       <Typography variant="h4" sx={{ mb: 2 }}>
         How to navigate Storybook
       </Typography>
-
       <Card variant="outlined">
         <CardContent>
           <Stack spacing={1.25} sx={{ maxWidth: 980 }}>
             <Typography variant="body2" sx={{ opacity: 0.85 }}>
               Storybook is the fastest way to learn the surface area of This.GUI.
             </Typography>
-
             <List dense sx={{ pl: 1 }}>
               <ListItem>
                 <ListItemIcon>
-                  <Icon name="search" />
+                <Icon name="search" />
                 </ListItemIcon>
                 <ListItemText
                   primary="Use the left search to find components"
@@ -557,9 +542,7 @@ export default function Home() {
                 />
               </ListItem>
             </List>
-
             <Divider />
-
             <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
               This.GUI architecture (high-level)
             </Typography>
@@ -595,35 +578,48 @@ export default function Home() {
                 />
               </ListItem>
               <ListItem>
-                <ListItemIcon>
-                  <Icon name="route" />
-                </ListItemIcon>
-                <ListItemText
+              <ListItemIcon>
+              <Icon name="route" />
+              </ListItemIcon>
+              <ListItemText
                   primary="Routing + registries"
                   secondary="QRouter / QRegistry are the glue for declarative navigation and component lookup across namespaces."
                 />
               </ListItem>
               <ListItem>
-                <ListItemIcon>
+              <ListItemIcon>
                   <Icon name="handshake" />
-                </ListItemIcon>
-                <ListItemText
+              </ListItemIcon>
+              <ListItemText
                   primary="Contexts + hooks"
                   secondary="Providers establish shared state (sidebar view, theme mode). Hooks read/write that state cleanly."
                 />
               </ListItem>
             </List>
-
             <Typography variant="caption" sx={{ opacity: 0.7 }}>
-              Tip: If something looks wrong, jump to the matching story under Layout / Sidebars / Theme — it’s the source of truth for intended behavior.
+            Tip: If something looks wrong, jump to the matching story under Layout / Sidebars / Theme — it’s the source of truth for intended behavior.
             </Typography>
           </Stack>
         </CardContent>
       </Card>
     </Box>
+      <Typography sx={{ maxWidth: 640, fontSize: '1.1rem', lineHeight: 1.4, mb: 3 }}>
+      Designed in Veracruz.
+      </Typography>
   </Box>
-    </GuiProvider>
+    </Theme>
   );
-}
-
-<Home />
+};
+import type { Meta, StoryObj } from '@storybook/react';
+const meta = {
+  title: 'GUI/Home',
+  component: Home,
+  parameters: {
+    layout: 'fullscreen',
+  },
+} satisfies Meta<typeof Home>;
+export default meta;
+type Story = StoryObj<typeof meta>;
+export const Default: Story = {
+  render: () => <Home />,
+};

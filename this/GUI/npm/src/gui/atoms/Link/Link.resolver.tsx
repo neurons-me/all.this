@@ -1,6 +1,6 @@
 // src/gui/atoms/Link/Link.resolver.tsx
 import * as React from 'react';
-import type { RegistryEntry } from '@/gui/registry/types';
+import type { RegistryEntry } from '@/Registry/types';
 import Link, { LinkProps as GuiLinkProps } from './Link';
 import type { SxProps, Theme } from '@mui/material/styles';
 import { ensureNodeId } from '@/gui/utils/nodeID';

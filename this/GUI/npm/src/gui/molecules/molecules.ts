@@ -21,29 +21,25 @@
 import Dialog from './Dialog/Dialog';
 import { Hero } from './Hero/Hero';
 import Modal from './Modal/Modal';
+import type { ModalProps } from './Modal/Modal.types';
 import Page from './Page/Page';
-import ThemeModeToggle from '../Theme/ToggleMode/ToggleMode';
-import ThemesCatalog from '../Theme/Catalog/Catalog';
+import CodeBlock from './CodeBlock/CodeBlock';
 
 // Types
 import type { ComponentType } from 'react';
 import type { DialogProps } from './Dialog/Dialog';
 import type { HeroProps } from './Hero/Hero.types';
 import type PageProps from './Page/Page';
-
-const Theme = {
-  ThemeModeToggle,
-  ThemesCatalog,
-} as const;
+import type { CodeBlockProps } from './CodeBlock/CodeBlock';
 
 type MoleculesRegistry = {
   Dialog: typeof Dialog;
   Hero: typeof Hero;
   // NOTE: We intentionally widen Modal here to avoid TS4023 (`ModalProps` cannot be named)
   // when generating .d.ts for the registry object.
-  Modal: ComponentType<any>;
+  Modal: ComponentType<ModalProps>;
   Page: typeof Page;
-  Theme: typeof Theme;
+  CodeBlock: typeof CodeBlock;
 };
 
 const Molecules: MoleculesRegistry = {
@@ -51,7 +47,7 @@ const Molecules: MoleculesRegistry = {
   Hero,
   Modal,
   Page,
-  Theme,
+  CodeBlock
 };
 
 export {
@@ -59,13 +55,15 @@ export {
   Hero,
   Modal,
   Page,
-  Theme,
+  CodeBlock
 };
 
 export type {
   DialogProps,
   PageProps,
-  HeroProps
+  HeroProps,
+  CodeBlockProps,
+  ModalProps
 };
 
 export default Molecules;

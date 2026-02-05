@@ -12,7 +12,7 @@ import type { GuiContextValue } from '@/types/theme';
  *  - available themes
  *  - helper actions like `toggleMode`, `setMode`, etc.
  * 
- * The context value is expected to be provided by `GuiProvider`, which wraps the app.
+ * The context value is expected to be provided by `Theme`, which wraps the app.
  */
 export const ThemeContext = createContext<GuiContextValue | undefined>(undefined);
 /**
@@ -20,7 +20,7 @@ export const ThemeContext = createContext<GuiContextValue | undefined>(undefined
  * ---------------
  * Custom hook to access the GUI theme context.
  * 
- * This hook ensures that it is only used within the `GuiProvider` tree.
+ * This hook ensures that it is only used within the `Theme` tree.
  * If accessed outside the provider, it throws an error to help with debugging.
  * 
  * @returns {GuiContextValue} - The full GUI theme context state and helpers.
@@ -28,7 +28,7 @@ export const ThemeContext = createContext<GuiContextValue | undefined>(undefined
 export const useThemeContext = (): GuiContextValue => {
   const context = useContext(ThemeContext);
   if (!context) {
-    throw new Error('useThemeContext must be used within a GuiProvider');
+    throw new Error('useThemeContext must be used within a Theme provider');
   }
   return context;
 };

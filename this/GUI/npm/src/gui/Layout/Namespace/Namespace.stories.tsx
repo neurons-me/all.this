@@ -2,7 +2,7 @@ import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 
 import Namespace from "./Namespace";
-import { GuiProvider } from "@/gui/Theme/GuiProvider";
+import Theme from "@/gui/Theme/Theme";
 
 function withPath(path: string) {
   return (Story: any) => {
@@ -53,7 +53,7 @@ type Story = StoryObj<typeof Namespace>;
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <GuiProvider>
+    <Theme>
       <div
         style={{
           minHeight: "100vh",
@@ -63,7 +63,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       >
         {children}
       </div>
-    </GuiProvider>
+    </Theme>
   );
 }
 

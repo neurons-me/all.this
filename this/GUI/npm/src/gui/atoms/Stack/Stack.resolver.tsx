@@ -2,7 +2,7 @@
 import * as React from 'react';
 import Stack from './Stack';
 import Link from '@/gui/atoms/Link/Link';
-import type { RegistryEntry, ResolveCtx } from '@/gui/registry/types';
+import type { RegistryEntry, ResolveCtx } from '@/Registry/types';
 import { ensureNodeId } from '@/gui/utils/nodeID';
 /**
  * Declarative spec for Stack (layout primitive)

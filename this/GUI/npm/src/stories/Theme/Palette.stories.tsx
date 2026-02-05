@@ -1,5 +1,6 @@
 import React from 'react';
 import { Meta, StoryFn } from '@storybook/react';
+import { linkTo } from '@storybook/addon-links';
 import { Box, Typography, Toolbar, Bar } from '@/gui/atoms';
 import Icon from '@/gui/Theme/Icon/Icon';
 import { useGuiTheme } from '@/gui/hooks';
@@ -33,6 +34,53 @@ const PaletteViewer: React.FC = () => {
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
             GUI.Palette
           </Typography>
+
+          {/* Spacer */}
+          <Box sx={{ flex: 1 }} />
+
+          {/* Back to Themes Catalog */}
+          <Box
+            role="button"
+            tabIndex={0}
+            title="Go to Themes Catalog"
+            aria-label="Go to Themes Catalog"
+            onClick={() => {
+              try {
+                const fn = linkTo('GUI/Theme/Catalog', 'Playground');
+                if (typeof fn === 'function') return fn();
+              } catch {
+                // ignore
+              }
+              // Fallback hash navigation (works even if addon-links isn't enabled)
+              window.location.hash = '#/story/gui-theme-catalog--playground';
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                (e.currentTarget as any).click();
+              }
+            }}
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 36,
+              height: 36,
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'divider',
+              cursor: 'pointer',
+              userSelect: 'none',
+              '&:hover': {
+                backgroundColor: 'action.hover',
+              },
+              '&:active': {
+                transform: 'scale(0.98)',
+              },
+            }}
+          >
+            <Icon name="widgets" fontSize={18} />
+          </Box>
         </Toolbar>
       </Bar>
 

@@ -1,7 +1,7 @@
 // src/gui/atoms/Menu/Menu.resolver.tsx
 import * as React from 'react';
 import Menu from './Menu';
-import type { RegistryEntry, ResolveCtx } from '@/gui/registry/types';
+import type { RegistryEntry, ResolveCtx } from '@/Registry/types';
 import type { SxProps, Theme } from '@mui/material/styles';
 import type { PopoverOrigin } from '@mui/material/Popover';
 import { ensureNodeId } from '@/gui/utils/nodeID';

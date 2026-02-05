@@ -28,7 +28,7 @@ The **Button** primitive is a thin wrapper around MUI's \`MuiButton\` that prese
 - Sizes: \`small\`, \`medium\`, \`large\`.
 - **Icons** via tokens (\`startIcon\` / \`endIcon\`) or React nodes.
 - **Polymorphic**: \`component\` can be \`'a'\` or a Link (e.g. the This.GUI wrapper \`Link\`) for routing.
-- Respects your theme from \`GuiProvider\` (no need to wrap with \`ThemeProvider\`).
+- Respects your theme from \`Theme\` (no need to wrap with \`ThemeProvider\`).
 
 ---
 ## Key Props

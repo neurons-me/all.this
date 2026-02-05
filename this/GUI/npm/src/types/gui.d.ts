@@ -1,5 +1,5 @@
 import type {
-  GuiProvider,
+  Theme as ThemeComponent,
   useThemeContext,
   TopBar,
   useCodeGen,
@@ -33,7 +33,7 @@ import type {
 } from "../../index";
 
 export type GUIType = {
-  GuiProvider: typeof GuiProvider;
+  Theme: typeof ThemeComponent;
   useThemeContext: typeof useThemeContext;
   TopBar: typeof TopBar;
   useCodeGen: typeof useCodeGen;

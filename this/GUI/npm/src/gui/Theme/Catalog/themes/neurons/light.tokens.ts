@@ -8,6 +8,10 @@ const lightTokens = {
       "$type": "color",
       "$value": "#0a3a42"
     },
+    "primaryButton": {
+      "$type": "color",
+      "$value": "#0f6a78"
+    },
     "secondary": {
       "$type": "color",
       "$value": "#e5396f"

@@ -3,7 +3,7 @@ import * as React from 'react';
 import IconButton from './IconButton';
 import Icon from '@/gui/Theme/Icon/Icon';
 import Link from '@/gui/atoms/Link/Link';
-import type { RegistryEntry, ResolveCtx } from '@/gui/registry/types';
+import type { RegistryEntry, ResolveCtx } from '@/Registry/types';
 import type { SxProps, Theme } from '@mui/material/styles';
 import { ensureNodeId } from '@/gui/utils/nodeID';
 

@@ -1,9 +1,9 @@
-// src/themes/GuiProvider.tsx
-import React, { useEffect, useMemo, useState } from 'react';
+// src/themes/Theme.tsx
+import React, { useEffect, useMemo } from 'react';
 import { generatePaletteCssVars } from './utils/themeUtils';
 import { ThemeContext } from '@/gui/contexts/ThemeContext';
 import { ThemeProvider, CssBaseline } from '@mui/material';
-import type { Theme } from '@mui/material/styles';
+import type { Theme as MuiTheme } from '@mui/material/styles';
 import { themeTokens } from '@/gui/Theme/styles/theme.tokens';
 import { usePersistentThemeId, usePersistentThemeMode } from './utils/persistence';
 import { makeMuiTheme } from '@/gui/Theme/fromTokens';
@@ -13,17 +13,17 @@ import { InsetsProvider, useInsetsContext } from '@/gui/contexts/InsetsContext';
 import type {
   GuiContextValue,
 } from '@/types/theme';
-export type GuiProviderProps = {
+export type ThemeProps = {
   initialThemeId?: string;
   initialMode?: 'light' | 'dark'; // <-- añadido
   children?: React.ReactNode;
 };
 
-export function GuiProvider({
+export function Theme({
   initialThemeId = 'neurons.me',
   initialMode = 'light', // default
   children,
-}: GuiProviderProps) {
+}: ThemeProps) {
   // Persist last chosen `themeId`
   const [themeId, setThemeId] = usePersistentThemeId(initialThemeId);
   // Persist last chosen `mode`
@@ -42,11 +42,11 @@ export function GuiProvider({
   // Build MUI themes for both dark and light using the manifest's mode tokens.
   // IMPORTANT: makeMuiTheme signature assumed: makeMuiTheme(baseTokens, modeTokens, mode)
   const { mode: manifestModes } = manifest || ({} as any);
-  const lightMuiTheme = useMemo<Theme>(() => {
+  const lightMuiTheme = useMemo<MuiTheme>(() => {
     const lightTokens = manifestModes?.light ?? {};
     return makeMuiTheme(themeTokens, lightTokens, 'light');
   }, [manifestModes]);
-  const darkMuiTheme = useMemo<Theme>(() => {
+  const darkMuiTheme = useMemo<MuiTheme>(() => {
     const darkTokens = manifestModes?.dark ?? {};
     return makeMuiTheme(themeTokens, darkTokens, 'dark');
   }, [manifestModes]);
@@ -87,7 +87,7 @@ export function GuiProvider({
   );
 }
 
-const GuiThemeBridge: React.FC<{ theme: Theme; ctxValue: GuiContextValue; children?: React.ReactNode }> = ({ theme, ctxValue, children }) => {
+const GuiThemeBridge: React.FC<{ theme: MuiTheme; ctxValue: GuiContextValue; children?: React.ReactNode }> = ({ theme, ctxValue, children }) => {
   const { insets, updateInsets } = useInsetsContext();
   const themeWithInsets = useMemo(() => {
     return {
@@ -97,7 +97,7 @@ const GuiThemeBridge: React.FC<{ theme: Theme; ctxValue: GuiContextValue; childr
         insets,
       },
       updateInsets,
-    } as Theme & { layout: any; updateInsets: typeof updateInsets };
+    } as MuiTheme & { layout: any; updateInsets: typeof updateInsets };
   }, [insets, theme, updateInsets]);
 
   return (
@@ -108,4 +108,4 @@ const GuiThemeBridge: React.FC<{ theme: Theme; ctxValue: GuiContextValue; childr
   );
 };
 
-export default GuiProvider;
+export default Theme;

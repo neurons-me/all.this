@@ -13,6 +13,19 @@ export interface ThemesCatalogProps {
    * Custom styles for the component container.
    */
   sx?: SxProps<Theme>;
+  /**
+   * If true, the theme description text is not rendered inside each theme card.
+   */
+  hideDescription?: boolean;
+  /**
+   * If true, the theme author text is not rendered inside each theme card.
+   */
+  hideAuthor?: boolean;
+  /**
+   * If true, renders the catalog in a minimal mode (hides author + description).
+   * This is a convenience shortcut equivalent to setting `hideAuthor` and `hideDescription`.
+   */
+  minimal?: boolean;
 }
 
 /**
@@ -31,4 +44,17 @@ export interface ThemesCatalogResolverSpec {
    * Styles applied to the root element.
    */
   sx?: SxProps<Theme>;
+  /**
+   * If true, the theme description text is not rendered inside each theme card.
+   */
+  hideDescription?: boolean;
+  /**
+   * If true, the theme author text is not rendered inside each theme card.
+   */
+  hideAuthor?: boolean;
+  /**
+   * If true, renders the catalog in a minimal mode (hides author + description).
+   * This is a convenience shortcut equivalent to setting `hideAuthor` and `hideDescription`.
+   */
+  minimal?: boolean;
 }

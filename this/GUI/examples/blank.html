@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>.GUI — Blank Runtime</title>
+  </head>
+  <body>
+    <!--
+      Blank runtime.
+      Open DevTools and run:
+        window.GUI
+        Object.keys(window.GUI)
+    -->
+    <!-- React globals (required by the this.GUI UMD bundle) -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <!-- If the bundle checks process.env.NODE_ENV, this avoids ReferenceError in the browser -->
+    <script>
+      window.process = window.process || { env: { NODE_ENV: 'production' } };
+    </script>
+    <!-- this.GUI (UMD build: exposes window.GUI) -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/this.gui@latest/dist/this.gui.umd.js"
+      crossorigin="anonymous"
+    ></script>
+    <!-- Tiny verification (optional) -->
+    <script>
+      console.log('[blank] window.GUI available:', !!window.GUI);
+    </script>
+  </body>
+</html>

@@ -3,11 +3,11 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
-import { GuiProvider } from "this.gui";
+import { Theme } from "this.gui";
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <GuiProvider>
+    <Theme>
         <App />
-    </GuiProvider>
+    </Theme>
   </React.StrictMode>
 );

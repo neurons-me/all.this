@@ -1,4 +1,4 @@
-import type { RegistryEntry } from '@/gui/registry/types';
+import type { RegistryEntry } from '@/Registry/types';
 import { ensureNodeId } from '@/gui/utils/nodeID';
 import Modal from './Modal';
 import type { ModalProps } from './Modal.types';

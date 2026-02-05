@@ -1,8 +1,8 @@
 <img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1765903003/all.this_sr55ml.webp" style="zoom:55%;" />
 
-# all.this
+# All.This
 
-A modular ecosystem under **this.*** namespace.
+A modular **ecosystem** under **this.*** namespace.
 
 ## Modules
 

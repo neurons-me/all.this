@@ -1,7 +1,7 @@
 // src/gui/atoms/Toolbar/Toolbar.resolver.tsx
 import * as React from 'react';
 import Toolbar from './Toolbar';
-import type { RegistryEntry } from '@/gui/registry/types';
+import type { RegistryEntry } from '@/Registry/types';
 import type { SxProps, Theme } from '@mui/material/styles';
 import { ensureNodeId } from '@/gui/utils/nodeID';
 

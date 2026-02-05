@@ -1,90 +1,68 @@
 # .GUI
 
-###### A collection of components and building blocks enabling GUI generation.
-<img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761276578/this.gui.npm.png" alt="This.GUI logo" style="zoom:34%;" />
+A collection of components and building blocks enabling **.GUI** generation.
+<img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/w_180/v1761276578/this.gui.npm.png" alt="This.GUI logo" width="180" />
 
-**Install** via:
+### Links
+- **.GUI Website:** https://neurons-me.github.io/GUI/
+- **Storybook:** https://neurons-me.github.io/storybook-static/
+
+## Quick Start (npx)
+
+##### Create a new app using this.GUI:
+
+```bash
+npx this.gui AppName
+```
+
+```bash
+cd AppName
+```
+
+```bash
+npm install
+```
+
+```bash
+npm run dev
+```
+
+This generates a **minimal app** pre-wired with `this.gui`.
+
+### What you get
+- `src/main.tsx` boots a React app
+- `Theme` is already mounted
+- A simple `App.tsx` example using core atoms
+
+<img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/w_320/v1761281165/geometry_shapes-removebg-preview_anrdke.png" alt="Geometry shapes" width="244" />
+
+### Next steps
+
+###### Installing using npm:
 
 ```bash
 npm install this.gui
 ```
 
-**Use** as an **exportable React library**:
+All components are theme-aware and automatically inherit styles and tokens from the `Theme` provider
+
+- Explore components in Storybook: https://neurons-me.github.io/GUI/storybook-static/
+- Import atoms directly:
 
 ```ts
-import { TopBar } from 'this.gui'
+import { Button, Typography, Box } from "this.gui";
+// or subpath (more explicit)
+import { Button as AtomButton } from "this.gui/atoms";
 ```
 
-**.GUI** provides a rich collection of **atomic** and **composite** **components**  ready to use:
-
-```tsx
-import { Button, Card, Text } from 'this.gui';
-export function Example() {
-  return (
-    <Card>
-      <Text size="lg" weight="bold">Welcome!</Text>
-      <Button onClick={() => alert('Clicked!')}>Click me</Button>
-    </Card>
-  );
-}
-```
-
-### Or
+### Add the stylesheet
+`this.gui` ships a compiled stylesheet. Import it once at your app entry:
 
 ```ts
-import GUI from 'this.gui';
+import "this.gui/style.css";
 ```
 
-All components are theme-aware and automatically inherit styles and tokens from the `GuiProvider`
-<img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761281165/geometry_shapes-removebg-preview_anrdke.png" alt="Geometry shapes" style="zoom:33%;" />
-
-## Initialization
-To initialize **This.GUI** in your project, wrap your application with the`GuiProvider` and optionally set a theme:
-
-```tsx
-import { GuiProvider } from 'this.gui';
-import { Layout } from 'this.gui';
-
-function App() {
-  return (
-    <GuiProvider theme="dark">
-      <Layout>
-        <h1>Hello from This.GUI</h1>
-      </Layout>
-    </GuiProvider>
-  );
-}
-
-export default App;
-```
-
-This structure sets up the reactive theme system, context, and global styles  
-needed by all This.GUI components.
-
----
-
-## Declarative Rendering (Advanced)
-Under the hood **This.GUI** ships a resolver registry (`src/registry`) so teams  
-can plug a JSON → React renderer into the design system. The npm package does  
-**not** expose a ready-made `<RenderGUI />` helper yet; if you want declarative  
-rendering you need to wire it yourself:
-
-```tsx
-import { GuiRegistry } from 'this.gui/registry';
-import type { ResolveCtx } from 'this.gui/registry';
-
-function renderSpec(spec: { type: string; props?: any }, ctx?: ResolveCtx) {
-  const entry = GuiRegistry[spec.type];
-  if (!entry) throw new Error(`Unknown component type: ${spec.type}`);
-  return entry.resolve(spec as any, ctx);
-}
-```
-
-With that in place you can traverse a schema and render children as you prefer.  
-Until an official renderer is published, consume the React components directly  
-or build a thin wrapper like the example above.
-
----
+> **Tip:** If you're using the UMD build in a plain HTML page, include `styles.css` from the `dist/` folder and load `this.gui.umd.js` via a `<script>` tag.
 
 ## 🪐 License
 MIT © [neurons.me](https://neurons.me)

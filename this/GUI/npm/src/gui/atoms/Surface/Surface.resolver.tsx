@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { SxProps, Theme } from '@mui/material/styles';
 import Surface from './Surface';
-import type { RegistryEntry } from '@/gui/registry/types';
+import type { RegistryEntry } from '@/Registry/types';
 import { ensureNodeId } from '@/gui/utils/nodeID';
 import type { SurfaceResolverSpec as SurfaceSpec } from './Surface.types';
 

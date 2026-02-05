@@ -1,5 +1,6 @@
-//@/gui/layouts/ResponsiveUI/Layout/Layout.types.ts
+// @/gui/layouts/ResponsiveUI/Layout/Layout.types.ts
 import type { FooterElement } from '@/gui/Layout/Footer/Footer.types';
+import type { ReactNode } from 'react';
 
 export interface TopBarConfig {
   showMenuButton?: boolean;
@@ -34,11 +35,19 @@ export interface FooterConfig {
 }
 
 export interface LayoutProps {
+  // Legacy names (supported)
   topBarConfig?: TopBarConfig | boolean;
   leftSidebarConfig?: LeftSidebarConfig | boolean;
   rightSidebarConfig?: RightSidebarConfig | boolean;
   footerConfig?: FooterConfig | boolean;
-  children?: React.ReactNode;
+
+  // New semantic names (preferred)
+  TopBar?: TopBarConfig | boolean;
+  LeftSideBar?: LeftSidebarConfig | boolean;
+  RightSideBar?: RightSidebarConfig | boolean;
+  Footer?: FooterConfig | boolean;
+
+  children?: ReactNode;
 }
 
 export interface ContentChild {

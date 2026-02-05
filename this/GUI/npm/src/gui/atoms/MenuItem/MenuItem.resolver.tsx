@@ -5,7 +5,7 @@ import Link from '@/gui/atoms/Link/Link';
 import Icon from '@/gui/Theme/Icon/Icon';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import type { RegistryEntry, ResolveCtx } from '@/gui/registry/types';
+import type { RegistryEntry, ResolveCtx } from '@/Registry/types';
 import type { SxProps, Theme } from '@mui/material/styles';
 import type { ListItemIconProps as MuiListItemIconProps } from '@mui/material/ListItemIcon';
 import type { ListItemTextProps as MuiListItemTextProps } from '@mui/material/ListItemText';

@@ -39,10 +39,8 @@ export default function IdentityNoise() {
 
     const rawX = e.clientX - offset.x;
     const rawY = e.clientY - offset.y;
-
     const clampedX = Math.min(window.innerWidth - right - 120, Math.max(left, rawX));
     const clampedY = Math.min(window.innerHeight - bottom - 120, Math.max(top, rawY));
-
     setPos({ x: clampedX, y: clampedY });
   };
 
@@ -78,12 +76,10 @@ export default function IdentityNoise() {
     badgeSide === "left"
       ? ({ right: 120 + 10 } as const)
       : ({ left: 120 + 10 } as const);
-
   // Gentle "string" connector between orb and badge (bezier-ish + subtle wobble)
   const connectorKey = `${badgeSide}:${open ? "open" : "closed"}`;
   const connector = useMemo(() => {
     const radius = 30; // roughly the orb radius (60/2)
-
     // Anchor points are in the 80x80 relative box space.
     // orb center at (40,40). string attaches to left/right edge depending on badgeSide.
     const start = {
@@ -104,7 +100,6 @@ export default function IdentityNoise() {
 
     const dx = end.x - start.x;
     const dy = end.y - start.y;
-
     // Control points: create a gentle sag + curve. Direction changes with side.
     const c1 = {
       x: start.x + dx * 0.35,
@@ -117,7 +112,6 @@ export default function IdentityNoise() {
     };
 
     const d = `M ${start.x} ${start.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${end.x} ${end.y}`;
-
     return { d, start, end };
   }, [badgeSide]);
 
@@ -306,7 +300,7 @@ export default function IdentityNoise() {
                     userSelect: "none",
                   }}
                 >
-                  Identity Noise
+                  .me
                 </Box>
 
                 <Box

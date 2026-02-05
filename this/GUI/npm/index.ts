@@ -2,7 +2,7 @@
 // this.gui public entry (root)
 // Goal:
 // - Provide *tree-shakeable* named exports for app bundlers.
-// - Provide a *small* default surface for convenience.
+// - Provide a *small* runtime aggregate for UMD/introspection (no default export).
 //
 // Rule 0 (API stability):
 // - ❌ Do NOT use `export *` in the root entrypoint.
@@ -12,17 +12,14 @@
 // Pattern:
 //  1) constants
 //  2) explicit named exports (tree-shakeable)
-//  3) imports for the default surface
-//  4) default surface export
+//  3) runtime aggregates (UMD/global convenience)
 //
 // Usage examples:
 //   // ✅ Recommended (tree-shakeable)
-//   import { GuiProvider, ThemeModeToggle, Icon } from 'this.gui';
+//   import { Theme, ThemeModeToggle, Icon } from 'this.gui';
 //
-//   // ✅ Also supported (convenience default surface)
-//   import GUI from 'this.gui';
-//   const { GuiProvider, Layout } = GUI;
-//   const { Button } = GUI;
+//   // ✅ UMD/global usage (browser)
+//   // window.GUI.Button, window.GUI.mount, etc.
 //
 //   // ✅ Subpath imports (more explicit boundaries)
 //   // import { Button } from 'this.gui/atoms';
@@ -30,12 +27,15 @@
 //   // import { Hero } from 'this.gui/molecules';
 //
 // Notes:
-// - Keep the default export SMALL (core primitives + a few top-level components) to protect tree-shaking.
+// - Keep the *root exports* SMALL (core primitives + a few top-level components) to protect tree-shaking.
 // - Large aggregates (GUI.atoms / GUI.molecules / GUI.Components) should live in a separate
 //   entrypoint (e.g. `this.gui/full`) if you decide to offer that convenience.
 // =========================================
 // 1) constants
-export const version = '1.3.48';
+declare const __GUI_VERSION__: string;
+const injectedVersion = typeof __GUI_VERSION__ !== 'undefined' ? __GUI_VERSION__ : undefined;
+export const version = injectedVersion || '0.0.0-dev';
+export type { Theme as MuiTheme } from '@mui/material/styles';
 // 2) named exports (tree-shakeable)
 // Core primitives (ergonomic root exports)
 // NOTE: Export from concrete modules (not barrels) to preserve tree-shaking and avoid pulling in the whole atoms surface.
@@ -48,20 +48,28 @@ export { default as Typography } from '@/gui/atoms/Typography/Typography';
 // Friendly aliases (optional ergonomics)
 export { default as Text } from '@/gui/atoms/Typography/Typography';
 export { default as Input } from '@/gui/atoms/TextField/TextField';
-export { default as GuiProvider } from '@/gui/Theme/GuiProvider';
+export { default as Theme } from '@/gui/Theme/Theme';
 export { default as Layout } from '@/gui/Layout/Layout';
 export { default as Icon } from '@/gui/Theme/Icon/Icon';
 export { default as ThemeModeToggle } from '@/gui/Theme/ToggleMode/ToggleMode';
 export { default as Blockchain } from '@/gui/components/Blockchain/blockchain';
 export { default as HighLighter } from '@/gui/widgets/HighLighter/HighLighter';
+export { default as CodeBlock } from '@/gui/molecules/CodeBlock/CodeBlock';
+export { default as Modal } from '@/gui/molecules/Modal/Modal';
 export { ThemesCatalog, Catalog } from '@/gui/Theme';
 export {
   default as GUITools,
   guiToolsElements,
   guiToolsLeftSidebarConfig,
 } from '@/gui/molecules/menus/GUI-Tools/GUI-Tools';
-// 3) imports for the default surface
-import GuiProvider from '@/gui/Theme/GuiProvider';
+// 3) runtime aggregates (UMD/global convenience)
+// These are *named exports* so in UMD builds you can do:
+//   window.GUI.mount(...)
+//   window.GUI.Button
+//   window.GUI.Atoms.Button
+// without any `window.GUI.default` wrapper.
+// NOTE: We still import concrete modules (not barrels) to preserve tree-shaking.
+import ThemeComponent from '@/gui/Theme/Theme';
 import Box from '@/gui/atoms/Box/Box';
 import Button from '@/gui/atoms/Button/Button';
 import Link from '@/gui/atoms/Link/Link';
@@ -73,40 +81,69 @@ import Icon from '@/gui/Theme/Icon/Icon';
 import ThemeModeToggle from '@/gui/Theme/ToggleMode/ToggleMode';
 import Blockchain from '@/gui/components/Blockchain/blockchain';
 import HighLighter from '@/gui/widgets/HighLighter/HighLighter';
+import HighLightsDrawer from '@/gui/widgets/HighLighter/HighLightsDrawer';
+import CodeBlock from '@/gui/molecules/CodeBlock/CodeBlock';
+import Dialog from '@/gui/molecules/Dialog/Dialog';
+import { Hero } from '@/gui/molecules/Hero/Hero';
+import Modal from '@/gui/molecules/Modal/Modal';
+import Page from '@/gui/molecules/Page/Page';
 import { ThemesCatalog } from '@/gui/Theme';
 import GUITools, {
   guiToolsElements,
   guiToolsLeftSidebarConfig,
 } from '@/gui/molecules/menus/GUI-Tools/GUI-Tools';
-// 4) default surface export
-// Keep this object SMALL (core primitives + a few top-level components) to avoid harming tree-shaking for named imports.
-// (If you later want GUI.atoms / GUI.molecules, do it via a separate entrypoint.)
-const GUI = {
-  version,
+import IdentityNoise from '@/gui/components/IdentityNoise/IdentityNoise';
+
+export const Atoms = {
   Box,
   Button,
   Link,
   Paper,
   TextField,
   Typography,
-  GuiProvider,
+} as const;
+
+export const Molecules = {
+  Dialog,
+  Hero,
+  Modal,
+  Page,
+  CodeBlock,
+} as const;
+
+export const Widgets = {
+  HighLighter,
+  HighLightsDrawer,
+} as const;
+
+export const Components = {
+  Blockchain,
+  IdentityNoise,
+  Icon,
+  ThemeModeToggle,
+} as const;
+export const ThemeRuntime = {
+  Theme: ThemeComponent,
   Layout,
   Icon,
   ThemeModeToggle,
-  Blockchain,
-  HighLighter,
-  ThemesCatalog,
-  Catalog: ThemesCatalog,
 } as const;
 
-// Attach GUI Tools to the default/UMD surface under: GUI.menus['GUI-Tools']
-// (Use a string key because of the hyphen.)
-const _GUI_ANY = GUI as any;
-_GUI_ANY.menus = _GUI_ANY.menus || {};
-_GUI_ANY.menus['GUI-Tools'] = {
-  GUITools,
-  elements: guiToolsElements,
-  leftSidebarConfig: guiToolsLeftSidebarConfig,
-};
-
-export default GUI;
+// Lowercase aliases for explorer/runtime conventions
+export const atoms = Atoms;
+export const molecules = Molecules;
+export const widgets = Widgets;
+export const components = Components;
+export const theme = ThemeRuntime;
+// Menus registry (kept explicit to avoid accidental surface growth)
+export const menus = {
+  'GUI-Tools': {
+    GUITools,
+    elements: guiToolsElements,
+    leftSidebarConfig: guiToolsLeftSidebarConfig,
+  },
+} as const;
+// Mount API (React runtime)
+// GuiNode → renderer → ReactDOM, expects React/ReactDOM globals in UMD usage.
+export { mount } from '@/runtime/mount';
+export type { MountTarget } from '@/runtime/mount';

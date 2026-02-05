@@ -131,9 +131,9 @@ import TopBar from './TopBar';
 - \`elementsCenter\` and \`elementsRight\` accept objects with \`type\` and \`props\`, supporting nested menus.
 - Toggles like showThemeToggle and homeTo/position.
 Inset handling:
-  - Measure Toolbar with toolbarRef, call theme.updateInsets({ nav: h }), and clean up in return → this updates theme.layout.insets.nav in GuiProvider and also the CSS vars (--gui-nav-height).
+  - Measure Toolbar with toolbarRef, call theme.updateInsets({ nav: h }), and clean up in return → this updates theme.layout.insets.nav in Theme and also the CSS vars (--gui-nav-height).
 Theme integration:
-  - Use useTheme()/useMediaQuery(). In GuiProvider, inject updateInsets and layout.insets into the memoized MUI theme, so TopBar sees them correctly.
+  - Use useTheme()/useMediaQuery(). In Theme, inject updateInsets and layout.insets into the memoized MUI theme, so TopBar sees them correctly.
   
         `,
       },

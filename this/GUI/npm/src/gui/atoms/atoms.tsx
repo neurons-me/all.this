@@ -80,6 +80,10 @@ export type { MenuItemProps } from './MenuItem/MenuItem';
 import Paper, { type PaperProps } from './Paper/Paper';
 export { default as Paper } from './Paper/Paper';
 export type { PaperProps } from './Paper/Paper';
+// TextField is not polymorphic so we wrap it with forwardRef
+import TextField, { type TextFieldProps } from './TextField/TextField';
+export { default as TextField } from './TextField/TextField';
+export type { TextFieldProps } from './TextField/TextField';
 // Stack is not polymorphic so we wrap it with forwardRef
 import Stack, { type StackProps } from './Stack/Stack';
 export { default as Stack } from './Stack/Stack';
@@ -134,6 +138,7 @@ export type GuiSx = SxProps<Theme>;
 export const atoms = {
   Box,
   Typography,
+  TextField,
   Link,
   Stack,
   Divider,

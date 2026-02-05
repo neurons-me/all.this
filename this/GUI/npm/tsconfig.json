@@ -6,8 +6,8 @@
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": true,
-    "outDir": "dist/types",
-    "declarationDir": "dist/types",
+    "outDir": "dist",
+    "declarationDir": "dist",
     // NOTE: With `emitDeclarationOnly`, tsc will NOT output JS (only .d.ts).
     // Module settings compatible with Vite + TS
     "module": "ESNext",
@@ -24,6 +24,7 @@
     "lib": ["ES2020", "DOM"],
     // Path aliases used by this.gui source
     "baseUrl": "src",
+    
     "paths": {
       "@/gui/atoms": ["gui/atoms"],
       "@/gui/atoms/*": ["gui/atoms/*"],
