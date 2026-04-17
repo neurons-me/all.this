@@ -3701,6 +3701,7 @@
 
     const runtime = {
       ...baseRuntime,
+      me: me,
       resolve(expr, ctx, meta) {
         if (typeof expr === 'string' && expr.startsWith('remote/')) {
           const normalized = normalizeRemoteExpr(expr);
@@ -4063,6 +4064,7 @@
       currentCtx = meta.ctx || {};
       GUI.mount(spec, rootEl, {
         runtime: runtime,
+        me: me,
         ctx: meta.ctx,
         showUnknown: true,
         inspectorEnabled: inspectorEnabled,
