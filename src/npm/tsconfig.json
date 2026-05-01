@@ -3,16 +3,16 @@
     "target": "ESNext",
     "module": "ESNext",
     "lib": ["DOM", "ESNext"],
-    "moduleResolution": "Node",
+    "moduleResolution": "Bundler",
     "strict": true,
     "declaration": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "allowJs": true,
     "checkJs": false,
-    "outDir": "dist",
-    "baseUrl": "./src"
+    "rootDir": ".",
+    "outDir": "dist"
   },
-  "include": ["src/**/*"],
+  "include": ["index.ts", "src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

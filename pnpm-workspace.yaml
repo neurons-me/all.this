@@ -1,0 +1,6 @@
+packages:
+  - 'me/npm'
+  - 'modules/*'
+  - 'modules/*/npm'
+  - 'packages/*/npm'
+  - 'src/npm'
