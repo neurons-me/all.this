@@ -1,0 +1,15 @@
+[submodule "modules/cleaker"]
+	path = modules/cleaker
+	url = https://github.com/neurons-me/cleaker.git
+[submodule "modules/netget"]
+	path = modules/netget
+	url = https://github.com/neurons-me/netget.git
+[submodule "modules/monad"]
+	path = modules/monad
+	url = https://github.com/neurons-me/monad.git
+[submodule "me"]
+	path = me
+	url = https://github.com/neurons-me/.me.git
+[submodule "packages/GUI"]
+	path = packages/GUI
+	url = https://github.com/neurons-me/GUI.git
