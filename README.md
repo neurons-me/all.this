@@ -3,36 +3,35 @@
 # All.This
 A modular **ecosystem** under **all.this.**
 
-### User Centric:
+#### User Centric:
 
-**.me**
+# **.me**
 
-## Modules
+#### Modules
 
 **Cleaker, netget, pixelgrid, mlearning, monad, neurons.me.**
 
-## Packages
+#### Packages
 > Versions below are the pinned versions.
+
 **.text / .blockhain / .env / .GUI / .url / .DOM / .pixel / .wallet / .dictionaries / .img / .dir / .audio / .document / .video.**
 
-La estructura real es:
+`all.this` is the root repository. Everything inside is a **git submodule** — each one is its own independent repo.
 
+#### Two independent systems, same files 
 
-all.this/                    ← git repo principal
-  modules/
-    cleaker/                 ← git submodule (repo completo: npm/ + pip/ + crate/)
-      npm/                   ← pnpm workspace apunta AQUÍ (solo esta carpeta)
-      pip/
-      crate/
-    netget/                  ← git submodule (repo completo)
-      package.json           ← este es especial, su npm/ ES la raíz
-    monad/                   ← git submodule
-      npm/                   ← pnpm workspace
-  me/                        ← git submodule
-    npm/                     ← pnpm workspace
-Son dos sistemas ortogonales operando sobre los mismos archivos — no se pisan:
+**git submodules** | entire repo | version control, GitHub pushes | 
 
-Sistema	Scope	Propósito
-git submodules	Todo el repo (npm + pip + crate)	Control de versiones, pushes a GitHub
-pnpm workspace	Solo la carpeta npm/	Linkear dependencias JS entre módulos
+**pnpm workspace** | `npm/` folders only | link JS dependencies locally |
 
+They don't conflict. Submodules handle source control. pnpm handles local JS wiring. 
+
+## Getting Started 
+
+```bash
+bash git clone --recurse-submodules https://github.com/neurons-me/all.this.git 
+cd all.this 
+pnpm install 
+```
+
+The `pnpm-lock.yaml` file ensures reproducible installs across machines. Without it, `pnpm install` resolves versions from scratch — different machines, different versions, hard-to-reproduce bugs.
