@@ -215,6 +215,9 @@ importers:
       '@mui/material':
         specifier: ^6.4.6
         version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@mui/system':
+        specifier: ^6.5.0
+        version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1))(@types/react@18.3.28)(react@18.3.1)
       '@uiw/react-markdown-preview':
         specifier: ^5.1.5
         version: 5.2.0(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -224,6 +227,9 @@ importers:
       cleaker:
         specifier: ^3.0.6
         version: 3.0.9
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
@@ -372,6 +378,9 @@ importers:
       react-dom:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
+      react-router:
+        specifier: ^6.30.1
+        version: 6.30.3(react@18.3.1)
       react-router-dom:
         specifier: ^6.30.1
         version: 6.30.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -395,6 +404,31 @@ importers:
         version: 3.2.4(@types/debug@4.1.13)(@types/node@24.12.2)(@vitest/browser@3.2.4)(tsx@4.21.0)(yaml@2.8.3)
 
   src/npm:
+    dependencies:
+      cleaker:
+        specifier: workspace:^
+        version: link:../../modules/cleaker/npm
+      monad.ai:
+        specifier: workspace:^
+        version: link:../../modules/monad/npm
+      netget:
+        specifier: workspace:^
+        version: link:../../modules/netget
+      react:
+        specifier: ^18.0.0 || ^19.0.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.0.0 || ^19.0.0
+        version: 18.3.1(react@18.3.1)
+      react-router-dom:
+        specifier: ^6.0.0
+        version: 6.30.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      this.gui:
+        specifier: workspace:^
+        version: link:../../packages/GUI/npm
+      this.me:
+        specifier: workspace:^
+        version: link:../../me/npm
     devDependencies:
       '@types/node':
         specifier: ^24.5.2

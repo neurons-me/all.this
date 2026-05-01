@@ -4,10 +4,69 @@
   "description": "Data Structures and Functionalities for neurons.me",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./me": {
+      "types": "./dist/src/me.d.ts",
+      "import": "./dist/src/me.js"
+    },
+    "./cleaker": {
+      "types": "./dist/src/cleaker.d.ts",
+      "import": "./dist/src/cleaker.js"
+    },
+    "./gui": {
+      "types": "./dist/src/gui.d.ts",
+      "import": "./dist/src/gui.js"
+    },
+    "./gui/react": {
+      "types": "./dist/src/gui-react.d.ts",
+      "import": "./dist/src/gui-react.js"
+    },
+    "./gui/runtime": {
+      "types": "./dist/src/gui-runtime.d.ts",
+      "import": "./dist/src/gui-runtime.js"
+    },
+    "./gui/devtools": {
+      "types": "./dist/src/gui-devtools.d.ts",
+      "import": "./dist/src/gui-devtools.js"
+    },
+    "./gui/legacy": {
+      "types": "./dist/src/gui-legacy.d.ts",
+      "import": "./dist/src/gui-legacy.js"
+    },
+    "./gui/atoms": {
+      "types": "./dist/src/gui-atoms.d.ts",
+      "import": "./dist/src/gui-atoms.js"
+    },
+    "./gui/molecules": {
+      "types": "./dist/src/gui-molecules.d.ts",
+      "import": "./dist/src/gui-molecules.js"
+    },
+    "./gui/compounds": {
+      "types": "./dist/src/gui-compounds.d.ts",
+      "import": "./dist/src/gui-compounds.js"
+    },
+    "./gui/components": {
+      "types": "./dist/src/gui-components.d.ts",
+      "import": "./dist/src/gui-components.js"
+    },
+    "./monad": {
+      "types": "./dist/src/monad.d.ts",
+      "import": "./dist/src/monad.js"
+    },
+    "./netget": {
+      "types": "./dist/src/netget.d.ts",
+      "import": "./dist/src/netget.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
-    "build": "tsc",
-    "test": "npm test",
-    "start": "node index.js",
+    "build": "tsc -p tsconfig.json",
+    "type-check": "tsc --noEmit -p tsconfig.json",
+    "test": "npm run type-check",
     "bootstrap": "git submodule update --init --recursive && npm install",
     "update-submodules": "git submodule update --remote"
   },
@@ -15,7 +74,27 @@
     "come",
     "together"
   ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "dependencies": {
+    "cleaker": "workspace:^",
+    "monad.ai": "workspace:^",
+    "netget": "workspace:^",
+    "this.gui": "workspace:^",
+    "this.me": "workspace:^"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "react-router-dom": "^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react-router-dom": {
+      "optional": true
+    }
   },
   "repository": {
     "type": "git",
