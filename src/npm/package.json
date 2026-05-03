@@ -53,6 +53,14 @@
       "types": "./dist/src/gui-components.d.ts",
       "import": "./dist/src/gui-components.js"
     },
+    "./boot": {
+      "types": "./dist/src/boot/index.d.ts",
+      "import": "./dist/src/boot/index.js"
+    },
+    "./boot/browser": {
+      "types": "./dist/src/boot/browser-entry.d.ts",
+      "import": "./dist/src/boot/browser-entry.js"
+    },
     "./monad": {
       "types": "./dist/src/monad.d.ts",
       "import": "./dist/src/monad.js"

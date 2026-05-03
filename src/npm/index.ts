@@ -2,6 +2,7 @@ export { default as me } from "this.me";
 export { default as cleaker } from "cleaker";
 export * as monad from "monad.ai";
 export { default as netget, NetGet } from "netget";
+export * as boot from "./src/boot/index";
 
 export type { NetGetConfig } from "netget";
 
