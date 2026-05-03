@@ -3,6 +3,12 @@
 # All.This
 A modular **ecosystem** under **all.this.**
 
+## Entry Point
+
+Open [`all.this.html`](./all.this.html) to bootstrap the local system without assuming a Monad is already running.
+
+The file is static: it discovers local Monads, then hands off to the selected Monad so the existing `modules/monad/index.html` and GUI `dist` assets own the live interface. If no Monad is online, it shows the terminal command to start one.
+
 #### User Centric:
 
 # **.me**
