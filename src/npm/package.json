@@ -1,6 +1,6 @@
 {
   "name": "all.this",
-  "version": "1.0.45",
+  "version": "1.0.46",
   "description": "Data Structures and Functionalities for neurons.me",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

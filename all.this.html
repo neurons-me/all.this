@@ -12,11 +12,19 @@
     <div id="root"></div>
     <script type="module">
       const root = document.getElementById("root");
+      const params = new URLSearchParams(window.location.search);
+      const allowCdnBoot = params.get("cdn") === "1" || params.get("allowCdn") === "1";
       const bootCandidates = [
         "./src/npm/dist/src/boot/browser-entry.js",
+        "src/npm/dist/src/boot/browser-entry.js",
         "/src/npm/dist/src/boot/browser-entry.js",
-        "/all.this/dist/src/boot/browser-entry.js",
-        "https://cdn.jsdelivr.net/npm/all.this@1.0.45/dist/src/boot/browser-entry.js",
+        "/all.this/src/npm/dist/src/boot/browser-entry.js",
+      ];
+      const globalBootCandidates = [
+        "./src/npm/dist/src/boot/browser-global.js",
+        "src/npm/dist/src/boot/browser-global.js",
+        "/src/npm/dist/src/boot/browser-global.js",
+        "/all.this/src/npm/dist/src/boot/browser-global.js",
       ];
 
       function escapeHtml(value) {
@@ -82,25 +90,91 @@
       }
 
       async function importFirst(candidates) {
-        let lastError = null;
+        const failures = [];
         for (const candidate of candidates) {
           try {
             return await import(candidate);
           } catch (error) {
-            lastError = error;
+            failures.push({
+              candidate,
+              message: error?.message || String(error),
+            });
           }
         }
-        throw lastError || new Error("all.this boot unavailable");
+        const detail = failures
+          .map((failure) => `${failure.candidate} :: ${failure.message}`)
+          .join("\n");
+        throw new Error(`all.this boot unavailable\n${detail}`);
+      }
+
+      function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          const absoluteSrc = new URL(src, document.baseURI).href;
+          const existing = Array.from(document.querySelectorAll("script[src]")).find(
+            (node) => node.src === absoluteSrc,
+          );
+          if (existing) {
+            resolve(true);
+            return;
+          }
+
+          const script = document.createElement("script");
+          script.src = src;
+          script.async = false;
+          if (/^https?:/i.test(src)) script.crossOrigin = "anonymous";
+          script.onload = () => resolve(true);
+          script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+          document.head.appendChild(script);
+        });
+      }
+
+      async function loadScriptFirst(candidates) {
+        const failures = [];
+        for (const candidate of candidates) {
+          try {
+            await loadScript(candidate);
+            return candidate;
+          } catch (error) {
+            failures.push({
+              candidate,
+              message: error?.message || String(error),
+            });
+          }
+        }
+        const detail = failures
+          .map((failure) => `${failure.candidate} :: ${failure.message}`)
+          .join("\n");
+        throw new Error(`all.this static boot unavailable\n${detail}`);
+      }
+
+      async function startGlobalBoot(options) {
+        renderEmergencyBoot("all.this", "Loading static local package boot.");
+        await loadScriptFirst(globalBootCandidates);
+        const startAllThis = window.AllThisBoot?.startAllThis || window.AllThisBoot?.default;
+        if (typeof startAllThis !== "function") {
+          throw new Error("AllThisBoot.startAllThis missing");
+        }
+        return startAllThis(options);
       }
 
       try {
+        const bootOptions = { root, allowCdn: allowCdnBoot };
         renderEmergencyBoot("all.this", "Loading local-first package boot.");
-        const boot = await importFirst(bootCandidates);
-        const startAllThis = boot.startAllThis || boot.default;
-        if (typeof startAllThis !== "function") {
-          throw new Error("startAllThis export missing");
+        if (window.location.protocol === "file:") {
+          await startGlobalBoot(bootOptions);
+        } else {
+          try {
+            const boot = await importFirst(bootCandidates);
+            const startAllThis = boot.startAllThis || boot.default;
+            if (typeof startAllThis !== "function") {
+              throw new Error("startAllThis export missing");
+            }
+            await startAllThis(bootOptions);
+          } catch (error) {
+            console.warn("[all.this] ESM boot unavailable, trying static boot", error);
+            await startGlobalBoot(bootOptions);
+          }
         }
-        await startAllThis({ root });
       } catch (error) {
         renderEmergencyBoot(
           "all.this boot fault",
@@ -111,4 +185,3 @@
     </script>
   </body>
 </html>
-
