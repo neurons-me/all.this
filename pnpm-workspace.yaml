@@ -4,3 +4,6 @@ packages:
   - 'modules/*/npm'
   - 'packages/*/npm'
   - 'src/npm'
+allowBuilds:
+  esbuild: true
+  sqlite3: true
