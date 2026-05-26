@@ -76,6 +76,9 @@
     "http://localhost:8165",
   ];
 
+  var MONAD_INSTALL_GUIDE_PATH = "modules/monad/npm/README.md";
+  var MONAD_INSTALL_GUIDE_BASE = "modules/monad/npm/";
+
   var pendingScripts = new Map();
   var pendingStyles = new Map();
   var MONAD_ENDPOINTS_STORAGE_KEY = "all.this.monadEndpoints";
@@ -117,6 +120,32 @@
     if (!normalized) return "";
     setStoredMonadEndpoints(getStoredMonadEndpoints().concat([normalized]));
     return normalized;
+  }
+
+  function resolveMonadDiscoveryFactory(GUI) {
+    var candidates = [
+      GUI && GUI.createMonadDiscovery,
+      GUI && GUI.createMonadDiscoveryStore,
+      GUI && GUI.runtime && GUI.runtime.createMonadDiscovery,
+      GUI && GUI.Runtime && GUI.Runtime.createMonadDiscovery,
+      GUI && GUI.default && GUI.default.createMonadDiscovery,
+    ];
+    return candidates.find(function (candidate) { return typeof candidate === "function"; }) || null;
+  }
+
+  function createAllThisMonadDiscovery(GUI, options) {
+    var factory = resolveMonadDiscoveryFactory(GUI);
+    if (!factory) return null;
+    return factory({
+      endpoints: options.monadEndpoints,
+      extendedPorts: [8161, 8162, 8163, 8164, 8165],
+      storageKey: MONAD_ENDPOINTS_STORAGE_KEY,
+      requestTimeoutMs: options.monadScanTimeoutMs || DEFAULT_MONAD_SCAN_TIMEOUT_MS,
+      fastIntervalMs: 1000,
+      stableIntervalMs: 15000,
+      settlingWindowMs: 10000,
+      enableSSE: true,
+    });
   }
 
   function escapeHtml(value) {
@@ -584,10 +613,39 @@
       available: false,
       endpoint: endpoint || "",
       records: [],
+      actions: [],
+      commandActions: [],
       error: error || "",
       installCommand: "npm install -g monad.ai",
       startCommand: "monads start",
     };
+  }
+
+  function normalizeMonadsControlAction(value) {
+    var name = readString(value && value.name, value);
+    if (!name) return null;
+    return {
+      name: name,
+      label: readString(value && value.label),
+      command: readString(value && value.command),
+      method: readString(value && value.method),
+      path: readString(value && value.path),
+      scope: readString(value && value.scope),
+    };
+  }
+
+  function normalizeMonadsControlActions(command) {
+    var explicit = Array.isArray(command && command.actions)
+      ? command.actions.map(normalizeMonadsControlAction).filter(Boolean)
+      : [];
+    if (explicit.length) return explicit;
+    return [
+      { name: "list", label: "List", command: "monads list" },
+      { name: "start", label: "Start New", command: "monads start [name]" },
+      { name: "stop", label: "Stop", command: "monads stop <name>" },
+      { name: "status", label: "Status", command: "monads status <name>" },
+      { name: "logs", label: "Logs", command: "monads logs <name> --tail" },
+    ];
   }
 
   function normalizeMonadsControlRecord(value) {
@@ -615,10 +673,13 @@
           .map(normalizeMonadsControlRecord)
           .filter(Boolean);
         var command = (payload && payload.command) || {};
+        var commandActions = normalizeMonadsControlActions(command);
         return {
           available: true,
           endpoint: endpoint,
           records: records,
+          actions: commandActions.map(function (action) { return action.name; }),
+          commandActions: commandActions,
           error: "",
           installCommand: readString(command.install) || "npm install -g monad.ai",
           startCommand: readString(command.start) || "monads start",
@@ -627,6 +688,48 @@
       .catch(function (error) {
         return monadsControlUnavailable(endpoint, errorMessage(error));
       });
+  }
+
+  function monadsFromDiscoveryState(state) {
+    var rawMonads = Array.isArray(state && state.monads) ? state.monads : [];
+    return rawMonads.map(function (monad) {
+      var endpoint = normalizeMonadEndpointInput((monad && monad.endpoint) || (monad && monad.endpoints && monad.endpoints[0]));
+      if (!endpoint) return null;
+      return {
+        id: readString(monad && monad.id, endpoint),
+        name: readString(monad && monad.name, monad && monad.namespace, endpoint),
+        endpoint: endpoint,
+        aliases: Array.isArray(monad && monad.endpoints) ? monad.endpoints.map(normalizeMonadEndpointInput).filter(Boolean) : [endpoint],
+        namespace: readString(monad && monad.namespace),
+        status: monad && monad.healthy === false ? "offline" : "online",
+        cost: inferCost(endpoint),
+        capabilities: Array.isArray(monad && monad.capabilities) ? monad.capabilities : [],
+        raw: monad,
+      };
+    }).filter(Boolean);
+  }
+
+  function monadsControlFromDiscoveryState(state) {
+    var controls = Array.isArray(state && state.control) ? state.control : [];
+    var control = controls.find(function (entry) { return entry && entry.available; }) || controls[0];
+    if (!control || !control.available || !control.endpoint) {
+      var aliveEndpoint = "";
+      var endpoints = Array.isArray(state && state.endpoints) ? state.endpoints : [];
+      var alive = endpoints.find(function (endpoint) { return endpoint && endpoint.status === "alive"; });
+      aliveEndpoint = readString(state && state.source && state.source.surface && state.source.surface[0], alive && alive.url);
+      return monadsControlUnavailable(aliveEndpoint, "No local monad is exposing the web control panel.");
+    }
+    var commandActions = normalizeMonadsControlActions(control.command);
+    return {
+      available: true,
+      endpoint: normalizeMonadEndpointInput(control.endpoint),
+      records: (Array.isArray(control.records) ? control.records : []).map(normalizeMonadsControlRecord).filter(Boolean),
+      actions: commandActions.map(function (action) { return action.name; }),
+      commandActions: commandActions,
+      error: readString(control.error),
+      installCommand: readString(control.command && control.command.install) || "npm install -g monad.ai",
+      startCommand: readString(control.command && control.command.start) || "monads start",
+    };
   }
 
   function costRank(cost) {
@@ -1025,7 +1128,7 @@
   }
 
   function refreshAfterMonadControl(onRescan) {
-    if (typeof onRescan === "function") global.setTimeout(onRescan, 350);
+    if (typeof onRescan === "function") onRescan();
   }
 
   function runMonadsControlAction(control, path, init, onRescan) {
@@ -1033,7 +1136,7 @@
       showMonadsInstallHelp(control);
       return Promise.resolve(null);
     }
-    return fetchJsonWithTimeout(control.endpoint + path, init, 8000)
+    return fetchJsonWithTimeout(control.endpoint + path, init, 15000)
       .then(function (payload) {
         refreshAfterMonadControl(onRescan);
         return payload;
@@ -1044,7 +1147,18 @@
       });
   }
 
-  function startMonadFromWeb(control, onRescan) {
+  function runMonadLifecycleAction(control, path, onRescan, discovery, init) {
+    var task = function () {
+      return runMonadsControlAction(control, path, init || { method: "POST" }, onRescan);
+    };
+    if (discovery && typeof discovery.withSettling === "function") {
+      discovery.withSettling(task);
+      return;
+    }
+    task();
+  }
+
+  function startMonadFromWeb(control, onRescan, discovery) {
     if (!control.available) {
       showMonadsInstallHelp(control);
       return;
@@ -1058,13 +1172,20 @@
       browserAlert("Port must be a number from 1 to 65535.");
       return;
     }
-    runMonadsControlAction(control, "/__monads/start", {
-      method: "POST",
-      body: JSON.stringify({ name: String(name).trim() || undefined, port: port }),
-    }, onRescan);
+    var task = function () {
+      return runMonadsControlAction(control, "/__monads/start", {
+        method: "POST",
+        body: JSON.stringify({ name: String(name).trim() || undefined, port: port }),
+      }, onRescan);
+    };
+    if (discovery && typeof discovery.withSettling === "function") {
+      discovery.withSettling(task);
+      return;
+    }
+    task();
   }
 
-  function addManualMonadEndpoint(onRescan) {
+  function addManualMonadEndpoint(onRescan, discovery) {
     var value = browserPrompt("Monad endpoint:", "http://127.0.0.1:8161");
     if (value === null) return;
     var endpoint = addStoredMonadEndpoint(value);
@@ -1072,17 +1193,57 @@
       browserAlert("That endpoint does not look valid.");
       return;
     }
-    refreshAfterMonadControl(onRescan);
+    if (discovery && typeof discovery.addEndpoint === "function") {
+      discovery.addEndpoint(endpoint);
+    } else {
+      refreshAfterMonadControl(onRescan);
+    }
   }
 
-  function clearManualMonadEndpoints(onRescan) {
+  function clearManualMonadEndpoints(onRescan, discovery) {
+    var manual = getStoredMonadEndpoints();
     setStoredMonadEndpoints([]);
-    refreshAfterMonadControl(onRescan);
+    if (discovery && typeof discovery.removeEndpoint === "function") {
+      manual.forEach(function (endpoint) { discovery.removeEndpoint(endpoint); });
+    } else {
+      refreshAfterMonadControl(onRescan);
+    }
   }
 
-  function stopMonadFromWeb(control, record, onRescan) {
-    if (!browserConfirm("Stop " + record.name + "?")) return;
-    runMonadsControlAction(control, "/__monads/" + encodeURIComponent(record.name) + "/stop", { method: "POST" }, onRescan);
+  function showMonadsCommandHelp(control) {
+    var lines = (control.commandActions || [])
+      .map(function (action) { return action.command || action.name; })
+      .filter(Boolean);
+    showInfoModal(
+      "monads commands",
+      ["Available from this local monad:", ""].concat(lines.length ? lines : [control.startCommand]).join("\n"),
+    );
+  }
+
+  function onMonadFromWeb(control, record, onRescan, discovery) {
+    runMonadLifecycleAction(control, monadsControlActionPath(control, record, "on", "resume", "start"), onRescan, discovery);
+  }
+
+  function pauseMonadFromWeb(control, record, onRescan, discovery) {
+    runMonadLifecycleAction(control, monadsControlActionPath(control, record, "pause"), onRescan, discovery);
+  }
+
+  function restartMonadFromWeb(control, record, onRescan, discovery) {
+    if (!browserConfirm("Restart " + record.name + "?")) return;
+    runMonadLifecycleAction(control, monadsControlActionPath(control, record, "restart"), onRescan, discovery);
+  }
+
+  function offMonadFromWeb(control, record, onRescan, discovery) {
+    if (!browserConfirm("Turn off " + record.name + "?")) return;
+    runMonadLifecycleAction(control, monadsControlActionPath(control, record, "off", "stop"), onRescan, discovery);
+  }
+
+  function deleteMonadFromWeb(control, record, onRescan, discovery) {
+    var confirmed = browserConfirm(
+      "Delete " + record.name + "? This will stop it and remove its local runtime data and logs.",
+    );
+    if (!confirmed) return;
+    runMonadLifecycleAction(control, monadsControlActionPath(control, record, "delete", "rm", "remove"), onRescan, discovery);
   }
 
   function showMonadStatusFromWeb(control, record) {
@@ -1195,7 +1356,35 @@
     }));
   }
 
-  function buildMonadsControlRows(control, onRescan) {
+  function monadsControlAction(control) {
+    var commandActions = Array.isArray(control.commandActions) ? control.commandActions : [];
+    var requested = Array.prototype.slice.call(arguments, 1).map(function (name) { return String(name).toLowerCase(); });
+    return commandActions.find(function (action) { return requested.indexOf(String(action.name).toLowerCase()) >= 0; }) || null;
+  }
+
+  function monadsControlHasAction(control) {
+    var available = new Set((control.actions || []).map(function (name) { return String(name).toLowerCase(); }));
+    for (var index = 1; index < arguments.length; index += 1) {
+      if (available.has(String(arguments[index]).toLowerCase())) return true;
+    }
+    return Boolean(monadsControlAction.apply(null, arguments));
+  }
+
+  function monadsControlActionPath(control, record) {
+    var names = Array.prototype.slice.call(arguments, 2);
+    var action = monadsControlAction.apply(null, [control].concat(names));
+    if (action && action.path) {
+      return action.path.replace(/:name/g, encodeURIComponent(record.name));
+    }
+    var suffix = names.find(function (name) { return monadsControlHasAction(control, name); }) || names[0] || "status";
+    return "/__monads/" + encodeURIComponent(record.name) + "/" + suffix;
+  }
+
+  function isMonadOnline(record) {
+    return record.status === "online" || record.status === "running";
+  }
+
+  function buildMonadsControlRows(control, onRescan, discovery) {
     if (!control.available) {
       return [
         guiText("No local web control endpoint answered. Install monad.ai, start one monad, then rescan.", {
@@ -1234,7 +1423,7 @@
     var header = guiNode("Box", {
       sx: {
         display: { xs: "none", sm: "grid" },
-        gridTemplateColumns: "minmax(110px, 1fr) 64px 88px minmax(120px, 1.2fr) auto",
+        gridTemplateColumns: "minmax(110px, 1fr) 64px 90px minmax(120px, 1.2fr) minmax(250px, auto)",
         gap: 1,
         px: 0.5,
         color: "text.secondary",
@@ -1247,7 +1436,7 @@
       return guiNode("Box", {
         sx: {
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", sm: "minmax(110px, 1fr) 64px 88px minmax(120px, 1.2fr) auto" },
+          gridTemplateColumns: { xs: "1fr", sm: "minmax(110px, 1fr) 64px 90px minmax(120px, 1.2fr) minmax(250px, auto)" },
           gap: { xs: 0.75, sm: 1 },
           alignItems: "center",
           p: 0.75,
@@ -1256,28 +1445,48 @@
           borderRadius: 1,
           bgcolor: "rgba(255,255,255,0.018)",
         },
-      }, [
+      }, (function () {
+        var online = isMonadOnline(record);
+        var paused = record.status === "paused";
+        return [
         guiText(record.name, { variant: "body2", sx: { fontWeight: 500 } }),
         guiText(record.port ? String(record.port) : "-", { variant: "caption", sx: { color: "text.secondary", fontFamily: "monospace" } }),
-        guiNode("Chip", { label: record.status, size: "small", variant: record.status === "online" ? "filled" : "outlined" }),
+        guiNode("Chip", { label: record.status, size: "small", variant: online ? "filled" : "outlined" }),
         guiText(record.namespace || "-", {
           variant: "caption",
           sx: { color: "text.secondary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" },
         }),
         guiNode("Box", { sx: { display: "flex", gap: 0.5, flexWrap: "wrap", justifyContent: { xs: "flex-start", sm: "flex-end" } } }, [
-          guiNode("Button", { variant: "text", size: "small", label: "Status", onClick: function () { showMonadStatusFromWeb(control, record); } }),
-          guiNode("Button", { variant: "text", size: "small", label: "Logs", onClick: function () { showMonadLogsFromWeb(control, record); } }),
-          record.status === "online"
-            ? guiNode("Button", { variant: "text", size: "small", label: "Stop", onClick: function () { stopMonadFromWeb(control, record, onRescan); } })
+          monadsControlHasAction(control, "status")
+            ? guiNode("Button", { variant: "text", size: "small", label: "Status", onClick: function () { showMonadStatusFromWeb(control, record); } })
+            : null,
+          monadsControlHasAction(control, "logs")
+            ? guiNode("Button", { variant: "text", size: "small", label: "Logs", onClick: function () { showMonadLogsFromWeb(control, record); } })
+            : null,
+          !online && monadsControlHasAction(control, "on", "resume")
+            ? guiNode("Button", { variant: paused ? "contained" : "outlined", size: "small", label: "On", onClick: function () { onMonadFromWeb(control, record, onRescan, discovery); } })
+            : null,
+          online && monadsControlHasAction(control, "pause")
+            ? guiNode("Button", { variant: "outlined", size: "small", label: "Pause", onClick: function () { pauseMonadFromWeb(control, record, onRescan, discovery); } })
+            : null,
+          monadsControlHasAction(control, "restart")
+            ? guiNode("Button", { variant: "text", size: "small", label: "Restart", onClick: function () { restartMonadFromWeb(control, record, onRescan, discovery); } })
+            : null,
+          (online || paused) && monadsControlHasAction(control, "off", "stop")
+            ? guiNode("Button", { variant: "text", size: "small", label: "Off", onClick: function () { offMonadFromWeb(control, record, onRescan, discovery); } })
+            : null,
+          monadsControlHasAction(control, "delete", "rm", "remove")
+            ? guiNode("Button", { variant: "text", size: "small", color: "error", label: "Delete", onClick: function () { deleteMonadFromWeb(control, record, onRescan, discovery); } })
             : null,
         ].filter(Boolean)),
-      ]);
+        ];
+      })());
     });
 
     return [header].concat(rows);
   }
 
-  function buildMonadsControlCard(control, onRescan) {
+  function buildMonadsControlCard(control, onRescan, discovery) {
     var manualEndpoints = getStoredMonadEndpoints();
     return guiStatusCard({
       title: "Monads Control Panel",
@@ -1286,26 +1495,32 @@
         : "The browser needs a local monad to expose the monads command.",
       state: control.available ? "ready" : "install",
       chips: control.available ? [control.records.length + " known", "monads"] : ["monads not detected"],
-      body: buildMonadsControlRows(control, onRescan),
+      body: buildMonadsControlRows(control, onRescan, discovery),
       actions: [
         guiNode("Button", {
           variant: "contained",
           size: "small",
           label: "Start a New Monad",
-          onClick: function () { startMonadFromWeb(control, onRescan); },
+          onClick: function () { startMonadFromWeb(control, onRescan, discovery); },
         }),
         guiNode("Button", { variant: "outlined", size: "small", label: "Rescan", onClick: onRescan }),
         guiNode("Button", {
           variant: "outlined",
           size: "small",
           label: "Add endpoint",
-          onClick: function () { addManualMonadEndpoint(onRescan); },
+          onClick: function () { addManualMonadEndpoint(onRescan, discovery); },
         }),
+        control.available ? guiNode("Button", {
+          variant: "text",
+          size: "small",
+          label: "Commands",
+          onClick: function () { showMonadsCommandHelp(control); },
+        }) : null,
         manualEndpoints.length ? guiNode("Button", {
           variant: "text",
           size: "small",
           label: "Clear manual",
-          onClick: function () { clearManualMonadEndpoints(onRescan); },
+          onClick: function () { clearManualMonadEndpoints(onRescan, discovery); },
         }) : null,
         control.available ? null : guiNode("Button", {
           variant: "text",
@@ -1324,6 +1539,8 @@
     var monadsControl = input.monadsControl;
     var guiResolution = input.guiResolution;
     var onRescan = input.onRescan;
+    var onOpenInstallGuide = input.onOpenInstallGuide;
+    var discovery = input.discovery;
     var best = recommendedMonad(monads);
     var bestName = best ? displayMonadName(best) : "none";
     var meState = meBoot.status === "initiated" ? "online" : meBoot.status;
@@ -1379,11 +1596,60 @@
           body: monads.length ? [buildMonadsGrid(GUI, monads, best)] : [],
           actions: best
             ? [guiNode("Button", { variant: "outlined", size: "small", label: "Open", href: best.endpoint.replace(/\/+$/, "") + "/" })]
-            : [guiNode("Button", { variant: "outlined", size: "small", label: "Installation guide", href: "modules/monad/npm/README.md" })],
+            : [guiNode("Button", {
+                variant: "outlined",
+                size: "small",
+                label: "Installation guide",
+                href: MONAD_INSTALL_GUIDE_PATH,
+                onClick: onOpenInstallGuide,
+              })],
         }),
-        buildMonadsControlCard(monadsControl, onRescan),
+        buildMonadsControlCard(monadsControl, onRescan, discovery),
       ]),
     ]));
+  }
+
+  function buildMonadInstallGuideSurface(onBack) {
+    return guiNode("Box", {
+      sx: {
+        flex: 1,
+        minHeight: "100%",
+        width: "100%",
+        p: { xs: 1.5, sm: 2.5, md: 3 },
+      },
+    }, [
+      guiNode("Box", {
+        sx: {
+          width: "min(100%, 980px)",
+          display: "grid",
+          gap: { xs: 1.25, sm: 1.75 },
+        },
+      }, [
+        guiNode("Box", {
+          sx: {
+            display: "flex",
+            gap: 1,
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+          },
+        }, [
+          guiText("monad.ai installation", { variant: "h5", sx: { fontWeight: 560, lineHeight: 1.2 } }),
+          guiNode("Box", { sx: { display: "flex", gap: 0.75, flexWrap: "wrap" } }, [
+            onBack ? guiNode("Button", { variant: "outlined", size: "small", label: "Back", onClick: onBack }) : null,
+            guiNode("Button", { variant: "text", size: "small", label: "Raw README", href: MONAD_INSTALL_GUIDE_PATH }),
+          ].filter(Boolean)),
+        ]),
+        guiNode("MarkdownDocument", {
+          src: MONAD_INSTALL_GUIDE_PATH,
+          baseUrl: MONAD_INSTALL_GUIDE_BASE,
+          title: "monad.ai",
+          subtitle: "Installation guide",
+          maxWidth: 920,
+          sx: { mx: 0 },
+        }),
+      ]),
+    ]);
   }
 
   function buildAllThisLayoutSpec(input) {
@@ -1404,14 +1670,90 @@
     var root = resolveRoot(options.root);
     var me = null;
     var meBoot = null;
-    var monads = [];
-    var monadsControl = null;
     var GUI = null;
     var guiResolution = null;
+    var discovery = null;
+    var fallbackMonads = [];
+    var fallbackMonadsControl = monadsControlUnavailable("", "Monad discovery runtime unavailable.");
+    var lastRenderFingerprint = "";
+    var currentResult = null;
 
     if (!options.rescan) {
       notify(options, { step: "boot:start", detail: "all.this package global boot" });
       ensureBootScreen(root, "all.this", "Resolving local .me, monads, and GUI.");
+    }
+
+    function renderFromState(state, force) {
+      var monads = discovery ? monadsFromDiscoveryState(state) : fallbackMonads;
+      var monadsControl = discovery ? monadsControlFromDiscoveryState(state) : fallbackMonadsControl;
+      var shouldOpenGuide = typeof window !== "undefined" && window.location.hash === "#view=monad-install";
+      var view = shouldOpenGuide ? "monad-install" : "main";
+      var renderFingerprint = JSON.stringify({
+        view: view,
+        discovery: (state && state.fingerprint) || "",
+        monads: monads.map(function (monad) { return [monad.id, monad.endpoint, monad.status]; }),
+        control: [
+          monadsControl.available,
+          monadsControl.endpoint,
+          monadsControl.records.map(function (record) { return [record.name, record.status, record.endpoint]; }),
+        ],
+        gui: guiResolution && guiResolution.source,
+        me: meBoot && meBoot.status,
+      });
+      if (!force && renderFingerprint === lastRenderFingerprint) return Promise.resolve(currentResult);
+      lastRenderFingerprint = renderFingerprint;
+
+      var rescan = function () {
+        if (discovery && typeof discovery.rescan === "function") {
+          discovery.rescan({ mode: "fast", reason: "all.this:rescan" });
+          return;
+        }
+        startAllThis(Object.assign({}, options, { rescan: true })).catch(function (error) {
+          showInfoModal("rescan error", errorMessage(error));
+        });
+      };
+      var backFromGuide = function () {
+        if (typeof window !== "undefined") {
+          history.replaceState(null, "", window.location.pathname + window.location.search);
+        }
+        renderFromState((discovery && discovery.getState && discovery.getState()) || state, true);
+      };
+      var openInstallGuide = function (event) {
+        if (event && typeof event.preventDefault === "function") event.preventDefault();
+        if (typeof window !== "undefined") {
+          history.replaceState(null, "", "#view=monad-install");
+        }
+        renderFromState((discovery && discovery.getState && discovery.getState()) || state, true);
+      };
+
+      var surfacePromise = shouldOpenGuide
+        ? Promise.resolve(buildMonadInstallGuideSurface(backFromGuide))
+        : resolveMainSurface({
+            GUI: GUI,
+            me: me,
+            meBoot: meBoot,
+            monads: monads,
+            monadsControl: monadsControl,
+            guiResolution: guiResolution,
+            onRescan: rescan,
+            onOpenInstallGuide: openInstallGuide,
+            discovery: discovery,
+          });
+
+      return surfacePromise.then(function (surface) {
+        var spec = buildAllThisLayoutSpec({ GUI: GUI, me: me, monads: monads, surface: surface, onRescan: rescan });
+        if (typeof GUI.mount !== "function") throw new Error("[all.this] GUI.mount unavailable");
+        if (!options.rescan && (!currentResult || !currentResult.mount)) root.innerHTML = "";
+        var mount = GUI.mount(spec, root, {
+          gui: GUI,
+          me: me,
+          devtools: { inspector: false, adminView: false },
+        });
+        currentResult = { GUI: GUI, me: me, monads: monads, monadsControl: monadsControl, spec: spec, mount: mount, meBoot: meBoot, guiResolution: guiResolution };
+        global.__ALL_THIS_BOOT__ = currentResult;
+        notify(options, { step: "boot:mounted", me: meBoot, monads: monads, gui: guiResolution });
+        return currentResult;
+      });
     }
 
     return resolveMeKernel(options)
@@ -1419,53 +1761,52 @@
         me = result.me;
         meBoot = result.boot;
         notify(options, { step: "me:resolve:done", me: meBoot });
-        if (!options.rescan) ensureBootScreen(root, "all.this", "Scanning local monad routes.");
-        notify(options, { step: "monad:scan:start", me: meBoot });
-        return resolveMonadProvider(options);
-      })
-      .then(function (resolvedMonads) {
-        monads = resolvedMonads;
-        notify(options, { step: "monad:scan:done", me: meBoot, monads: monads });
         if (!options.rescan) ensureBootScreen(root, "all.this", "Resolving GUI local-first.");
-        notify(options, { step: "gui:resolve:start", me: meBoot, monads: monads });
-        return resolveGUI(Object.assign({}, options, { monads: monads }));
+        notify(options, { step: "gui:resolve:start", me: meBoot, monads: [] });
+        return resolveGUI(Object.assign({}, options, { monads: [] }));
       })
       .then(function (resolved) {
         GUI = resolved.GUI;
         guiResolution = resolved.resolution;
-        notify(options, { step: "gui:resolve:done", me: meBoot, monads: monads, gui: guiResolution });
-        var rescan = function () {
-          startAllThis(Object.assign({}, options, { rescan: true })).catch(function (error) {
-            showInfoModal("rescan error", errorMessage(error));
-          });
-        };
-        return resolveMonadsControl(recommendedMonad(monads))
-          .then(function (resolvedControl) {
-            monadsControl = resolvedControl;
-            return resolveMainSurface({
-              GUI: GUI,
-              me: me,
-              meBoot: meBoot,
-              monads: monads,
-              monadsControl: monadsControl,
-              guiResolution: guiResolution,
-              onRescan: rescan,
+        notify(options, { step: "gui:resolve:done", me: meBoot, monads: [], gui: guiResolution });
+        discovery = createAllThisMonadDiscovery(GUI, options);
+        var previousDiscovery = global.__ALL_THIS_MONAD_DISCOVERY__;
+        if (previousDiscovery && previousDiscovery !== discovery && typeof previousDiscovery.stop === "function") {
+          previousDiscovery.stop();
+        }
+        global.__ALL_THIS_MONAD_DISCOVERY__ = discovery;
+        currentResult = { GUI: GUI, me: me, monads: [], monadsControl: fallbackMonadsControl, spec: null, mount: null, meBoot: meBoot, guiResolution: guiResolution };
+
+        if (!discovery) {
+          notify(options, { step: "monad:scan:start", me: meBoot });
+          return resolveMonadProvider(options)
+            .then(function (resolvedMonads) {
+              fallbackMonads = resolvedMonads;
+              notify(options, { step: "monad:scan:done", me: meBoot, monads: fallbackMonads });
+              return resolveMonadsControl(recommendedMonad(fallbackMonads));
+            })
+            .then(function (resolvedControl) {
+              fallbackMonadsControl = resolvedControl;
+              return renderFromState({ fingerprint: "fallback" }, true);
             });
-          })
-          .then(function (surface) {
-            var spec = buildAllThisLayoutSpec({ GUI: GUI, me: me, monads: monads, surface: surface, onRescan: rescan });
-            if (typeof GUI.mount !== "function") throw new Error("[all.this] GUI.mount unavailable");
-            if (!options.rescan) root.innerHTML = "";
-            var mount = GUI.mount(spec, root, {
-              gui: GUI,
-              me: me,
-              devtools: { inspector: false, adminView: false },
-            });
-            var finalResult = { GUI: GUI, me: me, monads: monads, monadsControl: monadsControl, spec: spec, mount: mount, meBoot: meBoot, guiResolution: guiResolution };
-            global.__ALL_THIS_BOOT__ = finalResult;
-            notify(options, { step: "boot:mounted", me: meBoot, monads: monads, gui: guiResolution });
-            return finalResult;
+        }
+
+        notify(options, { step: "monad:discovery:start", me: meBoot });
+        discovery.subscribe(function (state) {
+          renderFromState(state).catch(function (error) {
+            showInfoModal("render error", errorMessage(error));
           });
+        });
+        discovery.start();
+        var wait = typeof discovery.waitForChange === "function"
+          ? discovery.waitForChange({
+              timeoutMs: Math.max(1200, DEFAULT_MONAD_SCAN_TIMEOUT_MS + 700),
+              predicate: function (state) { return !!(state && state.lastUpdatedAt); },
+            }).catch(function () { return null; })
+          : Promise.resolve(null);
+        return wait.then(function () {
+          return renderFromState(discovery.getState(), true);
+        });
       });
   }
 
