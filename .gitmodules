@@ -13,3 +13,6 @@
 [submodule "packages/GUI"]
 	path = packages/GUI
 	url = https://github.com/neurons-me/GUI.git
+[submodule "neurons.me"]
+	path = neurons.me
+	url = https://github.com/neurons-me/neurons.me.git
