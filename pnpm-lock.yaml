@@ -133,6 +133,9 @@ importers:
       chalk:
         specifier: ^5.6.2
         version: 5.6.2
+      cleaker:
+        specifier: workspace:*
+        version: link:../cleaker/npm
       commander:
         specifier: ^14.0.1
         version: 14.0.3
@@ -222,8 +225,8 @@ importers:
         specifier: ^4.0.11
         version: 4.1.0(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       cleaker:
-        specifier: ^3.0.6
-        version: 3.0.9
+        specifier: workspace:*
+        version: link:../../../modules/cleaker/npm
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -2806,9 +2809,6 @@ packages:
   ci-info@4.4.0:
     resolution: {integrity: sha512-77PSwercCZU2Fc4sX94eF8k8Pxte6JAwL4/ICZLFjJLqegs7kCuAsqqj/70NQF6TvDpgFjkubQB2FW2ZZddvQg==}
     engines: {node: '>=8'}
-
-  cleaker@3.0.9:
-    resolution: {integrity: sha512-QUq8h3OHIcXde/5ueyLpIrXDEnEbzl5SNV/ZgSBudwlhmlaBDHd57SWAyeQRnnpDnkTFY6vuVDO2E0zSuWm/gA==}
 
   cli-tableau@2.0.1:
     resolution: {integrity: sha512-he+WTicka9cl0Fg/y+YyxcN6/bfQ/1O3QmgxRXDhABKqLzvoOSM4fMzp39uMyLBulAFuywD2N7UaoQE7WaADxQ==}
@@ -8094,8 +8094,6 @@ snapshots:
   chromatic@13.3.5: {}
 
   ci-info@4.4.0: {}
-
-  cleaker@3.0.9: {}
 
   cli-tableau@2.0.1:
     dependencies:
