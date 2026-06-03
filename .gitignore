@@ -54,3 +54,4 @@ dist-ssr/
 !packages-src/modules/tools/.gitkeep
 !packages-src/modules/controllers/.gitkeep
 **/.DS_Store
+.claude/
