@@ -4,7 +4,7 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "build/**", "npm/dist/**"]
+      "outputs": ["dist/**", "build/**", "Typescript/dist/**"]
     },
     "test": {
       "dependsOn": ["build"],
