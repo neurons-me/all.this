@@ -9,6 +9,8 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "test": "turbo run test",
+    "ci": "turbo run ci",
+    "validate": "turbo run test && turbo run build",
     "lint": "turbo run lint",
     "clean": "turbo run clean"
   },

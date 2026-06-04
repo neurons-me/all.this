@@ -7,8 +7,14 @@
       "outputs": ["dist/**", "build/**", "Typescript/dist/**"]
     },
     "test": {
-      "dependsOn": ["build"],
-      "outputs": []
+      "dependsOn": ["^build"],
+      "outputs": [],
+      "cache": false
+    },
+    "ci": {
+      "dependsOn": ["test", "^build"],
+      "outputs": ["dist/**", "Typescript/dist/**"],
+      "cache": false
     },
     "dev": {
       "cache": false,
