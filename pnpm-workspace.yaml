@@ -1,7 +1,7 @@
 packages:
   - 'me/Typescript'
   - 'modules/*/Typescript'
-  - 'packages/*/npm'
+  - 'packages/*/Typescript'
 allowBuilds:
   esbuild: true
   sqlite3: true
