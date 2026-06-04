@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>all.this — Docs</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; background: #f4f7f8; color: #0f1720; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    .page { max-width: 960px; margin: 0 auto; padding: 56px 32px 80px; }
+    .kicker { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: #51606d; margin-bottom: 12px; }
+    h1 { font-size: 2.75rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 12px; }
+    .subtitle { color: #51606d; margin-bottom: 48px; font-size: 1.05rem; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    @media (max-width: 720px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .grid { grid-template-columns: 1fr; } }
+    .card { display: flex; flex-direction: column; gap: 10px; padding: 20px; border-radius: 12px; border: 1px solid rgba(15,23,32,0.12); background: #fff; text-decoration: none; color: inherit; transition: box-shadow 140ms ease, border-color 140ms ease, transform 140ms ease; }
+    .card:hover { box-shadow: 0 4px 20px rgba(15,23,32,0.10); border-color: #0f6a78; transform: translateY(-1px); }
+    .card-icon { width: 36px; height: 36px; border-radius: 8px; background: rgba(15,106,120,0.10); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+    .card-title { font-size: 1rem; font-weight: 700; }
+    .card-desc { font-size: 0.875rem; color: #51606d; line-height: 1.55; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #0b1114; color: #e8eded; }
+      .kicker, .subtitle, .card-desc { color: #98a7b3; }
+      .card { background: #111a1f; border-color: rgba(232,237,237,0.10); }
+      .card:hover { border-color: #4fd1c5; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+      .card-icon { background: rgba(79,209,197,0.12); }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <p class="kicker">all.this</p>
+    <h1>all.this Docs</h1>
+    <p class="subtitle">The neurons.me monorepo — all packages in one place.</p>
+
+    <div class="grid">
+
+      <a class="card" href="https://neurons-me.github.io/.me/">
+        <div class="card-icon">🧬</div>
+        <div class="card-title">.me</div>
+        <div class="card-desc">Sovereign kernel. Schema-free semantic memory.</div>
+      </a>
+
+      <a class="card" href="https://neurons-me.github.io/Cleaker/">
+        <div class="card-icon">🔑</div>
+        <div class="card-title">cleaker</div>
+        <div class="card-desc">Namespace resolver. Who am I, here.</div>
+      </a>
+
+      <a class="card" href="https://neurons-me.github.io/monad/">
+        <div class="card-icon">⚡</div>
+        <div class="card-title">monad</div>
+        <div class="card-desc">HTTP daemon. Exposes namespace over HTTP.</div>
+      </a>
+
+      <a class="card" href="https://neurons-me.github.io/netget/">
+        <div class="card-icon">🌐</div>
+        <div class="card-title">netget</div>
+        <div class="card-desc">Gateway. Routes hostnames to monads.</div>
+      </a>
+
+      <a class="card" href="https://neurons-me.github.io/GUI/">
+        <div class="card-icon">🎨</div>
+        <div class="card-title">.GUI</div>
+        <div class="card-desc">React component library. Renders the surface.</div>
+      </a>
+
+      <a class="card" href="https://github.com/neurons-me/all.this">
+        <div class="card-icon">🐙</div>
+        <div class="card-title">GitHub</div>
+        <div class="card-desc">all.this monorepo source code.</div>
+      </a>
+
+    </div>
+  </div>
+  <footer style="margin-top:64px;padding:32px 0;text-align:center;border-top:1px solid rgba(15,23,32,0.08);">
+    <a href="https://neurons.me" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;opacity:0.45;transition:opacity 120ms;" onmouseover="this.style.opacity=0.9" onmouseout="this.style.opacity=0.45">
+      <img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760629056/neurons-grey_hxjcom.png" alt="neurons.me" style="width:24px;height:24px;object-fit:contain;" />
+    </a>
+  </footer>
+</body>
+</html>
