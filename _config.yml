@@ -1,0 +1,40 @@
+title: all.this
+description: The complete neurons.me stack — sovereign semantic compute.
+url: https://neurons-me.github.io
+baseurl: "/all.this"
+
+remote_theme: neurons-me/neurons-me
+
+plugins:
+  - jekyll-remote-theme
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  parse_block_html: true
+  hard_wrap: false
+
+exclude:
+  - node_modules
+  - "*/node_modules"
+  - pnpm-lock.yaml
+  - turbo.json
+  - src
+  - me
+  - modules
+  - packages
+  - neurons.me
+  - CLAUDE.md
+
+me_theme:
+  brand: all.this
+  favicon: "https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760629064/neurons.me_b50f6a.png"
+  nav:
+    - label: Home
+      url: https://neurons-me.github.io/
+    - label: Docs
+      relative_url: /docs/
+    - label: Github
+      url: https://github.com/neurons-me/all.this
+    - label: neurons.me
+      url: https://neurons.me
