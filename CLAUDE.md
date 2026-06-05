@@ -1,5 +1,4 @@
 # CLAUDE.md
-
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ---
@@ -19,7 +18,7 @@ all.this/
     GUI/Typescript/       → React component library (UMD + Vite)
 ```
 
-Turbo is the task runner. Build order is enforced by `turbo.json` (`^build` dependency chain): `this.me` → `cleaker` → `monad` → `netget`.
+Turbo is the task runner. Build order is enforced by `turbo.json` (`^build` dependency chain): `.me` → `cleaker` → `monad` → `netget`.
 
 ---
 
