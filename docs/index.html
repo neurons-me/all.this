@@ -31,8 +31,18 @@
 </head>
 <body>
   <div class="page">
-    <p class="kicker">all.this</p>
-    <h1>all.this Docs</h1>
+    <div style="display:flex; align-items:flex-start; gap:20px; justify-content:space-between;">
+      <div>
+        <p class="kicker">all.this</p>
+        <h1>all.this Docs</h1>
+      </div>
+      <div
+        data-gui-searchbar
+        data-src="https://neurons-me.github.io/index.json"
+        data-placeholder="Search in All.This"
+        style="width:240px; max-width:38vw; margin-top:8px;"
+      ></div>
+    </div>
     <p class="subtitle">The neurons.me monorepo — all packages in one place.</p>
 
     <div class="grid">
@@ -80,5 +90,6 @@
       <img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760629056/neurons-grey_hxjcom.png" alt="neurons.me" style="width:24px;height:24px;object-fit:contain;" />
     </a>
   </footer>
+  <script src="https://neurons-me.github.io/vendor/gui-searchbar.iife.js" defer></script>
 </body>
 </html>
