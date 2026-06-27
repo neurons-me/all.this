@@ -21,6 +21,14 @@
     .card-icon img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
     .card-title { font-size: 1rem; font-weight: 700; }
     .card-desc { font-size: 0.875rem; color: #51606d; line-height: 1.55; }
+
+    /* card-brand — wider variant, icon on the right with room to breathe. A distinct
+       layout from .card, not a replacement: used for the top-level stack cards here. */
+    .card-brand { flex-direction: row; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; }
+    .card-brand .card-brand-text { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .card-brand .card-icon { width: 64px; height: 64px; border-radius: 14px; flex-shrink: 0; font-size: 1.8rem; }
+    .card-brand .card-icon img { padding: 10px; }
+
     @media (prefers-color-scheme: dark) {
       body { background: #0b1114; color: #e8eded; }
       .kicker, .subtitle, .card-desc { color: #98a7b3; }
@@ -48,50 +56,60 @@
 
     <div class="grid">
 
-      <a class="card" href="https://neurons-me.github.io/.me/">
+      <a class="card card-brand" href="https://neurons-me.github.io/.me/">
+        <div class="card-brand-text">
+          <div class="card-title">.me</div>
+          <div class="card-desc">Sovereign kernel. Schema-free semantic memory.</div>
+        </div>
         <div class="card-icon">
           <picture>
             <source media="(prefers-color-scheme: dark)" srcset="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760758662/this.me-removebg-preview_fvyeda.png" />
             <img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1761149332/this.me-removebg-preview_2_j1eoiy.png" alt=".me" />
           </picture>
         </div>
-        <div class="card-title">.me</div>
-        <div class="card-desc">Sovereign kernel. Schema-free semantic memory.</div>
       </a>
 
-      <a class="card" href="https://neurons-me.github.io/Cleaker/">
+      <a class="card card-brand" href="https://neurons-me.github.io/Cleaker/">
+        <div class="card-brand-text">
+          <div class="card-title">cleaker</div>
+          <div class="card-desc">Namespace resolver. Who am I, here.</div>
+        </div>
         <div class="card-icon">
           <img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1765054949/cleaker.me_gusn1q.png" alt="cleaker" />
         </div>
-        <div class="card-title">cleaker</div>
-        <div class="card-desc">Namespace resolver. Who am I, here.</div>
       </a>
 
-      <a class="card" href="https://neurons-me.github.io/monad/">
+      <a class="card card-brand" href="https://neurons-me.github.io/monad/">
+        <div class="card-brand-text">
+          <div class="card-title">monad</div>
+          <div class="card-desc">HTTP daemon. Exposes namespace over HTTP.</div>
+        </div>
         <div class="card-icon">
           <img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1778090977/monad.ai.profile-removebg-preview_np26yp.png" alt="monad" />
         </div>
-        <div class="card-title">monad</div>
-        <div class="card-desc">HTTP daemon. Exposes namespace over HTTP.</div>
       </a>
 
-      <a class="card" href="https://neurons-me.github.io/netget/">
+      <a class="card card-brand" href="https://neurons-me.github.io/netget/">
+        <div class="card-brand-text">
+          <div class="card-title">netget</div>
+          <div class="card-desc">Gateway. Routes hostnames to monads.</div>
+        </div>
         <div class="card-icon">
           <picture>
             <source media="(prefers-color-scheme: dark)" srcset="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1778177581/ChatGPT_Image_May_7_2026_12_12_28_PM_xzkwtc.png" />
             <img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1778254832/me.docs.axioms__1_-removebg-preview_xvdqof.png" alt="netget" />
           </picture>
         </div>
-        <div class="card-title">netget</div>
-        <div class="card-desc">Gateway. Routes hostnames to monads.</div>
       </a>
 
-      <a class="card" href="https://neurons-me.github.io/GUI/">
+      <a class="card card-brand" href="https://neurons-me.github.io/GUI/">
+        <div class="card-brand-text">
+          <div class="card-title">.GUI</div>
+          <div class="card-desc">React component library. Renders the surface.</div>
+        </div>
         <div class="card-icon">
           <img src="https://res.cloudinary.com/dkwnxf6gm/image/upload/v1760629119/this.gui.neurons.me_mkapde.png" alt=".GUI" />
         </div>
-        <div class="card-title">.GUI</div>
-        <div class="card-desc">React component library. Renders the surface.</div>
       </a>
 
       <a class="card" href="https://github.com/neurons-me/all.this">
