@@ -2,7 +2,6 @@
 
 # all.this
 **Sovereign semantic compute. Identity, namespace, runtime — owned by you.**
-
 The complete [neurons.me](https://neurons.me) stack in one monorepo.
 
 ---
@@ -70,11 +69,8 @@ this.gui   → React UI. renders the semantic surface.
 ```
 
 Two independent systems, same files:
-
 **git submodules** — source control, independent repos, GitHub pushes
-
 **pnpm workspace** — links JS dependencies locally for cross-package imports
-
 They don't conflict. Submodules handle source control. pnpm handles local JS wiring.
 
 ---
