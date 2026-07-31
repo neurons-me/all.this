@@ -1,6 +1,6 @@
 [submodule "modules/cleaker"]
 	path = modules/cleaker
-	url = https://github.com/neurons-me/cleaker.git
+	url = https://github.com/neurons-me/Cleaker.git
 [submodule "modules/netget"]
 	path = modules/netget
 	url = https://github.com/neurons-me/netget.git
