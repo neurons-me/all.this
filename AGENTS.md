@@ -42,19 +42,12 @@ or the actual per-package commands in `CLAUDE.md`.
 | `SynthesisSource.disclosure` | **Implemented.** `modules/monad/Typescript/src/kernel/synthesis.ts` now carries per-source disclosure. Only `public`/`opened` sources are value-eligible for quorum; `closed`/`contested` sources remain visible in the audit trail without forming false null quorums. |
 | Canonical namespace grammar | **Unified for the monad bridge.** `modules/monad/Typescript/src/runtime/bridge.ts` now imports `parseNrpTarget` from `cleaker`, a canonical NRP wrapper built on `parseNamespaceExpression`. The legacy `parseTarget` / `parseMeTarget` compatibility path remains available for older `cleaker("me://...")` callers. |
 | Disclosure states, HTTP vs WebSocket | **Unified.** `http/nrpHandler.ts` now classifies internally (`public`/`stealth`/`closed`) and maps to the wire the same way `pathResolver.ts` does — `stealth` never leaves the process. `packages/GUI/Typescript/.../Beatle.types.ts`'s `NRPDisclosure` matches the canonical `public`/`opened`/`closed`/`contested` set; the `stealth` leak is closed. |
+| Single-forward bridge value extraction | **Fixed.** `handlers/bridgeHandler.ts`'s single-forward path used to spread the upstream `payload` and then overwrite `patched.target` with `bridgeTarget`, silently discarding a real nested envelope's `target.value`. It now extracts `value` via `extractPayloadValue()` first, the same helper the synthesis path already used — both bridge response shapes now agree on what `target` means on the wire. |
 
 ## Priorities, in order
 
-No open priorities right now — see "Open questions" below for decisions that need a
-human, and the known gap noted next for a bug that still needs its own fix.
-
-**Known gap, not yet scheduled:** `handlers/bridgeHandler.ts`'s single-forward path
-(used when synthesis is off, or `maxCandidates=1`) spreads the upstream `payload`
-and then overwrites `patched.target` with its own `bridgeTarget`. If the upstream
-ever returns the real nested envelope (`{ target: { value } }`) instead of a flat
-one, this clobbers the real value before the client sees it — same bug class as the
-`extractPayloadValue` fix, a third, independent site. Needs its own fix and tests,
-separate from any commit above.
+No open priorities right now. See "Open questions" below for decisions that need a
+human.
 
 ## Open questions you can help resolve
 
