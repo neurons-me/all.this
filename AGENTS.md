@@ -41,16 +41,20 @@ or the actual per-package commands in `CLAUDE.md`.
 | Adaptive weights | Implemented: global prior + namespace-local posterior, blended by `maturity = min(1, sampleCount/200)` |
 | `SynthesisSource.disclosure` | **Implemented.** `modules/monad/Typescript/src/kernel/synthesis.ts` now carries per-source disclosure. Only `public`/`opened` sources are value-eligible for quorum; `closed`/`contested` sources remain visible in the audit trail without forming false null quorums. |
 | Canonical namespace grammar | **Unified for the monad bridge.** `modules/monad/Typescript/src/runtime/bridge.ts` now imports `parseNrpTarget` from `cleaker`, a canonical NRP wrapper built on `parseNamespaceExpression`. The legacy `parseTarget` / `parseMeTarget` compatibility path remains available for older `cleaker("me://...")` callers. |
-| Disclosure states, HTTP vs WebSocket | **Inconsistent.** `http/pathResolver.ts` correctly collapses `stealth` to `closed` on the wire. `http/nrpHandler.ts` (the `/nrp` WebSocket path) still carries all four states including `stealth` — and that leak reaches `packages/GUI/Typescript/.../Beatle.types.ts`. |
+| Disclosure states, HTTP vs WebSocket | **Unified.** `http/nrpHandler.ts` now classifies internally (`public`/`stealth`/`closed`) and maps to the wire the same way `pathResolver.ts` does — `stealth` never leaves the process. `packages/GUI/Typescript/.../Beatle.types.ts`'s `NRPDisclosure` matches the canonical `public`/`opened`/`closed`/`contested` set; the `stealth` leak is closed. |
 
 ## Priorities, in order
 
-1. Unify disclosure state across HTTP and WebSocket — `nrpHandler.ts` should map
-   `stealth` to `closed` the same way `pathResolver.ts` already does, and the leak
-   into `Beatle.types.ts` should close with it.
+No open priorities right now — see "Open questions" below for decisions that need a
+human, and the known gap noted next for a bug that still needs its own fix.
 
-Do this before adding more GUI surface state; otherwise the UI will learn and render
-a disclosure state the HTTP contract deliberately hides.
+**Known gap, not yet scheduled:** `handlers/bridgeHandler.ts`'s single-forward path
+(used when synthesis is off, or `maxCandidates=1`) spreads the upstream `payload`
+and then overwrites `patched.target` with its own `bridgeTarget`. If the upstream
+ever returns the real nested envelope (`{ target: { value } }`) instead of a flat
+one, this clobbers the real value before the client sees it — same bug class as the
+`extractPayloadValue` fix, a third, independent site. Needs its own fix and tests,
+separate from any commit above.
 
 ## Open questions you can help resolve
 
