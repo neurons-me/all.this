@@ -37,24 +37,20 @@ or the actual per-package commands in `CLAUDE.md`.
 |---|---|
 | Kernel (`.me`), `netget`, `cleaker` | Operating; core axioms covered by `me/Typescript/tests/axioms.test.ts` |
 | Mesh — single-forward resolution | Implemented (Phases 1–9): parse → discover → filter → score → forward → learn → log |
-| Mesh — synthesis by reduction | Implemented (Phase 10): top-N parallel forward, reduced to `public` / `contested` / `closed`, `_synthesis` exposed on the wire |
+| Mesh — synthesis by reduction | Implemented (Phase 10): top-N parallel forward, reduced to `public` / `opened` / `contested` / `closed`, `_synthesis` exposed on the wire |
 | Adaptive weights | Implemented: global prior + namespace-local posterior, blended by `maturity = min(1, sampleCount/200)` |
-| `SynthesisSource.disclosure` | **Missing.** `modules/monad/Typescript/src/kernel/synthesis.ts` — the type carries `value`, `ok`, `score`, `latencyMs`, not `disclosure`. A quorum can currently form over `closed`/absent sources without that fact being visible to the reduction. |
+| `SynthesisSource.disclosure` | **Implemented.** `modules/monad/Typescript/src/kernel/synthesis.ts` now carries per-source disclosure. Only `public`/`opened` sources are value-eligible for quorum; `closed`/`contested` sources remain visible in the audit trail without forming false null quorums. |
 | Canonical namespace grammar | **Unified for the monad bridge.** `modules/monad/Typescript/src/runtime/bridge.ts` now imports `parseNrpTarget` from `cleaker`, a canonical NRP wrapper built on `parseNamespaceExpression`. The legacy `parseTarget` / `parseMeTarget` compatibility path remains available for older `cleaker("me://...")` callers. |
 | Disclosure states, HTTP vs WebSocket | **Inconsistent.** `http/pathResolver.ts` correctly collapses `stealth` to `closed` on the wire. `http/nrpHandler.ts` (the `/nrp` WebSocket path) still carries all four states including `stealth` — and that leak reaches `packages/GUI/Typescript/.../Beatle.types.ts`. |
 
 ## Priorities, in order
 
-1. Add `disclosure` to `SynthesisSource`, and make quorum reduction respect it —
-   `public`/`opened` sources should be eligible for a value quorum; `closed` sources
-   should be visible in the audit trail but not silently treated as agreeing nulls.
-2. Unify disclosure state across HTTP and WebSocket — `nrpHandler.ts` should map
+1. Unify disclosure state across HTTP and WebSocket — `nrpHandler.ts` should map
    `stealth` to `closed` the same way `pathResolver.ts` already does, and the leak
    into `Beatle.types.ts` should close with it.
 
-Do these in this order. Disclosure reduction should be fixed before the WebSocket/UI
-cleanup, so the wire-visible states and the synthesis audit trail converge together
-instead of drifting again.
+Do this before adding more GUI surface state; otherwise the UI will learn and render
+a disclosure state the HTTP contract deliberately hides.
 
 ## Open questions you can help resolve
 
