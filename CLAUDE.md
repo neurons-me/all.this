@@ -185,9 +185,9 @@ Surface config lives in `modules/monad/Typescript/env/self.json` (not committed;
 | Kernel internals | `me/Typescript/src/me.ts`, `core-write.ts`, `secret-context.ts` |
 | Axioms / invariants | `me/Typescript/tests/axioms.test.ts`, `me/Typescript/docs/Axioms.md` |
 | Monad HTTP routing | `modules/monad/Typescript/src/app.ts`, `handlers/ledgerHandler.ts` |
-| Namespace resolution | neurons-me.github.io/NRP |
-| NRP protocol spec | `neurons-me.github.io/NRP/Namespace-Protocol-Resolution.md` |
-| NRP implementation status | `neurons-me.github.io/NRP/status.md` |
+| NRP protocol spec (normative) | `modules/monad/Typescript/typedocs/NRP-v0.3.0.md` — canonical source lives with the implementation (monad), not the public site |
+| NRP implementation status | `modules/monad/Typescript/typedocs/Mesh/status.md` |
+| NRP public overview (non-canonical) | `https://neurons-me.github.io/NRP/` — thin index/map only, links back to the above; never the source of truth |
 | Disclosure envelope | `modules/monad/Typescript/src/http/pathResolver.ts`, `http/disclosure.ts` |
 | Surface registration | `modules/monad/Typescript/src/runtime/netgetRegistration.ts` |
 | Monad mesh scoring | `modules/monad/Typescript/src/kernel/scoring.ts`, `meshSelect.ts`, `patchBay.ts` |
