@@ -5,6 +5,23 @@
   "description": "The complete neurons.me ecosystem — all.this",
   "author": "sui Gn",
   "license": "MIT",
+  "exports": {
+    "./browser": {
+      "types": "./browser.ts",
+      "import": "./browser.ts"
+    },
+    "./server": {
+      "types": "./server.ts",
+      "import": "./server.ts"
+    }
+  },
+  "dependencies": {
+    "this.me": "workspace:*",
+    "cleaker": "workspace:*",
+    "monad.ai": "workspace:*",
+    "netget": "workspace:*",
+    "this.gui": "workspace:*"
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -16,7 +33,8 @@
   },
   "devDependencies": {
     "turbo": "^2.0.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "tsx": "^4.20.6"
   },
   "engines": {
     "node": ">=20.0.0"
