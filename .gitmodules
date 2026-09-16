@@ -19,3 +19,6 @@
 [submodule "packages/url"]
 	path = packages/url
 	url = https://github.com/neurons-me/this.url.git
+[submodule "this.DOM"]
+	path = this.DOM
+	url = https://github.com/neurons-me/this.DOM
