@@ -105,7 +105,36 @@ After rebuilding GUI, sync UMD to both netget asset locations:
 | **Gateway** | `netget` | OpenResty config generation. Routes hostnames → monads via `surface_proxy.lua`. |
 | **UI** | `GUI` | React component library compiled to UMD, loaded by monad's HTML shell. |
 
-### `this.me` kernel
+### No module owns a domain — `window.location` is the only anchor
+
+Confirmed 2026-09-16, after removing the last hardcoded root
+(`local.cleaker`/`cleaker.me`) from `CleakerLanding.tsx`: none of the
+layers above are tied to a specific hostname, and none should be. Each is
+a direct, portable load — `this.me`, `cleaker`, `monad.ai`, `netget`, `GUI`
+(and the in-progress `this.url`/`this.DOM`, see
+`packages/GUI/Typescript/src/gui/All.This/NRP/Beatle/SetChemistry.findings.md`)
+all run identically regardless of which domain they're served from. The
+one legitimate exception is the physical location of whatever's currently
+running — `window.location` in a browser, `req.headers['host']` in a
+server process (`window` doesn't exist in Node; `nrpHandler.ts`'s own
+`deriveEndpoints()` already reads the request's Host header for exactly
+this reason). Neither is a hardcoded value; both are a physical fact about
+the current page/request, safe to read for "where am I" (never for "what
+does this namespace mean," which is a protocol question, not a location
+one — see SetChemistry.findings.md's "relative-name resolution context"
+case for why guessing the second from the first is wrong even when it
+looks convenient).
+
+`window.location`'s own two-part shape (client-side; the server-side
+equivalent is just `req.url`/`req.headers['host']` split the same way)
+mirrors NRP's `me://namespace/path` almost exactly: `location.origin` is
+the namespace-context anchor (which root you're standing on),
+`location.pathname` is where locally-resolved state actually lives —
+bookmarkable, shareable, refresh-safe. `CleakerLanding.tsx`'s
+own routes (`/users`, `/blockchain`, `/keychain`, `/url`) are exactly this:
+each one a `path` segment carrying real resolved context, the same
+relationship `me://` has to its own path component, just reflected in the
+one URL bar a browser tab actually has.
 
 `new ME(seed)` creates the kernel root. The `seed` (64-hex string) is the **namespace authority** — it is not the hostname. Everything cryptographic derives from it:
 
@@ -174,7 +203,15 @@ Surface config lives in `modules/monad/Typescript/env/self.json` (not committed;
 
 2. **`surface_proxy.lua` ranks trust, it does not verify claims**: it now has a trust-tier system (`owner > admin > peer > guest`, computed at registration time by `apps.lua`'s `derive_trust()` against `gateway-claims.json`) and logs a `WARNING` when two same-tier candidates disagree on `identityHash` for the same host — better than the old silent string-only match, but still not verification. Routing is decided by relative registration-time trust ranking, not by checking that a candidate's `identityHash` holds an actual, currently-valid claim for the namespace it's answering for. Two different namespaces with the same hostname string and the same trust tier are still indistinguishable — the mismatch is only ever logged, never rejected. Closing this depends on gap #1 above (surface claims) existing first.
 
+   **Now directly load-bearing (2026-09-12), not just a routing-time concern**: `netget`'s own gateway-setup claim flow (`gatewaySetupSession.ts`'s `commitSignedClaim`) resolves which monad serves a namespace via `resolveSurface()` — reading the same `apps.json` this gap describes. The claim flow's own signature/claim-identity verification is real and independently checked, but it trusts `resolveSurface()`'s answer to know *which* monad to check against; if this gap let a rogue local reporter win the trust/recency reduction, it would redirect that check to a fabricated origin. Contained today only because mesh registration is hard-loopback-enforced on both the monad client (`netgetRegistration.ts`) and netget's Lua ingest (`apps.lua`'s `is_local_request()`) — exploiting it needs code execution on the same machine. That containment disappears the moment cross-host mesh work begins, so closing this gap (signed heartbeats) is a hard prerequisite before that work, not an optional hardening pass. See `gatewaySetupSession.ts`'s own comment at its `resolveSurface()` call site, and session memory `project_netget_gateway_claim_authority.md`/`project_mesh_roadmap_phases.md`.
+
 3. **`modules/monad/npm` must not exist**: if you see a process started from that path, it is a zombie from when `npm` was a symlink to `Typescript`. Kill it and restart from `modules/monad/Typescript/`.
+
+4. **`monad.ai`'s own `/.mesh/announce` (2026-09-12): substantially hardened, one gap deliberately not closeable here.** This is a genuinely different, cross-host-capable registration path from netget's loopback-locked `/apps/report` (gap #2 above) — distinguished this session after independent review found it was previously wide open (no auth, no destination validation). Now closed: signature verification (`status: 'pending'|'verified'` on `MonadIndexEntry`), first-key-wins re-announce protection (checked regardless of whether the LATER announce itself verifies — an earlier version of this fix had a real bypass here, found in review and fixed), a squatting check applied identically to both `claimed_namespaces` and the primary `namespace` field (an unclaimed namespace passes through, a namespace someone else genuinely holds does not), a hard-coded block on the cloud metadata address in `bridgeHandler.ts`, an operator-configurable trusted-key allowlist that fails closed (not open) when misconfigured, and the pending-gate applied to every selection path including the explicit `?monad=name` shortcut. **Not closed**: `identity_hash` is now included in the signed payload (can't be swapped post-signing), but nothing cryptographically binds a signing key to the `.me` identity it claims to speak for — that's gap #1 above (surface identity is unclaimed), not something this pass could close without inventing a real delegation mechanism. See `modules/monad/Typescript/src/http/meshAnnounce.ts`'s own doc comments and `tests/NRP/meshAnnounce.test.ts` for the exact guarantees and their tests.
+
+5. **RESOLVED 2026-09-13 — namespace-derived gateway claims used to break `grantAdmin`/`revokeAdmin`/`transferOwner` in real runtime.** `GatewayClaimsManager`'s three methods wrote through the OLD model — `commitSnapshot()` → `writeLedger()` → an UNSIGNED `writeToMonad()` HTTP call — correct only when netget owned a dedicated, unclaimed monad; once the monad genuinely held a `.me` claim, `commandHandler.ts`'s write-auth gate rejected it with `NAMESPACE_WRITE_FORBIDDEN` (confirmed live pre-fix). **Fix — the E+A signed-delegation mechanism**: canonical owner/admins/grants state now lives in `.me` itself, in a new kernel-root, namespace-independent branch (`daemon.gateways.<gatewayId>`, deliberately not nested under any user's `users.<handle>` tree — see `modules/monad/Typescript/src/claim/gatewayAuthority.ts`'s own header comment), mutated only via signed grant/revoke/transfer/bootstrap calls verified independently by whichever monad holds that branch (never trusting netget's own prior check). Two checks per mutation, never conflated: "vigencia" (is the signing keychain key currently active) and "autorización" (does that identity currently hold gateway authority, per the branch's OWN state — never the keychain's own `admin` bit, which means something narrower). Netget's `GatewayClaimsManager.materializeFromGatewayAuthority()` only ever reads this branch back to refresh the local `gateway-claims.json` cache Lua consumes — read access, never write permission. The OLD unsigned methods (`bootstrapOwner`/`grantAdmin`/`revokeAdmin`/`transferOwner`) are kept, doc-commented LEGACY, for `gateway-claims.test.ts`'s own self-owned-ledger model coverage only. **Behavior change worth knowing**: deleting `gateway-claims.json` locally no longer means "unbound" — the canonical branch on the monad is the real source of truth now (see `gateway-setup-session.test.ts`'s case 7h). **MVP scope**: assumes the acting identity's keychain and the gateway's canonical branch live on the SAME monad (today's real single-operator setup) — a second admin on a genuinely different host is future work, not solved here. See `modules/netget/Typescript/tests/gateway-claims-live-write-integration.test.ts` and `modules/monad/Typescript/tests/gatewayAuthority.test.ts` for the live-verified guarantees, and session memory `project_mesh_announce_trust_hardening.md`'s "RESOLVED" section for the full design rationale (options A-E considered, why E+A was chosen).
+
+   **Hardening pass, 2026-09-13 (before any UI/VM work) — three guarantees investigated and live-verified, disposable infra + real process restarts, not just unit coverage**: (1) `bootstrapGatewayAuthority` now also requires the claiming namespace to be rooted in this installation's own configured identity (`isNamespaceLocalToThisInstallation`, reusing `kernel/manager.ts`'s `isRecognizedOwnRootConstant`) — investigation found the specific attack this closes (claim a foreign namespace here, bootstrap someone else's gatewayId) was already unreachable via the standard claim+keychain flow (a separate, pre-existing guard blocks obtaining an active key for a genuinely foreign namespace), so this is explicit defense-in-depth, not a newly-closed live exploit; concurrent bootstrap requests for the same gatewayId are confirmed atomic (exactly one winner) via a live two-request race test. (2) `GatewayClaimsManager.materializeFromGatewayAuthority()` had a real bug — any unreachable/wrong/non-OK response silently downgraded the local cache to an empty "needs bootstrap" snapshot; fixed to preserve the existing local cache whenever the canonical branch can't be verified, confirmed via a real killed-and-relaunched monad process (not just a new JS object) that the canonical branch alone restores the original owner after the local cache is wiped. (3) revoking gateway-admin status is confirmed to kill an already-issued, still-signing-key-valid admin session on its very next use, while an identity that retains authority is unaffected. A minor, unrelated robustness gap was also found and spun off separately (not fixed here): registering a keychain key for a namespace foreign to a monad's own root crashes with an uncaught 500 instead of a clean 4xx.
 
 ---
 
