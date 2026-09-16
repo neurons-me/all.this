@@ -16,3 +16,6 @@
 [submodule "neurons.me"]
 	path = neurons.me
 	url = https://github.com/neurons-me/neurons.me.git
+[submodule "packages/url"]
+	path = packages/url
+	url = https://github.com/neurons-me/this.url.git
