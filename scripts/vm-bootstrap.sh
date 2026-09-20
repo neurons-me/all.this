@@ -2,14 +2,18 @@
 # vm-bootstrap.sh -- stand up (or bring current) a netget gateway VM from the repo alone.
 #
 #   curl -fsSL https://raw.githubusercontent.com/neurons-me/all.this/main/scripts/vm-bootstrap.sh -o /tmp/vm-bootstrap.sh
-#   bash /tmp/vm-bootstrap.sh --gateway-namespace netget.site --namespace cleaker:cleaker.me:8162
+#   bash /tmp/vm-bootstrap.sh --gateway-monad netget:cleaker.me:8161 --main-server-name netget.site
 #
-# What it leaves running: ONE runtime per namespace. The gateway's monad
-# (netget, netget.site, :8161) also serves the gateway's API (netget/gateway);
-# each --namespace name:namespace:port is a monad that serves that namespace and the
-# Cleaker landing (its own front end). OpenResty (already installed) is configured
-# from the domains registered in the gateway's kernel, and its config and Lua
-# handlers are applied as a pair, validated, and undone if they do not validate.
+# What it leaves running: ONE monad for the identity namespace (--gateway-monad
+# name:namespace:port, e.g. netget:cleaker.me:8161). It serves the namespace (its
+# root, www and every handle) with the Cleaker app, AND it mounts the gateway's API
+# (netget/gateway): the gateway's first claim is only accepted for an identity that
+# lives on that very monad, so the two cannot be separate processes. The Cleaker app
+# reaches the gateway at /netget on the namespace's own address; --main-server-name is
+# the host of the older admin screens (Domains, Logs). --extra-monad adds monads for
+# further namespaces (no gateway). OpenResty (already installed) is configured from the
+# domains registered in the kernel; config and Lua handlers are applied as a pair,
+# validated, and undone if they do not validate.
 #
 # It never touches /etc/letsencrypt, OpenResty's binary, or anything that is not
 # netget's. --wipe (with --yes-wipe) first removes netget's own software and state
@@ -21,19 +25,17 @@ set -euo pipefail
 
 ROOT="${ROOT:-/mnt/neuroverse/all.this}"
 REPO="${REPO:-https://github.com/neurons-me/all.this.git}"
-GATEWAY_NAMESPACE=""
-GATEWAY_MONAD="${GATEWAY_MONAD:-netget}"
-GATEWAY_PORT="${GATEWAY_PORT:-8161}"
-NAMESPACES=()            # name:namespace:port
+GATEWAY_SPEC=""          # name:namespace:port -- the namespace's monad, which also mounts the gateway
+MAIN_SERVER_NAME=""      # host of the admin screens
+EXTRA=()                 # name:namespace:port
 DRY=0; WIPE=0; YES_WIPE=0
 
 usage() { sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'; exit "${1:-0}"; }
 while [ $# -gt 0 ]; do
   case "$1" in
-    --gateway-namespace) GATEWAY_NAMESPACE="$2"; shift 2;;
-    --gateway-monad)     GATEWAY_MONAD="$2"; shift 2;;
-    --gateway-port)      GATEWAY_PORT="$2"; shift 2;;
-    --namespace)         NAMESPACES+=("$2"); shift 2;;
+    --gateway-monad)     GATEWAY_SPEC="$2"; shift 2;;
+    --main-server-name)  MAIN_SERVER_NAME="$2"; shift 2;;
+    --extra-monad)       EXTRA+=("$2"); shift 2;;
     --root)              ROOT="$2"; shift 2;;
     --wipe)              WIPE=1; shift;;
     --yes-wipe)          YES_WIPE=1; shift;;
@@ -42,7 +44,10 @@ while [ $# -gt 0 ]; do
     *) echo "unknown option: $1" >&2; usage 1;;
   esac
 done
-[ -n "$GATEWAY_NAMESPACE" ] || { echo "--gateway-namespace is required (e.g. netget.site)" >&2; exit 1; }
+[ -n "$GATEWAY_SPEC" ] || { echo "--gateway-monad name:namespace:port is required (e.g. netget:cleaker.me:8161)" >&2; exit 1; }
+[ -n "$MAIN_SERVER_NAME" ] || { echo "--main-server-name is required (the admin screens' host, e.g. netget.site)" >&2; exit 1; }
+IFS=: read -r GATEWAY_MONAD GATEWAY_NAMESPACE GATEWAY_PORT <<<"$GATEWAY_SPEC"
+[ -n "$GATEWAY_MONAD" ] && [ -n "$GATEWAY_NAMESPACE" ] && [ -n "$GATEWAY_PORT" ] || { echo "--gateway-monad must be name:namespace:port" >&2; exit 1; }
 
 say()  { printf '\n\033[1m== %s\033[0m\n' "$*"; }
 note() { printf '   %s\n' "$*"; }
@@ -129,11 +134,11 @@ wait_http() { # url, seconds
   local i; for i in $(seq 1 "$2"); do curl -fs -m 4 -o /dev/null "$1" && return 0; sleep 1; done; return 1
 }
 
-say "gateway monad: $GATEWAY_MONAD ($GATEWAY_NAMESPACE, :$GATEWAY_PORT)"
+say "the namespace's monad, which also mounts the gateway: $GATEWAY_MONAD ($GATEWAY_NAMESPACE, :$GATEWAY_PORT)"
 # Its environment is written BEFORE its first start, so it never runs on the default
 # seed (its namespace's name, which is public). Its seed is netget's own persisted identity.
 run netget gateway-adopt "$GATEWAY_MONAD" --namespace "$GATEWAY_NAMESPACE" --port "$GATEWAY_PORT" \
-    --main-server-name "$GATEWAY_NAMESPACE" --use-gateway-seed
+    --main-server-name "$MAIN_SERVER_NAME" --frontend "$UI_DIST" --use-gateway-seed
 # OpenResty's worker writes apps.json (where monads register) into <data dir>/runtime; a
 # directory netget just created for its own user would refuse it. Group it to the worker
 # and make it group-writable + setgid, so files keep that group whoever writes them.
@@ -155,7 +160,7 @@ if running "$GATEWAY_MONAD"; then note "already running"; else
 fi
 [ "$DRY" = 1 ] || wait_http "http://127.0.0.1:$GATEWAY_PORT/healthcheck" 90 || die "the gateway monad did not come up (monads logs $GATEWAY_MONAD --tail)"
 
-for spec in "${NAMESPACES[@]:-}"; do
+for spec in "${EXTRA[@]:-}"; do
   [ -n "$spec" ] || continue
   IFS=: read -r name ns port <<<"$spec"
   say "namespace monad: $name ($ns, :$port)"
@@ -178,10 +183,11 @@ add_domain() { # domain type
   code="$(curl -s -m 30 -o /dev/null -w '%{http_code}' -X POST -H 'content-type: application/json' -d "$body" "http://127.0.0.1:$GATEWAY_PORT/add-domain")"
   case "$code" in 200) note "added $d";; 409) note "$d already registered";; *) die "add-domain $d answered $code";; esac
 }
-add_domain "$GATEWAY_NAMESPACE" main_server
+add_domain "$MAIN_SERVER_NAME" main_server
 # A namespace answers its root, www and every handle under it: the wildcard is registered
 # with the root (its certificate covers both), and nginx then names both in one block.
-for spec in "${NAMESPACES[@]:-}"; do [ -n "$spec" ] || continue; IFS=: read -r _ ns _ <<<"$spec"; add_domain "$ns" proxy; add_domain "*.$ns" proxy; done
+add_domain "$GATEWAY_NAMESPACE" proxy; add_domain "*.$GATEWAY_NAMESPACE" proxy
+for spec in "${EXTRA[@]:-}"; do [ -n "$spec" ] || continue; IFS=: read -r _ ns _ <<<"$spec"; add_domain "$ns" proxy; add_domain "*.$ns" proxy; done
 
 # ── nginx: conf + Lua together, validated, undone if invalid ──────────────────
 say "OpenResty"
@@ -190,14 +196,18 @@ run netget gateway-adopt "$GATEWAY_MONAD" --apply-nginx
 # ── what to check, and what is left for a person ──────────────────────────────
 say "check"
 if [ "$DRY" = 0 ]; then
-  for d in "$GATEWAY_NAMESPACE" $(for s in "${NAMESPACES[@]:-}"; do [ -n "$s" ] && { IFS=: read -r _ ns _ <<<"$s"; echo "$ns"; }; done); do
-    printf '   %-24s https -> %s\n' "$d" "$(curl -sk -m 15 -o /dev/null -w '%{http_code}' --resolve "$d:443:127.0.0.1" "https://$d/")"
+  hosts="$MAIN_SERVER_NAME $GATEWAY_NAMESPACE www.$GATEWAY_NAMESPACE"
+  for s in "${EXTRA[@]:-}"; do [ -n "$s" ] && { IFS=: read -r _ ns _ <<<"$s"; hosts="$hosts $ns"; }; done
+  for d in $hosts; do
+    printf '   %-24s https -> %s\n' "$d" "$(curl -sk -m 15 -o /dev/null -w '%{http_code}' -H 'Accept: text/html' --resolve "$d:443:127.0.0.1" "https://$d/")"
   done
 fi
 cat <<MSG
 
 Done. What is left is yours:
-  1. Claim the gateway:   netget setup-code     then open https://$GATEWAY_NAMESPACE/ and enter it
-  2. Add the other domains and their certificates from the gateway (or POST /add-domain on
-     127.0.0.1:$GATEWAY_PORT); certificates issued by hand are used from /etc/letsencrypt.
+  1. Claim the gateway, in the Cleaker app itself:
+       netget setup-code        (prints a short-lived code)
+       open https://$GATEWAY_NAMESPACE/netget , enter it, sign in or register on $GATEWAY_NAMESPACE, sign.
+  2. Add the other domains and their certificates (the older admin screens are at https://$MAIN_SERVER_NAME/,
+     or POST /add-domain on 127.0.0.1:$GATEWAY_PORT); certificates issued by hand are used from /etc/letsencrypt.
 MSG
