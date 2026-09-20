@@ -68,14 +68,16 @@ UI_DIST="$ROOT/modules/netget/Typescript/assets/main-server-ui/dist"
 
 # ── WIPE: netget's own software and state, nothing else ────────────────────────
 wipe_targets() {
-  printf '%s\n' "$ROOT" "$HOME/netget" "$HOME/.get" "$HOME/.monad" "$HOME/.monad-secrets" "$HOME/.netget" "$HOME/deploy-backups" "/opt/.get"
+  # Not $HOME/.netget: it holds the mkcert certificates the generated OpenResty config
+  # names for the local admin hosts; without them `openresty -t` (correctly) refuses it.
+  printf '%s\n' "$ROOT" "$HOME/netget" "$HOME/.get" "$HOME/.monad" "$HOME/.monad-secrets" "$HOME/deploy-backups" "/opt/.get"
 }
 if [ "$WIPE" = 1 ]; then
   # A script must not delete the directory it is running from.
   case "$(cd "$(dirname "$0")" && pwd)/" in
     "$ROOT"/*) tmp="$(mktemp /tmp/vm-bootstrap.XXXXXX.sh)"; cp "$0" "$tmp"; note "running from a copy ($tmp): $ROOT is about to be replaced"; exec bash "$tmp" "$@";;
   esac
-  say "WIPE (netget's own software and state; never /etc/letsencrypt, OpenResty's binary, ollama, vscode)"
+  say "WIPE (netget's own software and state; never /etc/letsencrypt, ~/.netget certs, OpenResty's binary, ollama, vscode)"
   wipe_targets | while read -r t; do [ -e "$t" ] && note "will remove: $t"; done
   [ "$YES_WIPE" = 1 ] || die "this deletes the paths above and cannot be undone. Run again with --yes-wipe (or without --wipe to keep them)."
   if [ -f "$MONADS_CLI" ]; then
@@ -131,6 +133,15 @@ say "gateway monad: $GATEWAY_MONAD ($GATEWAY_NAMESPACE, :$GATEWAY_PORT)"
 # seed (its namespace's name, which is public). Its seed is netget's own persisted identity.
 run netget gateway-adopt "$GATEWAY_MONAD" --namespace "$GATEWAY_NAMESPACE" --port "$GATEWAY_PORT" \
     --main-server-name "$GATEWAY_NAMESPACE" --use-gateway-seed
+# OpenResty's worker writes apps.json (where monads register) into <data dir>/runtime; a
+# directory netget just created for its own user would refuse it. Group it to the worker
+# and make it group-writable + setgid, so files keep that group whoever writes them.
+DATA_DIR="${NETGET_DATA_DIR:-$HOME/.get}"
+WORKER="$(ps -eo user,cmd 2>/dev/null | awk '/nginx: worker/{print $1; exit}' || true)"; WORKER="${WORKER:-www-data}"
+run mkdir -p "$DATA_DIR/runtime"
+run sudo -n chgrp "$WORKER" "$DATA_DIR" "$DATA_DIR/runtime"
+run chmod 2775 "$DATA_DIR/runtime"
+run chmod g+rx "$DATA_DIR"
 if running "$GATEWAY_MONAD"; then note "already running"; else
   run monads start "$GATEWAY_MONAD" --namespace "$GATEWAY_NAMESPACE" --port "$GATEWAY_PORT"
 fi
