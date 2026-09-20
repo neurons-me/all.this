@@ -181,7 +181,7 @@ add_domain() { # domain type
   body="$body}"
   if [ "$DRY" = 1 ]; then note "+ POST /add-domain $body (with the monad's internal token)"; return; fi
   # The gateway's routes take the machine's own callers: the monad keeps a token (0600) next to its state.
-  local tokfile="${MONADS_HOME:-$HOME/.monad}/monads/$GATEWAY_MONAD/internal.token"
+  local tokfile="${MONADS_HOME:-$HOME/.monad/monads}/$GATEWAY_MONAD/internal.token"  # MONADS_HOME already is the .../monads directory
   [ -r "$tokfile" ] || die "no internal token at $tokfile (has the monad started?)"
   code="$(curl -s -m 30 -o /dev/null -w '%{http_code}' -X POST -H 'content-type: application/json' -H "x-monad-internal-token: $(cat "$tokfile")" -d "$body" "http://127.0.0.1:$GATEWAY_PORT/add-domain")"
   case "$code" in 200) note "added $d";; 409) note "$d already registered";; *) die "add-domain $d answered $code";; esac
