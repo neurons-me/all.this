@@ -119,6 +119,7 @@ run bash -c "cd '$ROOT' && pnpm --filter 'monad.ai...' --workspace-concurrency=1
 say "build: GUI library, then the front end that the monads serve"
 run bash -c "cd '$ROOT/packages/GUI/Typescript' && npx vite build && npm run build:umd"
 run bash -c "cd '$ROOT/modules/netget/Typescript/src/htmls/Netget-REACT/frontend_local' && npm install --no-package-lock --no-audit --no-fund && npx vite build"
+run chmod +x "$MONADS_CLI"
 [ "$DRY" = 1 ] || [ -f "$UI_DIST/index.html" ] || die "the front end was not built ($UI_DIST/index.html)"
 
 # ── monads ────────────────────────────────────────────────────────────────────
@@ -136,7 +137,14 @@ run netget gateway-adopt "$GATEWAY_MONAD" --namespace "$GATEWAY_NAMESPACE" --por
 # OpenResty's worker writes apps.json (where monads register) into <data dir>/runtime; a
 # directory netget just created for its own user would refuse it. Group it to the worker
 # and make it group-writable + setgid, so files keep that group whoever writes them.
-DATA_DIR="${NETGET_DATA_DIR:-$HOME/.get}"
+# The directory netget itself resolves (a writable /opt/.get before ~/.get), not a guess:
+# OpenResty reads and writes the one it is configured with.
+DATA_DIR="${NETGET_DATA_DIR:-}"
+if [ -z "$DATA_DIR" ] && [ "$DRY" = 0 ]; then
+  DATA_DIR="$(cd "$ROOT/modules/netget/Typescript" && "$NODE" --import tsx --no-warnings -e "import('./src/utils/netgetPaths.js').then(m=>console.log(m.getNetgetDataDir()))")"
+fi
+DATA_DIR="${DATA_DIR:-$HOME/.get}"
+note "data dir: $DATA_DIR"
 WORKER="$(ps -eo user,cmd 2>/dev/null | awk '/nginx: worker/{print $1; exit}' || true)"; WORKER="${WORKER:-www-data}"
 run mkdir -p "$DATA_DIR/runtime"
 run sudo -n chgrp "$WORKER" "$DATA_DIR" "$DATA_DIR/runtime"
@@ -171,7 +179,9 @@ add_domain() { # domain type
   case "$code" in 200) note "added $d";; 409) note "$d already registered";; *) die "add-domain $d answered $code";; esac
 }
 add_domain "$GATEWAY_NAMESPACE" main_server
-for spec in "${NAMESPACES[@]:-}"; do [ -n "$spec" ] || continue; IFS=: read -r _ ns _ <<<"$spec"; add_domain "$ns" proxy; done
+# A namespace answers its root, www and every handle under it: the wildcard is registered
+# with the root (its certificate covers both), and nginx then names both in one block.
+for spec in "${NAMESPACES[@]:-}"; do [ -n "$spec" ] || continue; IFS=: read -r _ ns _ <<<"$spec"; add_domain "$ns" proxy; add_domain "*.$ns" proxy; done
 
 # ── nginx: conf + Lua together, validated, undone if invalid ──────────────────
 say "OpenResty"
