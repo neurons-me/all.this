@@ -7,7 +7,8 @@ const GUI = '/Users/suign/Desktop/Neuroverse/all.this/packages/GUI/Typescript/';
 const { chromium } = createRequire(GUI)('playwright');
 
 const PORT = 18461; // the monad
-const TLS = process.env.TLS === '1'; // real TLS via tls-proxy.mjs instead of a "treat as secure" flag
+const EDGE = process.env.EDGE === '1'; // through the real generated OpenResty (edge.mts); implies TLS
+const TLS = EDGE || process.env.TLS === '1'; // real TLS via tls-proxy.mjs / OpenResty instead of a "treat as secure" flag
 const BROWSER_PORT = TLS ? 18443 : PORT;
 const SCHEME = TLS ? 'https' : 'http';
 const ORIGINS = { apex: `${SCHEME}://acme.test:${BROWSER_PORT}`, www: `${SCHEME}://www.acme.test:${BROWSER_PORT}`, handle: `${SCHEME}://jabellae.acme.test:${BROWSER_PORT}` };
@@ -22,7 +23,8 @@ const browser = await_(chromium.launch({
   executablePath: process.env.HOME + '/Library/Caches/ms-playwright/chromium-1208/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing',
   args: [
     '--headless=new',
-    '--host-resolver-rules=MAP acme.test 127.0.0.1, MAP *.acme.test 127.0.0.1',
+    // EDGE: resolve to this machine's LAN address so nginx sees a non-loopback peer, as it does in production
+    `--host-resolver-rules=MAP acme.test ${EDGE ? tlsState.LAN_IP : '127.0.0.1'}, MAP *.acme.test ${EDGE ? tlsState.LAN_IP : '127.0.0.1'}`,
     ...(TLS ? [`--ignore-certificate-errors-spki-list=${tlsState.SPKI}`] : [`--unsafely-treat-insecure-origin-as-secure=${Object.values(ORIGINS).join(',')}`]),
   ],
 }));
@@ -146,6 +148,39 @@ function await_(p) { return p; }
   check(`${CLAIM_AT}: the gateway has an owner and is bootstrapped`, !!identity.owner && identity.bootstrapped === true, `adminCount=${identity.adminCount}`);
   sameOriginOnly(claimOrigin, CLAIM_AT, from);
 
+  if (EDGE) {
+    const log = fs.readFileSync(tlsState.EDGE_LOG, 'utf8').split('\n').filter(Boolean);
+    const parse = (l) => { const m = l.match(/^(\S+) .*?"(\S+) (\S+) [^"]*" (\d{3}) /); return m ? { peer: m[1], method: m[2], path: m[3], status: Number(m[4]) } : null; };
+    const rows = log.map(parse).filter(Boolean);
+    const writes = rows.filter((r) => r.method !== 'GET' && r.method !== 'HEAD' && r.method !== 'OPTIONS');
+    const paths = [...new Set(writes.map((r) => `${r.method} ${r.path.split('?')[0]}`))];
+    console.log(`INFO  edge: writes that went through nginx: ${paths.join(', ')}`);
+    for (const p of ['/setup/verify-code', '/setup/challenge', '/setup/verify-callback', '/setup/claim']) {
+      const hits = writes.filter((r) => r.path.split('?')[0] === p);
+      check(`edge: POST ${p} went through nginx and was answered 2xx`, hits.length > 0 && hits.every((h) => h.status >= 200 && h.status < 300), hits.map((h) => h.status).join(','));
+    }
+    // The www run signs in twice, on purpose, with an identity that only the apex holds a key for; the monad
+    // answers those 403 (its own IDENTITY_MISMATCH), and the edge must pass them through unchanged. Any other
+    // refused write is a failure.
+    const deliberate = CLAIM_AT === 'www' ? 2 : 0;
+    const refusedWrites = writes.filter((r) => r.status >= 400);
+    const unexpected = refusedWrites.filter((r) => !(r.path.split('?')[0] === '/claims/signIn' && r.status === 403));
+    const signInRefusals = refusedWrites.length - unexpected.length;
+    check('edge: no write the flow made was refused, except the monad\'s own 403 to the deliberate wrong-door sign-ins (registration, key recovery, setup, claim)',
+      writes.length > 0 && unexpected.length === 0 && signInRefusals === deliberate,
+      unexpected.slice(0, 4).map((r) => `${r.method} ${r.path} ${r.status}`).join(' ') || `${writes.length} writes, ${signInRefusals} deliberate 403 (expected ${deliberate})`);
+    const peers = [...new Set(rows.filter((r) => r.method === 'POST').map((r) => r.peer))];
+    check('edge: nginx saw a non-loopback peer for the writes (the operator-only rules were not bypassed by loopback)', peers.length > 0 && peers.every((p) => p === tlsState.LAN_IP), peers.join(','));
+    const refusedReads = [...new Set(rows.filter((r) => (r.method === 'GET') && (r.status === 401 || r.status === 403 || r.status === 400)).map((r) => `${r.method} ${r.path.split('?')[0]} ${r.status}`))];
+    console.log(`INFO  edge: reads answered 400/401/403 (cross-origin reads to the apex are refused by the gateway origin guard): ${refusedReads.length ? refusedReads.join(', ') : 'none'}`);
+    // the operator-only control routes stay closed to this same non-loopback peer, through the same edge
+    const https = require('https');
+    const probe = (method, p) => new Promise((resolve) => { const r = https.request({ host: tlsState.LAN_IP, port: BROWSER_PORT, method, path: p, servername: 'acme.test', rejectUnauthorized: false, headers: { host: `acme.test:${BROWSER_PORT}`, 'content-type': 'application/json' } }, (res) => { res.resume(); resolve(res.statusCode); }); r.on('error', () => resolve(0)); r.end(method === 'POST' ? '{}' : undefined); });
+    const gw = await probe('POST', '/__gateway/claim');
+    check('edge: the monad-internal /__gateway/claim is not a success through the edge for this peer', gw >= 400, `status ${gw}`);
+    const cert = tlsState.EDGE_SANS || '';
+    check('edge: the certificate carries both acme.test and *.acme.test', /DNS:acme\.test/.test(cert) && /DNS:\*\.acme\.test/.test(cert), cert.slice(0, 60));
+  }
   if (TLS) {
     const secure = await page.evaluate(() => [location.protocol, window.isSecureContext, !!(crypto && crypto.subtle)]);
     check('tls: the page is https and a genuine secure context (no "treat as secure" flag)', secure[0] === 'https:' && secure[1] === true && secure[2] === true, secure.join(','));
