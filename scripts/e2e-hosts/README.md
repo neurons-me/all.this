@@ -47,12 +47,15 @@ Marking an origin secure for Chrome is not TLS, and even `TLS=1` is not producti
 
 ## What the runs assert about reads
 
-From every door the client must read the namespace through the transport the page has, never through an address
-built from the namespace's name. Each run asserts: no request goes to another host of the namespace; nothing is
-answered 401/403 (apart from the two deliberate wrong-door sign-ins of the `www` run); the page origin's
-`/__surface` resolves the request to `acme.test` at the apex and at `www` (the monad strips `www`) and to the
-handle's own namespace at a handle door; the sidebar is read from the page origin at the apex and `www`, and not at
-a handle door, whose transport answers for the handle and not for the namespace.
+The disposable monad declares DIFFERENT content in the root's tree (a sidebar item `/root-item`) and in the user's
+(`/handle-item`), so what is checked is that the right content arrives, not only that an error goes away.
+
+From every door the client reads the namespace through the transport the page has, never through an address built
+from its name, and the request says which tree it is about (`?namespace=acme.test`; the connection describes the
+door, not the namespace). Each run asserts: no request goes to another host of the namespace; nothing is answered
+401/403 (apart from the two deliberate wrong-door sign-ins of the `www` run); the page origin's `/__surface`,
+asked by name, resolves to `acme.test`; the sidebar reads are made against the page's own origin and, at `www` and
+a handle door, name their namespace; and the sidebar shows `/root-item` from every door and never `/handle-item`.
 
 So a green run here means the flow and the scheme-sensitive client logic hold; it does not replace
 running the flow on the real deployment's HTTPS edge before relying on it.

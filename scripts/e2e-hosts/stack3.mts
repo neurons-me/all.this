@@ -39,6 +39,16 @@ const app: any = await createMonadApp({
   guiPkgDistDir: runtimeDir, mePkgDistDir: runtimeDir, cleakerPkgDistDir: runtimeDir, reactUmdDir: runtimeDir, reactDomUmdDir: runtimeDir,
   routesPath: path.join(runtimeDir, "routes.js"), frontendDir: "/tmp/fe-local", modules: ["netget/gateway"], logger: false,
 });
+// DIFFERENT content in the root's tree and in a user's: what a door shows can only be right if the right tree
+// was read, not just if an error went away. Each declares one sidebar item.
+const memory: any = await import(path.join(NETGET, "node_modules/monad.ai/dist/src/claim/memoryStore.js"));
+const declare = (namespace: string, id: string, label: string, to: string) => {
+  const base = "layout.sidebar.scopes.root";
+  memory.appendSemanticMemory({ namespace, path: `${base}.itemIds`, operator: "=", data: [id], timestamp: Date.now() });
+  memory.appendSemanticMemory({ namespace, path: `${base}.items.${id}`, operator: "=", data: { type: "link", props: { id, label, to, icon: "home" } }, timestamp: Date.now() });
+};
+declare(ROOT, "rootitem", "Root Item", "/root-item");
+declare(`jabellae.${ROOT}`, "handleitem", "Handle Item", "/handle-item");
 console.log("modules:", JSON.stringify(app.monadModules));
 const server = app.listen(PORT, "127.0.0.1", () => console.log(`STACK READY http://${ROOT}:${PORT}`));
 fs.writeFileSync("/tmp/repro3.env", `TMP=${tmp}\nDATA=${data}\nMONADS_HOME=${monadsHome}\nPID=${process.pid}\n`);

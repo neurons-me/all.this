@@ -100,14 +100,17 @@ function await_(p) { return p; }
     check(`${label}: no read or write was refused with 401/403 (apart from the deliberate wrong-door sign-ins)`, unexpectedRefused.length === 0, unexpectedRefused.slice(0, 4).join(', '));
     const sameOriginSurface = responses.filter((r) => r.url.startsWith(origin + '/__surface'));
     const sidebarReads = sinceReqs.filter((r) => /\/layout\/sidebar\//.test(r.url));
-    // what the page's own transport says it resolved the request to: the namespace at apex and www, the handle's at a handle door
-    const expectedAnswer = label === 'handle' ? 'jabellae.acme.test' : 'acme.test';
+    // From every door the page's own transport is asked for the namespace BY NAME (?namespace=), and answers for it:
+    // the door decides the connection, not the tree. (The apex asks nothing: its door already is the namespace.)
     const answers = [...new Set(surfaceNamespaces.filter((x) => x.url.startsWith(origin + '/')).map((x) => x.ns))];
-    check(`${label}: the page origin's /__surface resolves the request to ${expectedAnswer}`, answers.length > 0 && answers.every((a) => a === expectedAnswer), answers.join(','));
-    if (label === 'handle') {
-      check('handle: the page origin answers for the handle, not the namespace, so the sidebar tree of the namespace is not read from it', sameOriginSurface.length > 0 && sidebarReads.length === 0, `${sameOriginSurface.map((r) => r.status).join(',')} surface, ${sidebarReads.length} sidebar reads`);
-    } else {
-      check(`${label}: the namespace's sidebar is read from the page's own origin, confirmed`, sameOriginSurface.some((r) => r.status === 200) && sidebarReads.length > 0 && sidebarReads.every((r) => r.url.startsWith(origin + '/')), `${sidebarReads.length} sidebar reads`);
+    check(`${label}: the page origin's /__surface resolves to acme.test${label === 'apex' ? '' : ' when asked by name'}`, answers.length > 0 && answers.every((a) => a === 'acme.test'), answers.join(','));
+    if (label !== 'apex') {
+      const asked = sinceReqs.filter((r) => /\/__surface\?namespace=acme\.test/.test(r.url) && r.url.startsWith(origin + '/'));
+      check(`${label}: the transport was asked by name (/__surface?namespace=acme.test) on the page's own origin`, asked.length > 0, `${asked.length} requests`);
+    }
+    check(`${label}: the namespace's sidebar is read from the page's own origin`, sameOriginSurface.some((r) => r.status === 200) && sidebarReads.length > 0 && sidebarReads.every((r) => r.url.startsWith(origin + '/')), `${sidebarReads.length} sidebar reads`);
+    if (label !== 'apex') {
+      check(`${label}: the sidebar reads name their namespace (?namespace=acme.test)`, sidebarReads.some((r) => /[?&]namespace=acme\.test/.test(r.url)), `${sidebarReads.filter((r) => /namespace=/.test(r.url)).length} named`);
     }
   };
 
@@ -143,6 +146,11 @@ function await_(p) { return p; }
 
   // ── claim at the chosen origin ─────────────────────────────────────────────────────────────
   await open(claimOrigin);
+  // what the sidebar shows, signed out: the ROOT's declared item, from any door, and never the user's tree
+  await page.waitForSelector('a[href="/root-item"]', { timeout: 8000 }).catch(() => {});
+  const hrefs = await page.$$eval('a[href]', (as) => as.map((a) => a.getAttribute('href')));
+  check(`${CLAIM_AT}: the sidebar shows the root's declared item (content from the right tree)`, hrefs.includes('/root-item'), hrefs.filter((x) => x && x.startsWith('/')).join(' '));
+  check(`${CLAIM_AT}: and not the item declared only in the user's tree`, !hrefs.includes('/handle-item'), hrefs.includes('/handle-item') ? 'handle-item is shown' : '');
   const from = requests.length;
   const claimed = await register(claimName, secret);
   check(`${CLAIM_AT}: registers as ${claimNs} (never doubled)`, claimed === claimNs, claimed);
