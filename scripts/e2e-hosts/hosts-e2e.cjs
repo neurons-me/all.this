@@ -35,7 +35,13 @@ function await_(p) { return p; }
   const ctx = await b.newContext();
   const page = await ctx.newPage();
   const requests = [];
+  const responses = [];
   page.on('request', (r) => requests.push({ method: r.method(), url: r.url() }));
+  const surfaceNamespaces = [];
+  page.on('response', (r) => {
+    responses.push({ url: r.url(), status: r.status() });
+    if (/^https?:\/\/[^/]+\/__surface(\?|$)/.test(r.url()) && r.status() === 200) r.json().then((j) => surfaceNamespaces.push({ url: r.url(), ns: j && j.target && j.target.namespace && j.target.namespace.me })).catch(() => {});
+  });
   const off = async () => { await page.evaluate(() => { window.dispatchEvent(new CustomEvent('this.gui:inspector:set', { detail: { enabled: false } })); window.dispatchEvent(new CustomEvent('this.gui:inspector:set', { detail: false })); }).catch(() => {}); };
   const open = async (origin, path = '/') => { await page.goto(origin + path); await page.waitForLoadState('networkidle').catch(() => {}); await wait(600); await off(); };
   const bodyText = () => page.evaluate(() => document.body.innerText);
@@ -83,11 +89,29 @@ function await_(p) { return p; }
     const carries = requests.slice(from).filter((r) => /\/(setup|claims|api\/v1\/keychain|admin-session)/.test(r.url) || (r.method !== 'GET' && r.method !== 'OPTIONS' && r.method !== 'HEAD'));
     const foreign = carries.filter((r) => !r.url.startsWith(origin + '/'));
     check(`${label}: every request that carries a code, signature or write stays on ${origin}`, carries.length > 0 && foreign.length === 0, foreign.length ? foreign.map((f) => f.method + ' ' + f.url).join(' ') : `${carries.length} requests`);
-    // public reads that go elsewhere are listed, not judged
-    const reads = [...new Set(requests.slice(from).filter((r) => r.method === 'GET' && /^https?:\/\/[^/]*acme\.test/.test(r.url) && !r.url.startsWith(origin + '/')).map((r) => 'GET ' + r.url.replace(/\?.*/, '')))];
-    console.log(`INFO  ${label}: public reads to other hosts of the namespace: ${reads.length ? reads.join(', ') : 'none'}`);
+    // reads too: nothing is sent to another door of the namespace (the apex from www/a handle page used to be),
+    // and nothing is refused
+    const sinceReqs = requests.slice(startIdx); // from the first load of the origin under test: the page load is where the sidebar and root are first read
+    const elsewhere = [...new Set(sinceReqs.filter((r) => /^https?:\/\/[^/]*acme\.test/.test(r.url) && !r.url.startsWith(origin + '/')).map((r) => r.method + ' ' + r.url.replace(/\?.*/, '')))];
+    check(`${label}: no request goes to another host of the namespace (reads use the transport the page has)`, elsewhere.length === 0, elsewhere.join(', '));
+    const refused = responses.filter((r) => r.status === 401 || r.status === 403).map((r) => r.status + ' ' + r.url.replace(/\?.*/, ''));
+    // the two deliberate wrong-door sign-ins are the monad's own 403 on /claims/signIn (www run only)
+    const unexpectedRefused = refused.filter((x) => !/\/claims\/signIn$/.test(x));
+    check(`${label}: no read or write was refused with 401/403 (apart from the deliberate wrong-door sign-ins)`, unexpectedRefused.length === 0, unexpectedRefused.slice(0, 4).join(', '));
+    const sameOriginSurface = responses.filter((r) => r.url.startsWith(origin + '/__surface'));
+    const sidebarReads = sinceReqs.filter((r) => /\/layout\/sidebar\//.test(r.url));
+    // what the page's own transport says it resolved the request to: the namespace at apex and www, the handle's at a handle door
+    const expectedAnswer = label === 'handle' ? 'jabellae.acme.test' : 'acme.test';
+    const answers = [...new Set(surfaceNamespaces.filter((x) => x.url.startsWith(origin + '/')).map((x) => x.ns))];
+    check(`${label}: the page origin's /__surface resolves the request to ${expectedAnswer}`, answers.length > 0 && answers.every((a) => a === expectedAnswer), answers.join(','));
+    if (label === 'handle') {
+      check('handle: the page origin answers for the handle, not the namespace, so the sidebar tree of the namespace is not read from it', sameOriginSurface.length > 0 && sidebarReads.length === 0, `${sameOriginSurface.map((r) => r.status).join(',')} surface, ${sidebarReads.length} sidebar reads`);
+    } else {
+      check(`${label}: the namespace's sidebar is read from the page's own origin, confirmed`, sameOriginSurface.some((r) => r.status === 200) && sidebarReads.length > 0 && sidebarReads.every((r) => r.url.startsWith(origin + '/')), `${sidebarReads.length} sidebar reads`);
+    }
   };
 
+  let startIdx = 0; // requests made while the page is on the origin under test (the www run first visits the apex on purpose)
   const claimOrigin = ORIGINS[CLAIM_AT];
   const claimName = CLAIM_AT === 'handle' ? 'jabellae' : CLAIM_AT === 'www' ? 'probe6.acme.test' : 'probe5';
   const claimNs = CLAIM_AT === 'handle' ? 'jabellae.acme.test' : CLAIM_AT === 'www' ? 'probe6.acme.test' : 'probe5.acme.test';
@@ -99,6 +123,7 @@ function await_(p) { return p; }
     const namespaceAtApex = await register('probe5', secret);
     check('apex: short name registers as probe5.acme.test', namespaceAtApex === 'probe5.acme.test', namespaceAtApex);
     await signOut();
+    startIdx = requests.length;
     await open(ORIGINS.www);
     let n0 = requests.length;
     await signIn('probe5', secret);
@@ -171,8 +196,6 @@ function await_(p) { return p; }
       unexpected.slice(0, 4).map((r) => `${r.method} ${r.path} ${r.status}`).join(' ') || `${writes.length} writes, ${signInRefusals} deliberate 403 (expected ${deliberate})`);
     const peers = [...new Set(rows.filter((r) => r.method === 'POST').map((r) => r.peer))];
     check('edge: nginx saw a non-loopback peer for the writes (the operator-only rules were not bypassed by loopback)', peers.length > 0 && peers.every((p) => p === tlsState.LAN_IP), peers.join(','));
-    const refusedReads = [...new Set(rows.filter((r) => (r.method === 'GET') && (r.status === 401 || r.status === 403 || r.status === 400)).map((r) => `${r.method} ${r.path.split('?')[0]} ${r.status}`))];
-    console.log(`INFO  edge: reads answered 400/401/403 (cross-origin reads to the apex are refused by the gateway origin guard): ${refusedReads.length ? refusedReads.join(', ') : 'none'}`);
     // the operator-only control routes stay closed to this same non-loopback peer, through the same edge
     const https = require('https');
     const probe = (method, p) => new Promise((resolve) => { const r = https.request({ host: tlsState.LAN_IP, port: BROWSER_PORT, method, path: p, servername: 'acme.test', rejectUnauthorized: false, headers: { host: `acme.test:${BROWSER_PORT}`, 'content-type': 'application/json' } }, (res) => { res.resume(); resolve(res.statusCode); }); r.on('error', () => resolve(0)); r.end(method === 'POST' ? '{}' : undefined); });

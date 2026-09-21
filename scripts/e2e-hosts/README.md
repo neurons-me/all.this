@@ -45,14 +45,14 @@ Marking an origin secure for Chrome is not TLS, and even `TLS=1` is not producti
 - No WebSocket (`wss://<namespace>/nrp`, which Beatle tries) and no browser on a real network.
 - Only the monad's own front end is served; whatever else a real host serves is not here.
 
-## A finding the edge run makes visible
+## What the runs assert about reads
 
-From a `www` or handle page the client reads a few public things from the apex (`/__surface`,
-`/gateway-identity`, the sidebar's `itemIds`). The gateway module's origin guard answers those `403
-ORIGIN_NOT_ALLOWED` unless the origin is the request's own host, a local one, or listed in
-`NETGET_GATEWAY_ORIGINS`. This happens with or without nginx, and it does not touch the claim (which runs
-same-origin); it means the sidebar/root verification quietly degrades on those doors. The run prints these
-as `INFO`, not as failures.
+From every door the client must read the namespace through the transport the page has, never through an address
+built from the namespace's name. Each run asserts: no request goes to another host of the namespace; nothing is
+answered 401/403 (apart from the two deliberate wrong-door sign-ins of the `www` run); the page origin's
+`/__surface` resolves the request to `acme.test` at the apex and at `www` (the monad strips `www`) and to the
+handle's own namespace at a handle door; the sidebar is read from the page origin at the apex and `www`, and not at
+a handle door, whose transport answers for the handle and not for the namespace.
 
 So a green run here means the flow and the scheme-sensitive client logic hold; it does not replace
 running the flow on the real deployment's HTTPS edge before relying on it.
