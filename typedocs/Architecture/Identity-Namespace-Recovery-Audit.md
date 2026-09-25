@@ -792,6 +792,46 @@ Concretely, this means:
    doesn't exist anywhere in this codebase yet, versus focusing near-term effort
    on closing the per-user-root gap (§10) which reuses primitives that already
    work?
+7. **(2026-09-24 follow-up, sharpens item 4 above) The `secret` sent to
+   `claimNamespace()`/`openNamespace()` is not merely "a plaintext secret the
+   server sees" — for any caller going through `deriveCleakerNode()`/`ME_RESEED`
+   (the real browser path: `packages/GUI/Typescript/src/gui/All.This/Cleaker/
+   signedRequest.ts`), it is the *exact same* `(username, password)` pair that
+   `deriveCompoundSeed()` (`me.ts:152-154`, cited in the `#seed`/
+   `deriveCompoundSeed` rows above) turns into the compound seed the Ed25519
+   signing key derives from. A claim/open request therefore transmits, in the
+   clear to the Monad, everything needed to reconstruct that identity's signing
+   key — not just "a credential," but the seed material itself. This was found
+   while reviewing a real sign-up-flow fix (`useCleakerAuth.ts`) that had
+   (re)introduced exactly this pattern; `createSeedSession.ts`'s pre-existing
+   `claim()`/`open()` (`monadClient.ts:666,752`) do the same thing more
+   directly, sending the raw kernel `seed` itself. Two things checked, not
+   merely asserted, before writing this:
+   - `secret`'s only other use, decrypting `noise` (`derive.ts`), was traced
+     through every caller in `monad`, `cleaker`, and `GUI` — no downstream
+     cryptographic consumer of `noise`'s *value* was found; it is generated
+     random at claim, round-tripped through encrypt/decrypt, and only ever
+     read again as opaque pass-through data (an audit `proofId` input, a
+     stashed `me.noise` field nothing else reads). This means a proof-of-
+     possession signature over a challenge is a plausible full replacement for
+     `secret` in `openNamespace()` — but "not found to be used" is not the same
+     as "provably unused everywhere," and dropping it is not yet decided.
+   - Real, currently-persisted local claims already exist under the
+     current (raw-secret-or-seed) commitment scheme —
+     `modules/monad/Typescript/env/claims/*.json`, including this
+     installation's own `suign.suis-macbook-air.local.json`. Any fix that
+     changes what `secret`/`seed` carries (e.g. a domain-separated verifier,
+     `keccak256("me.claim/secret-verifier:v1::" + ...)`, computed the same way
+     for both the `(username, password)` and raw-`seed` call shapes) breaks
+     `openNamespace()` for every one of these unless a migration path (re-claim,
+     or a transition window accepting both schemes) is built alongside it.
+     Not yet decided which.
+   Deliberately NOT bundled into this item: whether `deriveCompoundSeed()`
+   itself should move off a fast, unsalted `keccak256` onto a slow KDF —
+   that changes every existing identity's derived seed, is independent of the
+   claim-secret question above, and is tracked as its own **Open** item in
+   `modules/cleaker/Typescript/typedocs/Surface-Identity-Claims.md` instead of
+   here, so the two decisions don't get conflated.
 
 ---
 
