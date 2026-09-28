@@ -11,9 +11,10 @@ Read, in this order:
 
 1. `CLAUDE.md` in this repo — build commands, architecture layers, known
    architectural gaps, and the "key files to read first" table.
-2. The current NRP spec: `modules/monad/Typescript/typedocs/NRP-v0.3.0.md`
-   (normative). Not `Namespace-Protocol-Resolution.md` in isolation — that file is
-   now an alias pointing to v0.3.0, kept only for link stability.
+2. The current NRP spec (normative): `https://neurons-me.github.io/NRP/v.0.3.0.html`,
+   source in the sibling repo `neurons-me.github.io/docs/NRP/v.0.3.0.md`. It is the
+   contract every module follows, so it lives there, not inside monad. The old
+   `modules/monad/Typescript/typedocs/NRP-v0.3.0.md` is only a redirect stub.
 3. The live implementation status: `modules/monad/Typescript/typedocs/Mesh/status.md`.
 
 If a running monad is available, you can query its actual state directly instead of
