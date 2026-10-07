@@ -25,3 +25,6 @@
 [submodule "mlearning.studio"]
 	path = mlearning.studio
 	url = https://github.com/neurons-me/mlearning.studio.git
+[submodule "packages/wallet"]
+	path = packages/wallet
+	url = https://github.com/neurons-me/.wallet.git
