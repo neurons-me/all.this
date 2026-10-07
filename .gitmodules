@@ -22,3 +22,6 @@
 [submodule "this.DOM"]
 	path = this.DOM
 	url = https://github.com/neurons-me/this.DOM
+[submodule "mlearning.studio"]
+	path = mlearning.studio
+	url = https://github.com/neurons-me/mlearning.studio.git
