@@ -22,3 +22,6 @@
 [submodule "this.DOM"]
 	path = this.DOM
 	url = https://github.com/neurons-me/this.DOM
+[submodule "packages/wallet"]
+	path = packages/wallet
+	url = https://github.com/neurons-me/.wallet.git
