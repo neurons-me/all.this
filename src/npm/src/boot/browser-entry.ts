@@ -1657,6 +1657,36 @@ function monadsControlActionPath(
   return `/__monads/${encodeURIComponent(record.name)}/${suffix}`;
 }
 
+/**
+ * Orders (on, off, pause, restart, delete, start) are closed over HTTP until they are signed through .me
+ * (monad.ai typedocs/Mesh/monad-control-orders.md §6). The monad advertises them as CLI-only: method "CLI", no path.
+ * Such an action is shown disabled, never called; the server refuses it anyway.
+ */
+const MONAD_ORDERS_CLI_ONLY_MESSAGE =
+  "Orders from the web are paused until they are signed with your .me identity. Use the monads CLI on that machine.";
+
+function monadsOrderIsCliOnly(control: AllThisMonadsControl, ...names: string[]): boolean {
+  const action = monadsControlAction(control, ...names);
+  return Boolean(action && String(action.method || "").toUpperCase() === "CLI");
+}
+
+function monadsControlHasCliOnlyOrders(control: AllThisMonadsControl): boolean {
+  return ["start", "on", "resume", "pause", "off", "stop", "restart", "delete"]
+    .some((name) => monadsOrderIsCliOnly(control, name));
+}
+
+function monadOrderButton(
+  control: AllThisMonadsControl,
+  names: string[],
+  props: Record<string, any>,
+  onClick: () => void,
+): any {
+  if (monadsOrderIsCliOnly(control, ...names)) {
+    return guiNode("Button", { ...props, disabled: true });
+  }
+  return guiNode("Button", { ...props, onClick });
+}
+
 function isMonadOnline(record: AllThisMonadsControlRecord): boolean {
   return record.status === "online" || record.status === "running";
 }
@@ -1743,25 +1773,32 @@ function buildMonadsControlRows(control: AllThisMonadsControl, onRescan?: () => 
           ? guiNode("Button", { variant: "text", size: "small", label: "Logs", onClick: () => showMonadLogsFromWeb(control, record) })
           : null,
         !online && monadsControlHasAction(control, "on", "resume")
-          ? guiNode("Button", { variant: paused ? "contained" : "outlined", size: "small", label: "On", onClick: () => onMonadFromWeb(control, record, onRescan, discovery) })
+          ? monadOrderButton(control, ["on", "resume"], { variant: paused ? "contained" : "outlined", size: "small", label: "On" }, () => onMonadFromWeb(control, record, onRescan, discovery))
           : null,
         online && monadsControlHasAction(control, "pause")
-          ? guiNode("Button", { variant: "outlined", size: "small", label: "Pause", onClick: () => pauseMonadFromWeb(control, record, onRescan, discovery) })
+          ? monadOrderButton(control, ["pause"], { variant: "outlined", size: "small", label: "Pause" }, () => pauseMonadFromWeb(control, record, onRescan, discovery))
           : null,
         monadsControlHasAction(control, "restart")
-          ? guiNode("Button", { variant: "text", size: "small", label: "Restart", onClick: () => restartMonadFromWeb(control, record, onRescan, discovery) })
+          ? monadOrderButton(control, ["restart"], { variant: "text", size: "small", label: "Restart" }, () => restartMonadFromWeb(control, record, onRescan, discovery))
           : null,
         (online || paused) && monadsControlHasAction(control, "off", "stop")
-          ? guiNode("Button", { variant: "text", size: "small", label: "Off", onClick: () => offMonadFromWeb(control, record, onRescan, discovery) })
+          ? monadOrderButton(control, ["off", "stop"], { variant: "text", size: "small", label: "Off" }, () => offMonadFromWeb(control, record, onRescan, discovery))
           : null,
         monadsControlHasAction(control, "delete", "rm", "remove")
-          ? guiNode("Button", { variant: "text", size: "small", color: "error", label: "Delete", onClick: () => deleteMonadFromWeb(control, record, onRescan, discovery) })
+          ? monadOrderButton(control, ["delete", "rm", "remove"], { variant: "text", size: "small", color: "error", label: "Delete" }, () => deleteMonadFromWeb(control, record, onRescan, discovery))
           : null,
       ].filter(Boolean)),
     ];
   })()));
 
-  return [header, ...rows];
+  const notice = monadsControlHasCliOnlyOrders(control)
+    ? guiText(`${MONAD_ORDERS_CLI_ONLY_MESSAGE} Example: monads on ${control.records[0]?.name || "<name>"}`, {
+      variant: "caption",
+      sx: { color: "text.secondary", lineHeight: 1.5, px: 0.5 },
+    })
+    : null;
+
+  return [header, ...rows, notice].filter(Boolean);
 }
 
 function buildMonadsControlCard(control: AllThisMonadsControl, onRescan?: () => void, discovery?: any): any {
@@ -1777,12 +1814,11 @@ function buildMonadsControlCard(control: AllThisMonadsControl, onRescan?: () => 
       : ["monads not detected"],
     body: buildMonadsControlRows(control, onRescan, discovery),
     actions: [
-      guiNode("Button", {
+      monadOrderButton(control, ["start"], {
         variant: "contained",
         size: "small",
         label: "Start a New Monad",
-        onClick: () => startMonadFromWeb(control, onRescan, discovery),
-      }),
+      }, () => startMonadFromWeb(control, onRescan, discovery)),
       guiNode("Button", {
         variant: "outlined",
         size: "small",
