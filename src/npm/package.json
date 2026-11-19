@@ -1,6 +1,6 @@
 {
   "name": "all.this",
-  "version": "1.0.46",
+  "version": "2.0.0",
   "description": "Data Structures and Functionalities for neurons.me",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -53,14 +53,6 @@
       "types": "./dist/src/gui-components.d.ts",
       "import": "./dist/src/gui-components.js"
     },
-    "./boot": {
-      "types": "./dist/src/boot/index.d.ts",
-      "import": "./dist/src/boot/index.js"
-    },
-    "./boot/browser": {
-      "types": "./dist/src/boot/browser-entry.d.ts",
-      "import": "./dist/src/boot/browser-entry.js"
-    },
     "./monad": {
       "types": "./dist/src/monad.d.ts",
       "import": "./dist/src/monad.js"
@@ -84,23 +76,26 @@
   ],
   "files": [
     "dist",
+    "!dist/src/boot",
     "README.md",
     "LICENSE"
   ],
   "dependencies": {
-    "cleaker": "workspace:^",
-    "monad.ai": "workspace:^",
-    "netget": "workspace:^",
-    "this.gui": "workspace:^",
-    "this.me": "workspace:^"
+    "cleaker": "^4.0.0",
+    "this.gui": "^4.4.6",
+    "this.me": "^4.3.0"
   },
   "peerDependencies": {
+    "monad.ai": "^3.0.0",
+    "netget": "^2.7.7",
     "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0",
-    "react-router-dom": "^6.0.0"
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "peerDependenciesMeta": {
-    "react-router-dom": {
+    "monad.ai": {
+      "optional": true
+    },
+    "netget": {
       "optional": true
     }
   },
@@ -117,6 +112,8 @@
   "category": "utils",
   "devDependencies": {
     "@types/node": "^24.5.2",
+    "monad.ai": "^3.0.0",
+    "netget": "^2.7.7",
     "typescript": "^5.9.2"
   }
 }
