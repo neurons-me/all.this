@@ -1,0 +1,21 @@
+{
+  "name": "intersection-proof",
+  "version": "0.1.0",
+  "description": "neurons.me: executable proof of intersection cryptography (A ∩ B), n-of-n over ristretto255",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --import tsx --test --test-reporter=spec test/intersection.test.ts",
+    "demo": "node --import tsx demo.ts"
+  },
+  "engines": { "node": ">=20.19" },
+  "license": "MIT",
+  "dependencies": {
+    "@noble/ciphers": "2.4.0",
+    "@noble/curves": "2.4.0",
+    "@noble/hashes": "2.4.0"
+  },
+  "devDependencies": {
+    "tsx": "4.23.15"
+  }
+}

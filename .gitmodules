@@ -28,3 +28,6 @@
 [submodule "packages/wallet"]
 	path = packages/wallet
 	url = https://github.com/neurons-me/.wallet.git
+[submodule "packages/env"]
+	path = packages/env
+	url = https://github.com/neurons-me/this.env.git

@@ -192,8 +192,9 @@ Monads register by POSTing to `/apps/report` at the netget endpoint (default `lo
 | `ME_NAMESPACE` | Canonical rootspace name (e.g. `suis-macbook-air.local`) |
 | `MONAD_NAME` | Human name of this surface instance (e.g. `macbook`) |
 | `MONAD_PRIVATE_KEY` | Ed25519 surface identity key — if absent, **incorrectly** derived from `SEED` |
-| `ME_STATE_DIR` | Where `snapshot.json` lives (default: `me-state/`) |
-| `MONAD_SELF_CONFIG_PATH` | Path to `env/self.json` surface config |
+| `ME_STATE_DIR` | Where `snapshot.json` lives (default: `me-state/`) — also the default anchor for `self.json` and persistent claim storage (below) when set |
+| `MONAD_SELF_CONFIG_PATH` | Path to `env/self.json` surface config (default: `env/self.json`, or `<ME_STATE_DIR>/self.json` when `ME_STATE_DIR` is set) |
+| `MONAD_CLAIM_DIR` | Path to persistent claim storage (default: `env/claims`, or `<ME_STATE_DIR>/claims` when `ME_STATE_DIR` is set) — a disposable monad only needs to set `ME_STATE_DIR` to keep claim files self-contained |
 
 Surface config lives in `modules/monad/Typescript/env/self.json` (not committed; see `self.example.json`).
 
